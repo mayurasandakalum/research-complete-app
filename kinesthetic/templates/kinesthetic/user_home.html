@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Let's Quiz | Choose Lesson{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="text-center mb-5">පාඩම් තෝරන්න</h1>
+
+    <div class="row justify-content-center g-4">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h2 class="card-title">එකතු කිරීම</h2>
+                    {% if kinesthetic_profile and 'addition' in kinesthetic_profile.completed_lessons %}
+                    <p class="card-text text-success">Completed</p>
+                    {% else %}
+                    <p class="card-text">Learn addition using abacus</p>
+                    {% endif %}
+                    <a href="{{ url_for('kinesthetic.lesson_instructions', subject='addition') }}"
+                        class="btn btn-primary">
+                        පාඩම ආරම්භ කරන්න
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h2 class="card-title">අඩු කිරීම</h2>
+                    {% if kinesthetic_profile and 'subtraction' in kinesthetic_profile.completed_lessons %}
+                    <p class="card-text text-success">Completed</p>
+                    {% else %}
+                    <p class="card-text">Learn subtraction using abacus</p>
+                    {% endif %}
+                    <a href="{{ url_for('kinesthetic.lesson_instructions', subject='subtraction') }}"
+                        class="btn btn-primary">
+                        පාඩම ආරම්භ කරන්න
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h2 class="card-title">කාලය</h2>
+                    {% if kinesthetic_profile and 'time' in kinesthetic_profile.completed_lessons %}
+                    <p class="card-text text-success">Completed</p>
+                    {% else %}
+                    <p class="card-text">Learn to read time using clock</p>
+                    {% endif %}
+                    <a href="{{ url_for('kinesthetic.lesson_instructions', subject='time') }}" class="btn btn-primary">
+                        පාඩම ආරම්භ කරන්න
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
