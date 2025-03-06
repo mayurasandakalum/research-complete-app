@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='home.css') }}">
+ 
+    <style>
+
+    /* Footer */
+    .footer {
+            width: 100%;
+            background-color: #333;
+            color: #fff;
+            padding: 20px 0;
+            display: flex;
+            justify-content: center;
+            margin-top: 40px;
+        }
+
+        .footer-content {
+            width: 90%;
+            max-width: 1000px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .footer-logo img {
+            height: 50px;
+            margin-bottom: 10px;
+        }
+
+        .social-media {
+            margin: 10px 0;
+        }
+
+        .social-media a {
+            color: #fff;
+            margin: 0 10px;
+            font-size: 24px;
+            transition: color 0.3s;
+        }
+
+        .social-media a:hover {
+            color: #00acee;
+        }
+
+        .contact-info {
+            font-size: 14px;
+            font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+            margin-top: 10px;
+
+        }
+
+        </Style>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learn-Pal Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo">
+            <a href="/home"><img src="/static/Images/logo.png" alt="Company Logo" style="width:150px;height:150px;border-radius: 50%;"></a>
+        </div>
+        <a href="/logout" class="logout-btn">Logout</a>
+    </nav>
+
+    <!-- Dashboard Content -->
+    <div class="dashboard-container">
+        <h1>ඔබගේ ඉගෙනුම් ක්‍රමවේදය තෝරන්න</h1>
+        <div class="learning-methods">
+            <a href="auditory_learning" class="learning-btn auditory">Auditory Learning</a>
+            <a href="reading_writing_learning" class="learning-btn reading-writing">Reading & Writing Learning</a>
+            <a href="all_score" class="learning-btn visual">All Results</a>
+        </div>
+    </div>
+    
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+        <div class="social-media">
+            <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://twitter.com" target="_blank"><i class="fab fa-twitter"></i></a>
+            <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
+            <a href="https://linkedin.com" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+        </div>
+        <div class="contact-info">
+            <p>📧 Email: info@learn-pal.com</p>
+            <p>📞 Fax: +94 11 2345678</p>
+            <p>📍 Address: 123 Learn-Pal St, Colombo, Sri Lanka</p>
+        </div>
+    </div>
+</footer>
+</body>
+</html>
