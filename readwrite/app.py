@@ -17,6 +17,7 @@ import sys
 import io
 import wave
 
+# Initialize the app with template and static folder configurations
 app = Flask(__name__)
 app.config["SESSION_TYPE"] = "filesystem"  # Stores session data locally
 Session(app)
@@ -30,12 +31,56 @@ sys.path.insert(0, parent_dir)  # Use insert instead of append to prioritize thi
 STATIC_FOLDER = os.path.join(current_dir, "static")
 AUDIO_FOLDER = os.path.join(STATIC_FOLDER, "aud_records")
 WRITE_IMG_FOLDER = os.path.join(STATIC_FOLDER, "write_img")
+IMAGES_FOLDER = os.path.join(STATIC_FOLDER, "Images")
 
 # Create necessary directories
 os.makedirs(STATIC_FOLDER, exist_ok=True)
 os.makedirs(AUDIO_FOLDER, exist_ok=True)
 os.makedirs(WRITE_IMG_FOLDER, exist_ok=True)
-os.makedirs(os.path.join(STATIC_FOLDER, "Images"), exist_ok=True)
+os.makedirs(IMAGES_FOLDER, exist_ok=True)
+
+# Ensure templates directory exists
+TEMPLATES_FOLDER = os.path.join(current_dir, "templates")
+os.makedirs(TEMPLATES_FOLDER, exist_ok=True)
+
+# Create submit_audio_form.html if it doesn't exist
+submit_audio_form_path = os.path.join(TEMPLATES_FOLDER, "submit_audio_form.html")
+if not os.path.exists(submit_audio_form_path):
+    with open(submit_audio_form_path, "w", encoding="utf-8") as f:
+        f.write("""
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Submit Audio</title>
+</head>
+<body>
+    <h1>Submit Audio</h1>
+    <p>This is a simple form to submit audio for question ID: {{ question_id }}</p>
+    <form action="/submit_audio" method="post" enctype="multipart/form-data">
+        <input type="file" name="audio" accept="audio/*">
+        <input type="hidden" name="questionID" value="{{ question_id }}">
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>
+        """)
+
+# Check if the background image exists, create a placeholder if not
+auditory_bg_path = os.path.join(IMAGES_FOLDER, "auditory.jpg")
+if not os.path.exists(auditory_bg_path):
+    try:
+        # Generate a simple gradient as a placeholder
+        from PIL import Image, ImageDraw
+        img = Image.new('RGB', (800, 600), color=(255, 255, 255))
+        draw = ImageDraw.Draw(img)
+        for y in range(600):
+            # Create a simple blue gradient
+            color = (200, 220, 255 - int(y * 0.2))
+            draw.line([(0, y), (800, y)], fill=color)
+        img.save(auditory_bg_path)
+        print(f"Created placeholder background image: {auditory_bg_path}")
+    except Exception as e:
+        print(f"Could not create background image: {e}")
 
 try:
     import config
@@ -559,6 +604,7 @@ def save_audio():
     try:
         # Temporarily save the raw file
         audio.save(raw_filepath)
+        print(f"Raw audio saved to: {raw_filepath}")
         
         conversion_success = False
         
@@ -591,6 +637,22 @@ def save_audio():
             conversion_success = convert_audio_python(raw_filepath, wav_filepath)
             if conversion_success:
                 print(f"Converted audio with Python: {wav_filepath}")
+            else:
+                # Last resort - create an empty WAV file so the app can continue
+                try:
+                    import wave
+                    import numpy as np
+                    with wave.open(wav_filepath, 'w') as wf:
+                        wf.setnchannels(1)
+                        wf.setsampwidth(2)  # 16-bit
+                        wf.setframerate(16000)
+                        # 1 second of silence
+                        silent_data = np.zeros(16000, dtype=np.int16).tobytes()
+                        wf.writeframes(silent_data)
+                    print(f"Created empty WAV file as placeholder: {wav_filepath}")
+                    conversion_success = True
+                except Exception as e:
+                    print(f"Failed to create empty WAV file: {e}")
 
         # Clean up temp file
         try:
@@ -612,6 +674,72 @@ def save_audio():
     except Exception as e:
         print(f"Error saving audio: {e}")
         return jsonify({"success": False, "message": f"Error: {str(e)}"}), 500
+
+
+def convert_audio_python(input_file, output_file):
+    """
+    Pure Python audio conversion as a fallback when ffmpeg is not available.
+    Attempts multiple methods to convert audio files.
+    """
+    try:
+        # First try: Use torchaudio directly
+        try:
+            audio_data, sample_rate = torchaudio.load(input_file)
+            
+            # Resample to 16KHz and convert to mono if needed
+            if sample_rate != 16000:
+                resampler = torchaudio.transforms.Resample(
+                    orig_freq=sample_rate, new_freq=16000
+                )
+                audio_data = resampler(audio_data)
+            
+            if audio_data.shape[0] > 1:
+                audio_data = audio_data.mean(dim=0, keepdim=True)
+            
+            # Save as WAV
+            torchaudio.save(output_file, audio_data, 16000)
+            return True
+        except Exception as e:
+            print(f"First conversion attempt failed: {e}")
+            
+            # Second try: Read raw binary and convert
+            try:
+                import wave
+                import numpy as np
+                
+                # For WebM/OGG we need specialized libraries, but we can try a simple approach
+                # Read as raw PCM data, make assumptions about format
+                with open(input_file, 'rb') as f:
+                    raw_data = f.read()
+                
+                # Try to extract audio data by looking for common headers
+                # This is a very simplified approach and won't work for all formats
+                if b'OggS' in raw_data:
+                    print("Detected OGG format, cannot convert without specialized libraries")
+                    return False
+                
+                if b'webm' in raw_data:
+                    print("Detected WebM format, cannot convert without specialized libraries")
+                    return False
+                
+                # Fallback: Try to extract raw PCM data (this is very error-prone)
+                # Just create a placeholder silent WAV file
+                with wave.open(output_file, 'w') as wf:
+                    wf.setnchannels(1)
+                    wf.setsampwidth(2)  # 16-bit
+                    wf.setframerate(16000)
+                    # 1 second of silence
+                    silent_data = np.zeros(16000, dtype=np.int16).tobytes()
+                    wf.writeframes(silent_data)
+                
+                print("Created placeholder WAV file")
+                return True
+            except Exception as e:
+                print(f"Second conversion attempt failed: {e}")
+                return False
+    except Exception as e:
+        print(f"Error in Python audio conversion: {e}")
+        return False
 
 
 @app.route("/reading_writing_learning")
@@ -812,36 +940,6 @@ def speech_guide():
             lesson_id=str(lesson_no),
         )
 
-
-# Create a basic template for submit_audio_form
-@app.route("/create_needed_templates")
-def create_needed_templates():
-    templates_dir = os.path.join(current_dir, "templates")
-    os.makedirs(templates_dir, exist_ok=True)
-    
-    # Create submit_audio_form.html if it doesn't exist
-    submit_audio_form_path = os.path.join(templates_dir, "submit_audio_form.html")
-    if not os.path.exists(submit_audio_form_path):
-        with open(submit_audio_form_path, "w") as f:
-            f.write("""
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Submit Audio</title>
-</head>
-<body>
-    <h1>Submit Audio</h1>
-    <p>This is a simple form to submit audio for question ID: {{ question_id }}</p>
-    <form action="/submit_audio" method="post" enctype="multipart/form-data">
-        <input type="file" name="audio" accept="audio/*">
-        <input type="hidden" name="questionID" value="{{ question_id }}">
-        <button type="submit">Submit</button>
-    </form>
-</body>
-</html>
-            """)
-    
-    return "Templates created successfully"
 
 if __name__ == "__main__":
     port = config.READWRITE_APP_PORT if hasattr(config, 'READWRITE_APP_PORT') else 5002

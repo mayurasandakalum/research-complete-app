@@ -1,0 +1,52 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Virtual environments
+env/
+venv/
+ENV/
+
+# Flask session files
+flask_session/
+
+# Firebase credentials
+*-firebase-adminsdk-*.json
+
+# Model files (too large for Git)
+whisper-small-sinhala-finetuned/
+
+# Audio recordings
+static/aud_records/
+
+# Written images
+static/write_img/
+
+# User-uploaded content
+static/uploads/
+
+# Jupyter notebooks (optional)
+.ipynb_checkpoints
+
+# Logs
+*.log
+
+# Local development
+.env
+.vscode/
+.idea/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

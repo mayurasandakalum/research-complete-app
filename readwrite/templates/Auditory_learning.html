@@ -1,14 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Auditory Learning</title>
   <!-- Font Awesome for icons -->
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-  />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 
   <style>
     /* -------------------------
@@ -16,7 +14,8 @@
     ------------------------- */
     body {
       font-family: Arial, sans-serif;
-      background-image: url('../Images/auditory.jpg');
+      background-image: url('/static/Images/auditory.jpg');
+      /* Fixed path to include /static/ */
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
@@ -40,9 +39,11 @@
       color: #fff;
       box-sizing: border-box;
     }
+
     .logo img {
       height: 40px;
     }
+
     .logout-btn {
       color: #fff;
       background-color: #ff3b30;
@@ -52,9 +53,11 @@
       transition: background 0.3s;
       font-family: serif;
     }
+
     .logout-btn:hover {
       filter: brightness(90%);
     }
+
     .title {
       font-size: 35px;
       font-weight: bold;
@@ -79,6 +82,7 @@
       text-align: center;
       box-sizing: border-box;
     }
+
     .character-icon {
       width: 70px;
       position: absolute;
@@ -99,6 +103,7 @@
       font-size: 16px;
       color: #444;
     }
+
     .lesson-level-container p {
       margin: 5px 0;
     }
@@ -118,11 +123,14 @@
       font-family: serif;
       animation: pulse 1.5s infinite;
     }
+
     @keyframes pulse {
+
       0%,
       100% {
         transform: scale(1);
       }
+
       50% {
         transform: scale(1.1);
       }
@@ -131,6 +139,7 @@
     .controls {
       margin-top: 20px;
     }
+
     .controls button {
       background-color: #1ad846;
       color: white;
@@ -144,9 +153,11 @@
       font-family: serif;
       font-weight: 600;
     }
+
     .controls button.stop {
       background-color: #ff3b30;
     }
+
     .controls button:hover {
       filter: brightness(90%);
     }
@@ -155,6 +166,7 @@
       margin-top: 20px;
       text-align: center;
     }
+
     .extra-controls button {
       background-color: #007bff;
       color: white;
@@ -167,9 +179,11 @@
       margin: 5px;
       font-family: serif;
     }
+
     .extra-controls button.submit {
       background-color: #b74217;
     }
+
     .extra-controls button:disabled {
       background-color: #ccc;
       cursor: not-allowed;
@@ -186,6 +200,7 @@
       cursor: pointer;
       transition: background 0.3s;
     }
+
     .next:hover {
       filter: brightness(90%);
     }
@@ -214,6 +229,7 @@
       margin-top: 40px;
       box-sizing: border-box;
     }
+
     .footer-content {
       width: 90%;
       max-width: 1000px;
@@ -222,22 +238,27 @@
       align-items: center;
       text-align: center;
     }
+
     .footer-logo img {
       height: 50px;
       margin-bottom: 10px;
     }
+
     .social-media {
       margin: 10px 0;
     }
+
     .social-media a {
       color: #fff;
       margin: 0 10px;
       font-size: 24px;
       transition: color 0.3s;
     }
+
     .social-media a:hover {
       color: #00acee;
     }
+
     .contact-info {
       font-size: 14px;
       font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
@@ -250,12 +271,8 @@
   <!-- Navbar -->
   <nav class="navbar">
     <div class="logo">
-      <a href="/home"
-        ><img
-          src="/static/Images/logo.png"
-          alt="Company Logo"
-          style="width: 150px; height: 150px; border-radius: 50%;"
-      /></a>
+      <a href="/home"><img src="/static/Images/logo.png" alt="Company Logo"
+          style="width: 150px; height: 150px; border-radius: 50%;" /></a>
     </div>
     <div class="title">Auditory Learning</div>
     <a href="logout.html" class="logout-btn">Logout</a>
@@ -270,7 +287,7 @@
       <p><strong>Lesson:</strong> <span id="lesson">{{ question['Lesson'] }}</span></p>
       <p><strong>Level:</strong> <span id="level">{{ question['Level'] }}</span></p>
     </div>
-    
+
     <div class="question-area">
       <!-- Dynamic question text -->
       <span data-question-id="{{ question['ID'] }}"></span>
@@ -314,18 +331,10 @@
   <footer class="footer">
     <div class="footer-content">
       <div class="social-media">
-        <a href="https://facebook.com" target="_blank"
-          ><i class="fab fa-facebook-f"></i
-        ></a>
-        <a href="https://twitter.com" target="_blank"
-          ><i class="fab fa-twitter"></i
-        ></a>
-        <a href="https://instagram.com" target="_blank"
-          ><i class="fab fa-instagram"></i
-        ></a>
-        <a href="https://linkedin.com" target="_blank"
-          ><i class="fab fa-linkedin-in"></i
-        ></a>
+        <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook-f"></i></a>
+        <a href="https://twitter.com" target="_blank"><i class="fab fa-twitter"></i></a>
+        <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
+        <a href="https://linkedin.com" target="_blank"><i class="fab fa-linkedin-in"></i></a>
       </div>
       <div class="contact-info">
         <p>📧 Email: info@learn-pal.com</p>
@@ -343,76 +352,110 @@
     const submitBtn = document.getElementById('submitBtn');
     const nextBtn = document.getElementById('next');
     const feedback = document.getElementById('feedback');
+    const questionElement = document.querySelector('.question-area span');
+    const questionID = questionElement.dataset.questionId; // Get this once
 
     let mediaRecorder;
     let audioChunks = [];
     let isRecording = false;
-
-
+    let audioBlob = null; // Store the recorded audio blob
 
     document.addEventListener('DOMContentLoaded', () => {
+      // Display question ID visually for debugging
+      console.log("Question ID: ", questionID);
 
-      const questionID = "{{ question['ID'] }}"; 
-      const audio = new Audio(`/static/aud_records/tts_${questionID}_.wav`);
-      audio.play();
+      // Play TTS audio
+      try {
+        const audio = new Audio(`/static/aud_records/tts_${questionID}_.wav`);
+        audio.play().catch(e => console.error("Error playing TTS audio:", e));
+      } catch (e) {
+        console.error("Error with TTS audio:", e);
+      }
 
       // Toggle recording on recordBtn click
       recordBtn.addEventListener('click', async () => {
-        const questionElement = document.querySelector('.question-area span');
-        // Use "ID" from data-question-id
-        const questionID = questionElement.dataset.questionId;
+        try {
+          if (!isRecording) {
+            // Start recording
+            isRecording = true;
+            recordBtn.style.backgroundColor = 'red';
+            recordBtn.innerHTML = '<i class="fas fa-stop"></i> Stop Recording';
 
-        if (!isRecording) {
-          // Start recording
-          isRecording = true;
-          recordBtn.style.backgroundColor = 'red';
-          recordBtn.innerHTML = '<i class="fas fa-stop"></i> Stop Recording';
-
-          const stream = await navigator.mediaDevices.getUserMedia({
-            audio: true,
-          });
-          mediaRecorder = new MediaRecorder(stream);
-          audioChunks = [];
-
-          mediaRecorder.ondataavailable = (event) => {
-            audioChunks.push(event.data);
-          };
-
-          mediaRecorder.start();
-        } else {
-          // Stop recording
-          isRecording = false;
-          recordBtn.style.backgroundColor = '';
-          recordBtn.innerHTML = '<i class="fas fa-microphone"></i> Record';
-
-          mediaRecorder.stop();
-          mediaRecorder.onstop = async () => {
-            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-            const formData = new FormData();
-            formData.append('audio', audioBlob);
-            formData.append('questionID', questionID);
-
-            // Save audio file
-            await fetch('/save_audio', {
-              method: 'POST',
-              body: formData,
+            const stream = await navigator.mediaDevices.getUserMedia({
+              audio: true,
             });
 
-            console.log(`Audio file ${questionID}.wav saved successfully.`);
-            playBtn.style.display = 'inline'; // Show play button
-            // Enable retake and submit
-            retakeBtn.disabled = false;
-            submitBtn.disabled = false;
-          };
+            // Use standard MIME types that browsers support well
+            mediaRecorder = new MediaRecorder(stream, {
+              mimeType: 'audio/webm;codecs=opus'
+            });
+            audioChunks = [];
+
+            mediaRecorder.ondataavailable = (event) => {
+              audioChunks.push(event.data);
+            };
+
+            mediaRecorder.start();
+          } else {
+            // Stop recording
+            isRecording = false;
+            recordBtn.style.backgroundColor = '';
+            recordBtn.innerHTML = '<i class="fas fa-microphone"></i> Record';
+
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+              mediaRecorder.stop();
+            }
+
+            mediaRecorder.onstop = async () => {
+              try {
+                audioBlob = new Blob(audioChunks, { type: 'audio/webm;codecs=opus' });
+
+                // Create a FormData object and append the audio blob
+                const formData = new FormData();
+                formData.append('audio', audioBlob, `${questionID}.webm`);
+                formData.append('questionID', questionID);
+
+                // Save audio file
+                const response = await fetch('/save_audio', {
+                  method: 'POST',
+                  body: formData,
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                  console.log(`Audio file ${questionID}.wav saved successfully.`);
+                  playBtn.style.display = 'inline'; // Show play button
+                  // Enable retake and submit
+                  retakeBtn.disabled = false;
+                  submitBtn.disabled = false;
+                } else {
+                  console.error("Error saving audio:", result.message);
+                  alert("There was an error saving your audio. Please try again.");
+                }
+              } catch (error) {
+                console.error("Error in recording process:", error);
+                alert("There was an error with the recording. Please try again.");
+              }
+            };
+          }
+        } catch (error) {
+          console.error("Error accessing microphone:", error);
+          alert("Could not access your microphone. Please check your permissions and try again.");
         }
       });
 
       // Play recorded audio
       playBtn.addEventListener('click', () => {
-        const questionElement = document.querySelector('.question-area span');
-        const questionID = questionElement.dataset.questionId;
-        const audio = new Audio(`/static/aud_records/${questionID}.wav`);
-        audio.play();
+        try {
+          const audio = new Audio(`/static/aud_records/${questionID}.wav`);
+          audio.onerror = (e) => {
+            console.error("Error playing audio:", e);
+            alert("Could not play the recording. The file may be missing.");
+          };
+          audio.play();
+        } catch (e) {
+          console.error("Error with audio playback:", e);
+        }
       });
 
       // Function to fetch the next question
@@ -421,50 +464,13 @@
           .then((response) => response.json())
           .then((data) => {
             if (data.success) {
-              const questionData = data.question; 
-              const questionArea = document.querySelector('.question-area span');
-              questionArea.textContent = "";
-              questionArea.dataset.questionId = questionData.ID;
-
-              // Update Lesson and Level
-              document.getElementById('lesson').textContent = questionData.Lesson;
-              document.getElementById('level').textContent = questionData.Level;
-
-              // Update image if available
-              const imageArea = document.querySelector('.image-area');
-              if (data.Image) {
-                imageArea.innerHTML = `<img src="${data.Image}" alt="Related Image" />`;
-              } else {
-                imageArea.innerHTML = '';
-              }
-
-              // Reset or show play button depending on existing audio
-              // For demonstration, let's assume we rely on the server to let us know if audio exists
-              if (data.audio_exists) {
-                playBtn.style.display = 'inline';
-              } else {
-                playBtn.style.display = 'none';
-              }
-
-              // Reset record button
-              recordBtn.style.backgroundColor = '';
-              recordBtn.innerHTML = '<i class="fas fa-microphone"></i> Record';
-
-              // (Optional) If you want to automatically play TTS for new question:
-              const audio = new Audio(`/static/aud_records/tts_${questionData.ID}_.wav`);
-              audio.play();
-
-              // Disable retake & submit until new recording
-              retakeBtn.disabled = true;
-              submitBtn.disabled = true;
-
+              // ...existing code...
             } else {
-              if(!data.question){
+              if (!data.question) {
                 window.location.href = "{{ url_for('speech_guide') }}";
-              }else{
+              } else {
                 alert(data.message || 'No more questions available.');
               }
-
             }
           })
           .catch((error) => {
@@ -486,35 +492,48 @@
       feedback.textContent = '';
     });
 
-    // Submit Answer
+    // Submit Answer - using POST instead of GET
     submitBtn.addEventListener('click', () => {
-      fetch('/submit_audio')
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.success) {
-              if(data.correct){
-                alert("ඔබගේ පිළිතුර නිවැරදියි.")
-              }else{
-                let msg= "ඔබගේ පිළිතුර වැරදියි. නිවැරදි පිළිතුර * "+data.answer+" *"
-                  alert(msg)
-              } 
+      // Create form data with question ID
+      const formData = new FormData();
+      formData.append('questionID', questionID);
 
-              playBtn.style.display = 'none';
-
-              // Reset record button
-              recordBtn.style.backgroundColor = '';
-              recordBtn.innerHTML = '<i class="fas fa-microphone"></i> Record';
-
-              submitBtn.disabled = true;
-
+      fetch('/submit_audio', {
+        method: 'POST',
+        body: formData
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.success) {
+            if (data.correct) {
+              alert("ඔබගේ පිළිතුර නිවැරදියි.")
             } else {
-              alert(data.message || 'No more questions available.');
+              let msg = "ඔබගේ පිළිතුර වැරදියි. නිවැරදි පිළිතුර * " + data.answer + " *"
+              alert(msg)
             }
-          })
-          .catch((error) => {
-            console.error('Error fetching the next question:', error);
-          });
+
+            playBtn.style.display = 'none';
+
+            // Reset record button
+            recordBtn.style.backgroundColor = '';
+            recordBtn.innerHTML = '<i class="fas fa-microphone"></i> Record';
+
+            submitBtn.disabled = true;
+          } else {
+            alert(data.message || 'Error processing your answer.');
+          }
+        })
+        .catch(error => {
+          console.error('Error submitting answer:', error);
+          alert('There was a problem submitting your answer. Please try again.');
+        });
     });
   </script>
 </body>
+
 </html>
