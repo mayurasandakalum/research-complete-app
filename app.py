@@ -43,10 +43,11 @@ def wait_for_app(url, max_retries=10):
 
 @app.route('/')
 def index():
-    """Main app index showing links to both sub-apps."""
+    """Main app index showing links to all sub-apps."""
     return render_template('index.html', 
                           kinesthetic_url=f"http://localhost:{config.KINESTHETIC_APP_PORT}",
-                          readwrite_url=f"http://localhost:{config.READWRITE_APP_PORT}")
+                          readwrite_url=f"http://localhost:{config.READWRITE_APP_PORT}",
+                          visual_url=f"http://localhost:{config.VISUAL_APP_PORT}")  # Added visual URL
 
 @app.route('/kinesthetic')
 def kinesthetic_redirect():
@@ -58,13 +59,19 @@ def readwrite_redirect():
     """Redirect to the readwrite app."""
     return redirect(f"http://localhost:{config.READWRITE_APP_PORT}")
 
+@app.route('/visual')
+def visual_redirect():
+    """Redirect to the visual app."""
+    return redirect(f"http://localhost:{config.VISUAL_APP_PORT}")
+
 @app.route('/api/status')
 def api_status():
     """API endpoint to check the status of all apps."""
     status = {
         'main': 'running',
         'kinesthetic': 'unknown',
-        'readwrite': 'unknown'
+        'readwrite': 'unknown',
+        'visual': 'unknown'  # Added visual status
     }
     
     # Check kinesthetic app
@@ -82,6 +89,14 @@ def api_status():
             status['readwrite'] = 'running'
     except:
         status['readwrite'] = 'not running'
+    
+    # Check visual app
+    try:
+        response = requests.get(f"http://localhost:{config.VISUAL_APP_PORT}/api/info")
+        if response.status_code == 200:
+            status['visual'] = 'running'
+    except:
+        status['visual'] = 'not running'
     
     return jsonify(status)
 
@@ -136,6 +151,7 @@ def create_main_template():
         <div>
             <a class="app-link" href="{{ kinesthetic_url }}">Kinesthetic Learning App</a>
             <a class="app-link" href="{{ readwrite_url }}">Read/Write Learning App</a>
+            <a class="app-link" href="{{ visual_url }}">Visual Learning App</a>
         </div>
         
         <h2>System Status</h2>
@@ -193,10 +209,12 @@ if __name__ == '__main__':
     # Launch the other apps
     kinesthetic_process = launch_app('kinesthetic/app.py', config.KINESTHETIC_APP_PORT)
     readwrite_process = launch_app('readwrite/app.py', config.READWRITE_APP_PORT)
+    visual_process = launch_app('visual/app.py', config.VISUAL_APP_PORT)  # Launch visual app
     
     # Wait for the apps to be ready
     kinesthetic_url = f"http://localhost:{config.KINESTHETIC_APP_PORT}"
     readwrite_url = f"http://localhost:{config.READWRITE_APP_PORT}"
+    visual_url = f"http://localhost:{config.VISUAL_APP_PORT}"  # Add visual URL
     
     # Start a thread to open the browser when the apps are ready
     browser_thread = threading.Thread(target=open_browser)
