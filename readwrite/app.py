@@ -2,8 +2,6 @@
 
 from flask import Flask, render_template, request, jsonify, session
 from flask_session import Session
-import firebase_admin
-from firebase_admin import credentials, firestore
 import os
 import torch
 import torch.nn.functional as F
@@ -14,39 +12,199 @@ from gtts import gTTS
 import random
 import re
 import base64
-from get_letters import get_text
 from collections import Counter
-
+import sys
+import io
+import wave
 
 app = Flask(__name__)
 app.config["SESSION_TYPE"] = "filesystem"  # Stores session data locally
 Session(app)
 
+# Fix the import mechanism for the config module
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.insert(0, parent_dir)  # Use insert instead of append to prioritize this path
+
+# Make all paths absolute for consistency
+STATIC_FOLDER = os.path.join(current_dir, "static")
+AUDIO_FOLDER = os.path.join(STATIC_FOLDER, "aud_records")
+WRITE_IMG_FOLDER = os.path.join(STATIC_FOLDER, "write_img")
+
+# Create necessary directories
+os.makedirs(STATIC_FOLDER, exist_ok=True)
+os.makedirs(AUDIO_FOLDER, exist_ok=True)
+os.makedirs(WRITE_IMG_FOLDER, exist_ok=True)
+os.makedirs(os.path.join(STATIC_FOLDER, "Images"), exist_ok=True)
+
+try:
+    import config
+except ImportError:
+    print(f"Error: Cannot import config module. Looking in: {parent_dir}")
+    print(f"Python path: {sys.path}")
+    raise
+
+app.config['SECRET_KEY'] = config.SECRET_KEY
+
 database = {"sathira": "123"}  # username: password
 
+# Fix model loading by using the correct relative path
+whisper_model_path = os.path.join(current_dir, "whisper-small-sinhala-finetuned")
+print(f"Looking for model at: {whisper_model_path}")
+
 # Load the fine-tuned model and processor
-model = WhisperForConditionalGeneration.from_pretrained(
-    "./whisper-small-sinhala-finetuned"
-)
-processor = WhisperProcessor.from_pretrained("./whisper-small-sinhala-finetuned")
+try:
+    model = WhisperForConditionalGeneration.from_pretrained(
+        whisper_model_path,
+        local_files_only=True  # Explicitly specify loading from local files
+    )
+    processor = WhisperProcessor.from_pretrained(
+        whisper_model_path,
+        local_files_only=True
+    )
+    print(f"Successfully loaded model from {whisper_model_path}")
+except Exception as e:
+    print(f"Error loading model: {e}")
+    # Set to None - you might want to handle this better in production
+    model = None
+    processor = None
+
 # Set the language and task
 language = "Sinhala"
 task = "transcribe"
 # Update the model's generation configuration
-model.config.forced_decoder_ids = processor.get_decoder_prompt_ids(
-    language=language, task=task
-)
-model.config.suppress_tokens = None
+if model is not None:
+    model.config.forced_decoder_ids = processor.get_decoder_prompt_ids(
+        language=language, task=task
+    )
+    model.config.suppress_tokens = None
 
 model_st = SentenceTransformer("Ransaka/bert-small-sentence-transformer")
 
-UPLOAD_FOLDER = os.path.join("static", "aud_records")
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+# Flag to indicate if ffmpeg is available
+FFMPEG_AVAILABLE = False
+try:
+    import subprocess
+    result = subprocess.run(["ffmpeg", "-version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    FFMPEG_AVAILABLE = (result.returncode == 0)
+    print("ffmpeg is available in the system")
+except Exception:
+    print("ffmpeg is not available, will use Python fallback for audio conversion")
 
-# Initialize Firebase
-cred = credentials.Certificate("./learn-pal-firebase-adminsdk-ugedp-fcb865a7d8.json")
-firebase_admin.initialize_app(cred)
-db = firestore.client()
+# Flag to indicate if we're running with Firebase or in offline mode
+OFFLINE_MODE = False
+
+# Initialize Firebase with better error handling
+try:
+    import firebase_admin
+    from firebase_admin import credentials, firestore
+    
+    firebase_cred_path = os.path.join(current_dir, "learn-pal-firebase-adminsdk-ugedp-fcb865a7d8.json")
+    if os.path.exists(firebase_cred_path):
+        cred = credentials.Certificate(firebase_cred_path)
+        firebase_admin.initialize_app(cred)
+        db = firestore.client()
+        print(f"Successfully initialized Firebase with credentials from {firebase_cred_path}")
+    else:
+        print(f"Firebase credentials file not found at {firebase_cred_path}")
+        print("Running in OFFLINE MODE - Firebase features will be simulated")
+        OFFLINE_MODE = True
+        db = None
+except Exception as e:
+    print(f"Error initializing Firebase: {e}")
+    print("Running in OFFLINE MODE - Firebase features will be simulated")
+    OFFLINE_MODE = True
+    db = None
+
+# Import get_letters only if model is loaded successfully
+if model is not None:
+    try:
+        from get_letters import get_text
+    except ImportError:
+        print("Warning: Could not import get_letters module. Writing recognition will not work.")
+        def get_text(*args, **kwargs):
+            return "OCR module not available"
+
+# Mock Firebase collections for offline mode
+if OFFLINE_MODE:
+    class MockFirestore:
+        def __init__(self):
+            self.audio_questions = {
+                "1": {"Question": "Sample question 1", "Answer": "Sample answer 1", "Lesson": "lesson1", "ID": 1},
+                "2": {"Question": "Sample question 2", "Answer": "Sample answer 2", "Lesson": "lesson1", "ID": 2},
+                "3": {"Question": "Sample question 3", "Answer": "Sample answer 3", "Lesson": "lesson2", "ID": 3},
+            }
+            self.write_questions = {
+                "1": {"Question": "Write sample 1", "Answer": "Written answer 1", "Lesson": "lesson1", "ID": 1},
+                "2": {"Question": "Write sample 2", "Answer": "Written answer 2", "Lesson": "lesson1", "ID": 2},
+                "3": {"Question": "Write sample 3", "Answer": "Written answer 3", "Lesson": "lesson2", "ID": 3},
+            }
+            self.results = []
+            
+        def collection(self, name):
+            return MockCollection(self, name)
+    
+    class MockCollection:
+        def __init__(self, db, name):
+            self.db = db
+            self.name = name
+            
+        def document(self, doc_id):
+            return MockDocument(self.db, self.name, doc_id)
+            
+        def add(self, data):
+            self.db.results.append(data)
+            return True
+            
+        def where(self, field, op, value):
+            return MockQuery(self.db, self.name, field, op, value)
+    
+    class MockDocument:
+        def __init__(self, db, collection_name, doc_id):
+            self.db = db
+            self.collection = collection_name
+            self.id = doc_id
+        
+        def get(self):
+            return MockDocumentSnapshot(self.db, self.collection, self.id)
+    
+    class MockDocumentSnapshot:
+        def __init__(self, db, collection, doc_id):
+            self.db = db
+            self.collection = collection
+            self.id = doc_id
+            self._exists = False
+            self._data = {}
+            
+            if collection == "audio_questions" and doc_id in db.audio_questions:
+                self._exists = True
+                self._data = db.audio_questions[doc_id]
+            elif collection == "write_questions" and doc_id in db.write_questions:
+                self._exists = True
+                self._data = db.write_questions[doc_id]
+        
+        @property
+        def exists(self):
+            return self._exists
+            
+        def to_dict(self):
+            return self._data
+    
+    class MockQuery:
+        def __init__(self, db, collection, field, op, value):
+            self.db = db
+            self.collection = collection
+            self.field = field
+            self.op = op
+            self.value = value
+        
+        def stream(self):
+            results = []
+            # Just return empty results since this is a mock
+            return results
+    
+    # Use our mock Firestore
+    db = MockFirestore()
 
 # Global variable to track the current question ID
 AudQuestionID = 1
@@ -125,41 +283,50 @@ def random_q_r(num, noq):
 
 
 def stt_sinhala(audio_file):
-    global model
-    speech_array, sampling_rate = torchaudio.load(audio_file)
+    global model, processor
+    
+    if model is None or processor is None:
+        print("Model or processor not available. Cannot transcribe audio.")
+        return "Model not loaded"
+        
+    try:
+        speech_array, sampling_rate = torchaudio.load(audio_file)
 
-    # Resample the audio to 16 kHz if necessary
-    if sampling_rate != 16000:
-        resampler = torchaudio.transforms.Resample(
-            orig_freq=sampling_rate, new_freq=16000
+        # Resample the audio to 16 kHz if necessary
+        if sampling_rate != 16000:
+            resampler = torchaudio.transforms.Resample(
+                orig_freq=sampling_rate, new_freq=16000
+            )
+            speech_array = resampler(speech_array)
+
+        # Convert to mono channel if necessary
+        if speech_array.shape[0] > 1:
+            speech_array = speech_array.mean(dim=0)
+
+        # Prepare the input features
+        input_features = processor.feature_extractor(
+            speech_array.numpy(), sampling_rate=16000, return_tensors="pt"
+        ).input_features
+
+        # Move model and inputs to GPU if available
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        model = model.to(device)
+        input_features = input_features.to(device)
+
+        # Generate transcription
+        with torch.no_grad():
+            generated_ids = model.generate(input_features)
+
+        # Decode the transcription
+        transcription = processor.tokenizer.decode(
+            generated_ids[0], skip_special_tokens=True
         )
-        speech_array = resampler(speech_array)
 
-    # Convert to mono channel if necessary
-    if speech_array.shape[0] > 1:
-        speech_array = speech_array.mean(dim=0)
-
-    # Prepare the input features
-    input_features = processor.feature_extractor(
-        speech_array.numpy(), sampling_rate=16000, return_tensors="pt"
-    ).input_features
-
-    # Move model and inputs to GPU if available
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    model = model.to(device)
-    input_features = input_features.to(device)
-
-    # Generate transcription
-    with torch.no_grad():
-        generated_ids = model.generate(input_features)
-
-    # Decode the transcription
-    transcription = processor.tokenizer.decode(
-        generated_ids[0], skip_special_tokens=True
-    )
-
-    print("Transcription:", transcription)
-    return transcription
+        print("Transcription:", transcription)
+        return transcription
+    except Exception as e:
+        print(f"Error in speech-to-text: {e}")
+        return None
 
 
 def is_similar(target, source):
@@ -181,12 +348,18 @@ def sin_text_to_speech(text, qid):
     """
     Convert the given Sinhala text to speech using gTTS and play the audio.
     """
-    # Specify lang='si' for Sinhala
-    tts = gTTS(text=text, lang="si")
-    output_file = "./static/aud_records/tts_" + str(qid) + "_.wav"
-
-    # Save the audio to a file
-    tts.save(output_file)
+    try:
+        # Specify lang='si' for Sinhala
+        tts = gTTS(text=text, lang="si")
+        output_file = os.path.join(AUDIO_FOLDER, f"tts_{qid}_.wav")
+        
+        # Save the audio to a file
+        tts.save(output_file)
+        print(f"Generated TTS audio saved to {output_file}")
+        return True
+    except Exception as e:
+        print(f"Error generating TTS audio: {e}")
+        return False
 
 
 # Route for rendering the main page
@@ -223,6 +396,13 @@ def login():
 def registration():
     return render_template("registration.html")
 
+@app.route('/api/info')
+def api_info():
+    return jsonify({
+        'app': 'Read/Write App',
+        'status': 'running'
+    })
+
 
 # Route to handle registration form submission
 @app.route("/form_registration", methods=["POST"])
@@ -257,7 +437,11 @@ def auditory_learning():
     if question_doc.exists:
         question_data = question_doc.to_dict()
         question = question_data.get("Question", "No Question Available")
-        sin_text_to_speech(question, qid)
+        
+        tts_success = sin_text_to_speech(question, qid)
+        if not tts_success:
+            print(f"Warning: Could not generate TTS for question {qid}")
+            
         image = question_data.get("Image", None)
         if image:
             image = image.replace("<", "").replace(">", "")
@@ -318,27 +502,41 @@ def submit_sudio():
     global Aud_data
     global AudQuestionID
     global Aud_results
+    
+    # Handle both GET and POST requests
+    if request.method == "GET":
+        # For GET requests, return a simple form (helpful for debugging)
+        return render_template("submit_audio_form.html", question_id=Aud_data.get("ID", "unknown"))
+    
     correct = False
-    audio_file = "./static/aud_records/" + str(Aud_data["ID"]) + ".wav"
+    audio_file = os.path.join(AUDIO_FOLDER, f"{Aud_data['ID']}.wav")
+    
+    # Check if audio file exists
+    if not os.path.exists(audio_file):
+        print(f"Warning: Audio file not found: {audio_file}")
+        return jsonify({
+            "success": False, 
+            "message": "Audio file not found. Please record your answer first."
+        }), 400
 
     ans_txt = stt_sinhala(audio_file)
     user = session.get("user", "No user stored")
+    
     if ans_txt:
         ori_answer = Aud_data["Answer"]
         sim = is_similar(ori_answer, ans_txt)
-        print(sim, ori_answer)
+        print(f"Similarity score: {sim}, Original answer: {ori_answer}")
+        
         if sim > 0.6:
             correct = True
             Aud_results.append(Aud_data["Lesson"])
-            db.collection("audio_results").add({"name": user, "data": Aud_data})
+            if not OFFLINE_MODE:
+                db.collection("audio_results").add({"name": user, "data": Aud_data})
 
         return jsonify({"success": True, "correct": correct, "answer": ori_answer})
     else:
         AudQuestionID -= 1
-        return (
-            jsonify({"success": False, "message": "Speech to text model problem"}),
-            404,
-        )
+        return jsonify({"success": False, "message": "Speech to text model problem"}), 500
 
 
 @app.route("/save_audio", methods=["POST"])
@@ -351,37 +549,69 @@ def save_audio():
             400,
         )
 
-    # Temporarily save the raw file
+    # Create absolute paths
     raw_filename = f"{question_id}_raw"
-    raw_filepath = os.path.join("static", "aud_records", raw_filename)
-    audio.save(raw_filepath)
-
-    # Convert raw (WebM/OGG) to WAV
     wav_filename = f"{question_id}.wav"
-    wav_filepath = os.path.join("static", "aud_records", wav_filename)
+    
+    raw_filepath = os.path.join(AUDIO_FOLDER, raw_filename)
+    wav_filepath = os.path.join(AUDIO_FOLDER, wav_filename)
 
-    import subprocess
+    try:
+        # Temporarily save the raw file
+        audio.save(raw_filepath)
+        
+        conversion_success = False
+        
+        # Try ffmpeg first if available
+        if FFMPEG_AVAILABLE:
+            try:
+                subprocess.run(
+                    [
+                        "ffmpeg",
+                        "-y",  # overwrite
+                        "-i",
+                        raw_filepath,
+                        "-ar",
+                        "16000",  # resample to 16kHz if needed
+                        "-ac",
+                        "1",  # 1 channel
+                        wav_filepath,
+                    ],
+                    check=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE
+                )
+                conversion_success = True
+                print(f"Converted audio with ffmpeg: {wav_filepath}")
+            except subprocess.CalledProcessError as e:
+                print(f"ffmpeg error: {e}, trying Python fallback")
+            
+        # If ffmpeg failed or is not available, try Python fallback
+        if not conversion_success:
+            conversion_success = convert_audio_python(raw_filepath, wav_filepath)
+            if conversion_success:
+                print(f"Converted audio with Python: {wav_filepath}")
 
-    subprocess.run(
-        [
-            "ffmpeg",
-            "-y",  # overwrite
-            "-i",
-            raw_filepath,
-            "-ar",
-            "16000",  # resample to 16kHz if needed
-            "-ac",
-            "1",  # 1 channel
-            wav_filepath,
-        ]
-    )
-
-    # Optionally remove the raw file
-    os.remove(raw_filepath)
-
-    return jsonify(
-        {"success": True, "message": f"Audio file {wav_filename} saved successfully."}
-    )
+        # Clean up temp file
+        try:
+            if os.path.exists(raw_filepath):
+                os.remove(raw_filepath)
+        except Exception as e:
+            print(f"Warning: Could not remove temporary file: {e}")
+            
+        if conversion_success:
+            return jsonify({
+                "success": True, 
+                "message": f"Audio file {wav_filename} saved successfully."
+            })
+        else:
+            return jsonify({
+                "success": False, 
+                "message": "Failed to convert audio format."
+            }), 500
+    except Exception as e:
+        print(f"Error saving audio: {e}")
+        return jsonify({"success": False, "message": f"Error: {str(e)}"}), 500
 
 
 @app.route("/reading_writing_learning")
@@ -410,7 +640,7 @@ def next_question_rw():
 
     qid = random_q_w(WrQuestionID, no_q)
     question_doc = db.collection("write_questions").document(str(qid)).get()
-    if question_doc.exists:
+    if question_doc.exists():
         question_data = question_doc.to_dict()
         image = question_data.get("Image", None)
         if image:
@@ -488,10 +718,15 @@ def submit_write():
 def all_score():
     user = session.get("user", None)
     if user:
-        query = db.collection("audio_results").where("name", "==", user).stream()
-        query2 = db.collection("write_results").where("name", "==", user).stream()
-        res1 = calculate_res(query)
-        res2 = calculate_res(query2)
+        if not OFFLINE_MODE and db is not None:
+            query = db.collection("audio_results").where("name", "==", user).stream()
+            query2 = db.collection("write_results").where("name", "==", user).stream()
+            res1 = calculate_res(query)
+            res2 = calculate_res(query2)
+        else:
+            # Mock results for offline mode
+            res1 = {"lesson1": 3, "lesson2": 2}
+            res2 = {"lesson1": 2, "lesson3": 1}
         print(res1, res2)
     else:
         return render_template("Login.html")
@@ -578,5 +813,36 @@ def speech_guide():
         )
 
 
+# Create a basic template for submit_audio_form
+@app.route("/create_needed_templates")
+def create_needed_templates():
+    templates_dir = os.path.join(current_dir, "templates")
+    os.makedirs(templates_dir, exist_ok=True)
+    
+    # Create submit_audio_form.html if it doesn't exist
+    submit_audio_form_path = os.path.join(templates_dir, "submit_audio_form.html")
+    if not os.path.exists(submit_audio_form_path):
+        with open(submit_audio_form_path, "w") as f:
+            f.write("""
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Submit Audio</title>
+</head>
+<body>
+    <h1>Submit Audio</h1>
+    <p>This is a simple form to submit audio for question ID: {{ question_id }}</p>
+    <form action="/submit_audio" method="post" enctype="multipart/form-data">
+        <input type="file" name="audio" accept="audio/*">
+        <input type="hidden" name="questionID" value="{{ question_id }}">
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>
+            """)
+    
+    return "Templates created successfully"
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = config.READWRITE_APP_PORT if hasattr(config, 'READWRITE_APP_PORT') else 5002
+    app.run(debug=True, port=port)
