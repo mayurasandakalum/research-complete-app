@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Reading and Writing Learning</title>
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+    <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('/static/Images/auditory.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* Chatbox */
+        .chat-container {
+            width: 60%;
+            height: 80%;
+            max-width: 600px;
+            background: linear-gradient(135deg, #f2f5f5, #3ec8db);
+            border-radius: 30px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .question {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2b3172;
+            margin-bottom: 20px;
+        }
+
+        /* Drawing Canvas */
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            /* Let the canvas fill its container width, 
+               but do NOT set fixed height or width on the canvas 
+               directly via CSS */
+        }
+
+        canvas {
+            display: block; /* Removes inline offsets */
+            width: 100%;    /* The width is responsive to container */
+            /* height: 100%;  <-- Avoid forcing a height here */
+            background-color: #fff; /* For clarity when drawing */
+            border: 2px solid #ccc;
+            border-radius: 10px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .controls button {
+            margin: 0 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 30px;
+            border: none;
+            transition: background 0.3s;
+        }
+
+        .clear-btn {
+            background-color: #ff3b30;
+            color: white;
+        }
+
+        .submit-btn {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .next-btn {
+            background-color: #09ff00;
+            color: white;
+        }
+
+        .clear-btn:hover,
+        .submit-btn:hover,
+        .next-btn:hover {
+            filter: brightness(90%);
+        }
+
+        /* Footer */
+        .footer {
+            width: 100%;
+            background-color: #333;
+            color: #fff;
+            padding: 20px 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .footer-content {
+            width: 90%;
+            max-width: 1000px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        /* Navbar */
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 15px 30px;
+            background-color: transparent;
+            color: #fff;
+        }
+
+        .logo img {
+            height: 40px;
+        }
+
+        .logout-btn {
+            color: #fff;
+            background-color: #ff3b30;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 30px;
+            transition: background 0.3s;
+            font-family: serif;
+        }
+
+        .title {
+            font-size: 35px;
+            font-weight: bold;
+            font-family: 'Lucida Sans', sans-serif;
+            color: #333;
+        }
+
+        .radio-group {
+            display: flex;
+            justify-content: center;
+            margin: 15px 0;
+        }
+        
+        .radio-group label {
+            margin: 0 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo">
+            <a href="/home">
+                <img
+                    src="/static/Images/logo.png"
+                    alt="Company Logo"
+                    style="width:150px;height:150px;border-radius: 50%;"
+                />
+            </a>
+        </div>
+        <div class="title">Visual Learning</div>
+        <a href="logout.html" class="logout-btn">Logout</a>
+    </nav>
+
+    <div class="wrapper">
+        <!-- Chatbox -->
+        <div class="chat-container">
+            <div class="lesson-level-container">
+                <p><strong>Lesson:</strong> <span id="lesson">{{ question['Lesson'] }}</span></p>
+                <p><strong>Level:</strong> <span id="level">{{ question['Level'] }}</span></p>
+            </div>
+
+            <div class="question-area">
+                <span data-question-id="{{ question['ID'] }}">{{ question['Question'] }}</span>
+                <div class="image-area">
+                    {% if image %}
+                    <img src="{{ url_for('static', filename=image) }}" alt="Related Image" style="height:100px;width:100px;" />
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="radio-group">
+                <label><input type="radio" name="inputType" value="number" checked> Number</label>
+                <label><input type="radio" name="inputType" value="text"> Text</label>
+            </div>
+
+
+            <!-- Controls -->
+            <div class="controls">
+                <button id="clearBtn" class="clear-btn">Clear</button>
+                <button id="submitBtn" class="submit-btn">Submit Answer</button>
+                <button id="next" class="next-btn">Next</button>
+            </div>
+        </div>
+
+                    <!-- Drawing Area -->
+                    <div class="canvas-container">
+                        <canvas id="answerCanvas"></canvas>
+                    </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>📧 Email: info@learn-pal.com</p>
+            <p>📞 Fax: +94 11 2345678</p>
+            <p>📍 Address: 123 Learn-Pal St, Colombo, Sri Lanka</p>
+        </div>
+    </footer>
+
+    <script>
+        const canvas = document.getElementById('answerCanvas');
+        let signaturePad;
+
+        // Function to handle canvas resizing properly
+        function resizeCanvas() {
+          const ratio = 1
+          
+          // Scale the canvas so the drawing coordinates
+          // match the visible size in the browser
+          canvas.width = canvas.offsetWidth * ratio;
+          canvas.height = canvas.offsetHeight * ratio;
+          canvas.getContext('2d').scale(ratio, ratio);
+
+          // Clear and re-init signature pad if needed
+          if (signaturePad) {
+            signaturePad.clear();
+          }
+        }
+
+        // Initialize SignaturePad once the DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            // Resize the canvas to match container on load
+            resizeCanvas();
+
+            signaturePad = new SignaturePad(canvas, {
+                minWidth: 1,
+                maxWidth: 2.5,
+                backgroundColor: "rgb(255, 255, 255)", // Ensures a white background
+                penColor: "rgb(0, 0, 0)",
+            });
+
+            // If the window is resized, fix the canvas size again
+            window.addEventListener('resize', resizeCanvas);
+
+            function getSelectedInputType() {
+                return document.querySelector('input[name="inputType"]:checked').value === "number";
+            }
+
+            // Clear button
+            document.getElementById('clearBtn').addEventListener('click', () => {
+                signaturePad.clear();
+            });
+
+            // Submit button
+            document.getElementById('submitBtn').addEventListener('click', () => {
+                if (signaturePad.isEmpty()) {
+                    alert("Please draw something first.");
+                    return;
+                  }
+                  // Get base64 image data (PNG format)
+                  const dataURL = signaturePad.toDataURL("image/png");
+                    fetch("/submit_write", {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify({ image: dataURL,number:getSelectedInputType() }),
+                    }).then((response) => response.json())
+                    .then((data) => {
+                      if (data.success) {
+                        if(data.correct){
+                            alert("ඔබගේ පිළිතුර නිවැරදියි.")
+                        }else{
+                            let msg= "ඔබගේ පිළිතුර වැරදියි. නිවැරදි පිළිතුර * "+data.answer+" *"
+                            alert(msg)
+                        }          
+                      } else {
+                        alert(data.message || 'No more questions available.');
+                      }
+                    })
+                    .catch((error) => {
+                      console.error('Error fetching the next question:', error);
+                    });
+            });
+
+            // Next button
+            document.getElementById('next').addEventListener('click', () => {
+                fetch('/next_question_rw')
+                    .then(response => response.json())
+                    .then((data) => {
+                        if (data.success) {
+                          const questionData = data.question; 
+                          const questionArea = document.querySelector('.question-area span');
+                          questionArea.textContent = questionData.Question;
+                          questionArea.dataset.questionId = questionData.ID;
+            
+                          // Update Lesson and Level
+                          document.getElementById('lesson').textContent = questionData.Lesson;
+                          document.getElementById('level').textContent = questionData.Level;
+            
+                          // Update image if available
+                          const imageArea = document.querySelector('.image-area');
+                          if (data.Image) {
+                            imageArea.innerHTML = `<img src="${data.Image}" alt="Related Image" />`;
+                          } else {
+                            imageArea.innerHTML = '';
+                          }
+                            // Clear the canvas for the next question
+                            signaturePad.clear();
+                        } else {
+                            if(!data.question){
+                                window.location.href = "{{ url_for('write_guide') }}";
+                            }else{
+                                alert(data.message || 'Error fetching the next question.');
+                            }                
+                            
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching the next question:');
+                    });
+            });
+        });
+    </script>
+</body>
+</html>

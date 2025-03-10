@@ -1,0 +1,170 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+  /* Background Image */
+  body {
+    background-image: url('/static/Images/dashboard.jpg'); /* Replace with your image path */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    font-family: Arial, sans-serif;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+}
+
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 15px 30px;
+    background-color:transparent;
+    color: #fff;
+}
+
+.logo img {
+    height: 40px;
+}
+
+.title {
+    font-size: 24px;
+    font-weight: bold;
+    font-family: serif;
+}
+
+.logout-btn {
+    color: #fff;
+    background-color: #ff3b30;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 30px;
+    transition: background 0.3s;
+    font-family: serif;
+}
+
+.logout-btn:hover {
+    background-color: #e03229;
+}
+
+.dashboard-container {
+    text-align: center;
+    padding: 40px;
+    margin-top: 50px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background-color: #f6e8e8;
+    max-width: 800px;
+    width: 100%;
+}
+
+h1 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #333;
+    font-family: serif;
+}
+
+.learning-methods {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
+
+.learning-btn {
+    padding: 20px 30px;
+    font-size: 18px;
+    text-decoration: none;
+    color: #fff;
+    border-radius: 8px;
+    text-align: center;
+    width: 180px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+/* Shine effect for all buttons */
+.learning-btn::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 150%;
+    height: 150%;
+    background: rgba(255, 255, 255, 0.1);
+    transform: rotate(45deg);
+    animation: shine 4s infinite;
+}
+
+@keyframes shine {
+    0% {
+        transform: translateX(-100%) rotate(45deg);
+    }
+    100% {
+        transform: translateX(100%) rotate(45deg);
+    }
+}
+
+/* Hover effect */
+.learning-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+
+/* Auditory - Playful Green/Blue gradient */
+.auditory {
+    background: linear-gradient(45deg, #0b521e, #44b435);
+}
+.auditory:hover {
+    background: linear-gradient(45deg, #037063, #44b435);
+}
+
+/* Reading/Writing - Ocean Blues gradient */
+.reading-writing {
+    background: linear-gradient(45deg, #07457b, #08757b);
+}
+.reading-writing:hover {
+    background: linear-gradient(45deg, #07457b, #08757b);
+}
+
+/* Visual - Sunset gradient */
+.visual {
+    background: linear-gradient(45deg, #cf4449, #fad0c4);
+    color: #444; /* Darker text for better contrast */
+}
+.visual:hover {
+    background: linear-gradient(45deg, #cf4449, #ffd8ce);
+}
+
+/* Kinesthetic - Purple/Pink gradient */
+.kinesthetic {
+    background: linear-gradient(45deg, #402b72, #e87ac9);
+}
+.kinesthetic:hover {
+    background: linear-gradient(45deg, #402b72, #e87ac9);
+}
+
+/* Optional: Add pulse animation on hover */
+@keyframes pulse {
+    0% {
+        transform: scale(1) translateY(-3px);
+    }
+    50% {
+        transform: scale(1.02) translateY(-3px);
+    }
+    100% {
+        transform: scale(1) translateY(-3px);
+    }
+}
+
+.learning-btn:hover {
+    animation: pulse 2s infinite;
+}
