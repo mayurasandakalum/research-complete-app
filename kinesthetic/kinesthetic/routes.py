@@ -1,9 +1,12 @@
-from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify
+from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify, current_app
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.security import generate_password_hash, check_password_hash
 from firebase_admin import firestore
-from datetime import datetime  # Add this import at the top
-import random  # Add this import
+from datetime import datetime
+import random
+import base64
+import os
+import shutil
 
 from .models import (
     User,
@@ -12,6 +15,7 @@ from .models import (
     AttemptedQuestion,
     SubQuestion,
     Subject,
+    AnswerMethod,
 )
 from .forms import (
     UserLoginForm,
@@ -19,7 +23,9 @@ from .forms import (
     QuizForm,
     QuestionForm,
     SubQuestionForm,
-)  # Added QuestionForm and SubQuestionForm
+)
+from services.abacus_service import check_abacus_answer
+from services.clock_service import check_clock_answer  # Add this import
 
 db = firestore.client()
 
@@ -73,24 +79,9 @@ def play():
         kinesthetic_profile = QuizProfile(user_id=current_user.id)
         kinesthetic_profile.save()
 
-    subject = request.args.get("subject", Subject.ADDITION)
-
-    # Check if user has completed all lessons
-    if len(kinesthetic_profile.completed_lessons) == len(Subject.CHOICES):
+    # Check if user has completed all 15 questions
+    if kinesthetic_profile.mixed_quiz_completed:
         return render_template("kinesthetic/all_lessons_completed.html")
-
-    # Check if current subject is completed and redirect to next subject
-    if subject in kinesthetic_profile.completed_lessons:
-        next_subject = None
-        for s, _ in Subject.CHOICES:
-            if s not in kinesthetic_profile.completed_lessons:
-                next_subject = s
-                break
-        if next_subject:
-            return redirect(
-                url_for("kinesthetic.lesson_instructions", subject=next_subject)
-            )
-        return redirect(url_for("kinesthetic.leaderboard"))
 
     # Handle POST request for answering questions
     if request.method == "POST":
@@ -101,29 +92,65 @@ def play():
         # Get all the captured images
         captured_images = {}
         for key in request.form:
-            if key.startswith("captured_image_webcam"):
+            if key.startswith("captured_image_"):
                 captured_images[key] = request.form[key]
 
         # Get the sub-question to check correct answer
-        sub_question_ref = (
-            db.collection("sub_questions").document(sub_question_id).get()
-        )
+        sub_question_ref = db.collection("sub_questions").document(sub_question_id).get()
         if sub_question_ref.exists:
             sub_question_data = sub_question_ref.to_dict()
             correct_answer = sub_question_data.get("correct_answer")
             points = sub_question_data.get("points", 1)
 
-            # TODO: Implement image processing logic here
-            # is_correct = process_answer(answer_method, captured_images, correct_answer)
-            is_correct = True  # Temporary, replace with actual logic
-
-            # Save attempt
+            # Initialize variables
+            is_correct = False
+            detected_value = None
+            annotated_image_path = None
+            
+            # Process answer based on answer method
+            if answer_method == AnswerMethod.ABACUS and captured_images:
+                # Get the first captured image (we'll only use one for now)
+                base64_image = next(iter(captured_images.values()))
+                
+                # Check answer using the abacus service
+                is_correct, detected_value, annotated_image_path = check_abacus_answer(
+                    base64_image, correct_answer
+                )
+            elif (answer_method == AnswerMethod.ANALOG_CLOCK or 
+                  answer_method == AnswerMethod.DIGITAL_CLOCK) and captured_images:
+                # Get the first captured image
+                base64_image = next(iter(captured_images.values()))
+                
+                # Check answer using the clock service
+                is_correct, detected_value, annotated_image_path = check_clock_answer(
+                    base64_image, correct_answer
+                )
+            
+            # If there's an annotated image path, copy it to the static folder
+            if annotated_image_path and os.path.exists(annotated_image_path):
+                static_uploads = os.path.join(current_app.static_folder, "uploads")
+                os.makedirs(static_uploads, exist_ok=True)
+                
+                filename = os.path.basename(annotated_image_path)
+                static_path = os.path.join(static_uploads, filename)
+                shutil.copy(annotated_image_path, static_path)
+                
+                # Add the path to captured_images
+                captured_images["annotated_image"] = f"/static/uploads/{filename}"
+            
+            # Save attempt with detection results
+            result_data = {
+                "detected_value": detected_value,
+                "expected_value": correct_answer,
+            }
+            
             attempted = AttemptedQuestion(
                 user_id=current_user.id,
                 question_id=question_id,
                 sub_question_id=sub_question_id,
                 is_correct=is_correct,
                 images=captured_images,
+                result_data=result_data,  # Add results to the attempt record
             )
             attempted.save()
 
@@ -133,6 +160,10 @@ def play():
                 if kinesthetic_profile:
                     kinesthetic_profile.total_score += points
                     kinesthetic_profile.save()
+                    
+            # Pass the attempt ID to the result page
+            return redirect(url_for('kinesthetic.submission_result', 
+                                   attempted_question_id=attempted.id))
 
         # Update attempts counter
         kinesthetic_profile.current_lesson_attempts += 1
@@ -150,55 +181,120 @@ def play():
         return redirect(url_for("kinesthetic.play", subject=subject))
 
     # Handle GET request
-    # Get 5 random questions for the current subject
+    # Get all available questions for all subjects
     questions_ref = (
         db.collection("questions")
-        .where("subject", "==", subject)
         .where("is_published", "==", True)
         .get()
     )
-    available_questions = [Question.from_doc(q) for q in questions_ref]
+    all_available_questions = [Question.from_doc(q) for q in questions_ref]
 
-    if not available_questions:
-        flash("No questions available for this subject.", "warning")
+    # Check if there are any questions available
+    if not all_available_questions:
+        flash("No questions available.", "warning")
         return redirect(url_for("kinesthetic.user_home"))
 
-    # Add default value for remaining_questions
-    remaining_questions = 5 - (kinesthetic_profile.current_lesson_attempts or 0)
+    # Add default value for remaining_questions (out of 15 total)
+    total_questions = 15
+    remaining_questions = total_questions - (kinesthetic_profile.current_lesson_attempts or 0)
 
-    if kinesthetic_profile.current_lesson_attempts >= 5:
-        kinesthetic_profile.completed_lessons.append(subject)
-        kinesthetic_profile.current_lesson_attempts = 0
+    if kinesthetic_profile.current_lesson_attempts >= total_questions:
+        kinesthetic_profile.mixed_quiz_completed = True
         kinesthetic_profile.save()
-
-        # Find next subject
-        next_subject = None
-        for s, _ in Subject.CHOICES:
-            if s not in kinesthetic_profile.completed_lessons:
-                next_subject = s
-                break
-
-        if next_subject:
-            return redirect(
-                url_for("kinesthetic.lesson_instructions", subject=next_subject)
-            )
         return redirect(url_for("kinesthetic.leaderboard"))
 
-    # Select a random question
-    question = random.choice(available_questions)
+    # Group questions by subject to ensure we pick a good mix
+    questions_by_subject = {}
+    for question in all_available_questions:
+        if question.subject not in questions_by_subject:
+            questions_by_subject[question.subject] = []
+        questions_by_subject[question.subject].append(question)
+
+    # Select a random question, trying to balance subjects
+    available_subjects = list(questions_by_subject.keys())
+    
+    # If we've already seen questions from this profile, try to pick 
+    # from subjects we've seen less often
+    subject_counts = kinesthetic_profile.subject_counts if hasattr(kinesthetic_profile, 'subject_counts') else {}
+    
+    # Default to a random subject if we can't determine which one to pick
+    if not available_subjects:
+        flash("No subjects have available questions.", "warning")
+        return redirect(url_for("kinesthetic.user_home"))
+
+    # Try to pick the subject with the lowest count
+    min_count = float('inf')
+    selected_subject = random.choice(available_subjects)
+    
+    for subject in available_subjects:
+        count = subject_counts.get(subject, 0)
+        if count < min_count and questions_by_subject[subject]:
+            min_count = count
+            selected_subject = subject
+    
+    # Now get a random question from the selected subject
+    question = random.choice(questions_by_subject[selected_subject])
+    
+    # Update the subject counts for this profile
+    if not hasattr(kinesthetic_profile, 'subject_counts'):
+        kinesthetic_profile.subject_counts = {}
+    
+    kinesthetic_profile.subject_counts[selected_subject] = kinesthetic_profile.subject_counts.get(selected_subject, 0) + 1
+    kinesthetic_profile.save()
 
     return render_template(
         "kinesthetic/play.html",
         question=question,
-        subject=subject,
+        subject=selected_subject,  # Pass the subject for the current question
         remaining_questions=remaining_questions,
     )
 
 
-@kinesthetic_blueprint.route("/submission-result/<int:attempted_question_pk>")
+@kinesthetic_blueprint.route("/submission-result/<attempted_question_id>")
 @login_required
-def submission_result(attempted_question_pk):
-    attempted_question = AttemptedQuestion.query.get_or_404(attempted_question_pk)
+def submission_result(attempted_question_id):
+    # Get the attempted question from Firestore
+    attempted_doc = db.collection("attempted_questions").document(attempted_question_id).get()
+    
+    if not attempted_doc.exists:
+        flash("Attempt not found", "error")
+        return redirect(url_for('kinesthetic.play'))
+    
+    attempted_data = attempted_doc.to_dict()
+    
+    # Get the question details
+    question_doc = db.collection("questions").document(attempted_data.get("question_id", "")).get()
+    sub_question_doc = db.collection("sub_questions").document(attempted_data.get("sub_question_id", "")).get()
+    
+    if not question_doc.exists or not sub_question_doc.exists:
+        flash("Question details not found", "error")
+        return redirect(url_for('kinesthetic.play'))
+    
+    question_data = question_doc.to_dict()
+    sub_question_data = sub_question_doc.to_dict()
+    
+    # Prepare data for template
+    attempted_question = {
+        "id": attempted_question_id,
+        "is_correct": attempted_data.get("is_correct", False),
+        "images": attempted_data.get("images", {}),
+        "result_data": attempted_data.get("result_data", {}),
+        "question": {
+            "id": question_doc.id,
+            "text": question_data.get("text", ""),
+            "html": question_data.get("text", ""),  # For compatibility with template
+        },
+        "sub_question": {
+            "id": sub_question_doc.id,
+            "text": sub_question_data.get("text", ""),
+            "correct_answer": sub_question_data.get("correct_answer", ""),
+        },
+        "selected_choice": {  # Create a compatible structure for the template
+            "html": f"Detected value: {attempted_data.get('result_data', {}).get('detected_value', 'Unknown')}",
+            "is_correct": attempted_data.get("is_correct", False),
+        }
+    }
+    
     return render_template(
         "kinesthetic/submission_result.html", attempted_question=attempted_question
     )
@@ -515,3 +611,246 @@ def lesson_instructions(subject):
         subject=subject,
         subject_name=subject_names[subject],
     )
+
+
+@kinesthetic_blueprint.route("/process-answer", methods=["POST"])
+@login_required
+def process_answer():
+    """Process answer submission via AJAX"""
+    question_id = request.form.get("question_pk")
+    answer_method = request.form.get("answer_method")
+    sub_question_id = request.form.get("sub_question_id")
+    
+    # Get all the captured images
+    captured_images = {}
+    for key in request.form:
+        if key.startswith("captured_image_"):
+            captured_images[key] = request.form[key]
+
+    # Initialize response data
+    response_data = {
+        'is_correct': False,
+        'detected_value': None,
+        'expected_value': None,
+        'annotated_image_url': None
+    }
+    
+    # Get the sub-question to check correct answer
+    sub_question_ref = db.collection("sub_questions").document(sub_question_id).get()
+    if not sub_question_ref.exists:
+        return jsonify(response_data), 400
+    
+    sub_question_data = sub_question_ref.to_dict()
+    correct_answer = sub_question_data.get("correct_answer")
+    points = sub_question_data.get("points", 1)
+    
+    # Process answer based on answer method
+    if answer_method == AnswerMethod.ABACUS and captured_images:
+        # Get the first captured image (we'll only use one for now)
+        base64_image = next(iter(captured_images.values()))
+        
+        # Check answer using the abacus service
+        is_correct, detected_value, annotated_image_path = check_abacus_answer(
+            base64_image, correct_answer
+        )
+    elif (answer_method == AnswerMethod.ANALOG_CLOCK or 
+          answer_method == AnswerMethod.DIGITAL_CLOCK) and captured_images:
+        # Get the first captured image
+        base64_image = next(iter(captured_images.values()))
+        
+        # Check answer using the clock service
+        is_correct, detected_value, annotated_image_path = check_clock_answer(
+            base64_image, correct_answer
+        )
+        
+    # Update response data with detection results
+    response_data['is_correct'] = is_correct
+    response_data['detected_value'] = detected_value
+    response_data['expected_value'] = correct_answer
+    
+    # If there's an annotated image path, copy it to the static folder
+    if annotated_image_path and os.path.exists(annotated_image_path):
+        static_uploads = os.path.join(current_app.static_folder, "uploads")
+        os.makedirs(static_uploads, exist_ok=True)
+        
+        filename = os.path.basename(annotated_image_path)
+        static_path = os.path.join(static_uploads, filename)
+        shutil.copy(annotated_image_path, static_path)
+        
+        # Add the public URL to the response
+        response_data['annotated_image_url'] = f"/static/uploads/{filename}"
+        
+        # Add the path to captured_images for database
+        captured_images["annotated_image"] = f"/static/uploads/{filename}"
+    
+    # Save attempt with detection results
+    result_data = {
+        "detected_value": response_data['detected_value'],
+        "expected_value": response_data['expected_value'],
+    }
+    
+    attempted = AttemptedQuestion(
+        user_id=current_user.id,
+        question_id=question_id,
+        sub_question_id=sub_question_id,
+        is_correct=response_data['is_correct'],
+        images=captured_images,
+        result_data=result_data
+    )
+    attempted.save()
+
+    # Update score if correct
+    if response_data['is_correct']:
+        kinesthetic_profile = QuizProfile.get_by_user_id(current_user.id)
+        if kinesthetic_profile:
+            kinesthetic_profile.total_score += points
+            kinesthetic_profile.save()
+    
+    # Update attempts counter
+    kinesthetic_profile = QuizProfile.get_by_user_id(current_user.id)
+    kinesthetic_profile.current_lesson_attempts += 1
+    
+    # Check if lesson is complete (5 questions answered)
+    subject = request.args.get("subject", Subject.ADDITION)
+    if kinesthetic_profile.current_lesson_attempts >= 5:
+        kinesthetic_profile.completed_lessons.append(subject)
+        kinesthetic_profile.current_lesson_attempts = 0
+        response_data['lesson_completed'] = True
+    
+    kinesthetic_profile.save()
+    return jsonify(response_data)
+
+
+@kinesthetic_blueprint.route("/process-all-answers", methods=["POST"])
+@login_required
+def process_all_answers():
+    """Process all answers for a question's sub-questions together"""
+    # Check for proper request
+    if request.method != "POST":
+        flash("Invalid request method", "error")
+        return redirect(url_for("kinesthetic.play"))
+    
+    question_id = request.form.get("question_pk")
+    answer_method = request.form.get("answer_method")
+    sub_question_ids = request.form.getlist("sub_question_ids")
+    # Get subject from the form data
+    subject = request.form.get("subject", Subject.ADDITION)
+    
+    # Initialize response
+    response_data = {
+        "success": True,
+        "results": [],
+        "subject": subject,
+        "redirect_url": url_for("kinesthetic.play")  # No subject needed for mixed quiz
+    }
+    
+    total_points = 0
+    correct_count = 0
+    
+    # Process each sub-question
+    for sub_question_id in sub_question_ids:
+        # Look for captured image for this sub-question
+        image_key = f"captured_image_{sub_question_id}"
+        base64_image = request.form.get(image_key)
+        
+        if not base64_image:
+            continue  # Skip if no image for this sub-question
+            
+        # Get sub-question details
+        sub_question_ref = db.collection("sub_questions").document(sub_question_id).get()
+        if not sub_question_ref.exists:
+            continue
+            
+        sub_question_data = sub_question_ref.to_dict()
+        correct_answer = sub_question_data.get("correct_answer")
+        sub_question_text = sub_question_data.get("text", "")
+        points = sub_question_data.get("points", 1)
+        
+        # Initialize result for this sub-question
+        result = {
+            "sub_question_id": sub_question_id,
+            "sub_question_text": sub_question_text,
+            "is_correct": False,
+            "detected_value": None,
+            "expected_value": correct_answer,
+            "annotated_image_url": None
+        }
+        
+        # Process answer based on answer method
+        if answer_method == AnswerMethod.ABACUS:
+            # Check answer using the abacus service
+            is_correct, detected_value, annotated_image_path = check_abacus_answer(
+                base64_image, correct_answer
+            )
+        elif answer_method == AnswerMethod.ANALOG_CLOCK or answer_method == AnswerMethod.DIGITAL_CLOCK:
+            # Check answer using the clock service
+            is_correct, detected_value, annotated_image_path = check_clock_answer(
+                base64_image, correct_answer
+            )
+        else:
+            # Unsupported answer method
+            continue
+            
+        # Update result data
+        result["is_correct"] = is_correct
+        result["detected_value"] = detected_value
+        
+        # If there's an annotated image path, copy it to the static folder
+        if annotated_image_path and os.path.exists(annotated_image_path):
+            static_uploads = os.path.join(current_app.static_folder, "uploads")
+            os.makedirs(static_uploads, exist_ok=True)
+            
+            filename = os.path.basename(annotated_image_path)
+            static_path = os.path.join(static_uploads, filename)
+            shutil.copy(annotated_image_path, static_path)
+            
+            # Add the public URL to the result
+            result["annotated_image_url"] = f"/static/uploads/{filename}"
+        
+        # Save attempt to database
+        captured_images = {image_key: base64_image}
+        if result["annotated_image_url"]:
+            captured_images["annotated_image"] = result["annotated_image_url"]
+            
+        result_data = {
+            "detected_value": detected_value,
+            "expected_value": correct_answer,
+        }
+        
+        attempted = AttemptedQuestion(
+            user_id=current_user.id,
+            question_id=question_id,
+            sub_question_id=sub_question_id,
+            is_correct=is_correct,
+            images=captured_images,
+            result_data=result_data
+        )
+        attempted.save()
+        
+        # Update counters
+        if is_correct:
+            correct_count += 1
+            total_points += points
+            
+        # Add to results list
+        response_data["results"].append(result)
+    
+    # Update quiz profile
+    kinesthetic_profile = QuizProfile.get_by_user_id(current_user.id)
+    if kinesthetic_profile:
+        # Add points to the profile
+        kinesthetic_profile.total_score += total_points
+        
+        # Update attempts counter (this counts as one attempt regardless of sub-questions)
+        kinesthetic_profile.current_lesson_attempts += 1
+        
+        # Check if all questions are complete (15 total)
+        total_questions = 15
+        if kinesthetic_profile.current_lesson_attempts >= total_questions:
+            kinesthetic_profile.mixed_quiz_completed = True
+            response_data["quiz_completed"] = True
+            response_data["redirect_url"] = url_for("kinesthetic.leaderboard")
+            
+        kinesthetic_profile.save()
+    
+    return jsonify(response_data)
