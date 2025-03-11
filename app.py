@@ -9,16 +9,41 @@ import signal
 import time
 import threading
 import webbrowser
-from flask import Flask, render_template, jsonify, redirect
+from flask import Flask, render_template, jsonify, redirect, request, session, url_for, flash
 import requests
 import config
+import firebase_admin
+from firebase_admin import credentials, auth, firestore
+from functools import wraps
 
 # Initialize the main Flask app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = config.SECRET_KEY
 
+# Initialize Firebase
+cred = credentials.Certificate("research-app-9fff9-firebase-adminsdk-fbsvc-35cdf97b1e.json")
+firebase_app = firebase_admin.initialize_app(cred)
+db = firestore.client()
+
 # Store the process objects for cleanup
 app_processes = []
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            return redirect(url_for('login', next=request.url))
+        return f(*args, **kwargs)
+    return decorated_function
+
+def teacher_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session or session.get('user_type') != 'teacher':
+            flash('You need to be logged in as a teacher to access this page')
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 def launch_app(app_path, port):
     """Launch a Flask app as a separate process."""
@@ -44,10 +69,130 @@ def wait_for_app(url, max_retries=10):
 @app.route('/')
 def index():
     """Main app index showing links to all sub-apps."""
+    user_id = session.get('user_id')
+    user_type = session.get('user_type')
+    
+    # If teacher is logged in, redirect to dashboard
+    if user_id and user_type == 'teacher':
+        return redirect(url_for('dashboard'))
+    
     return render_template('index.html', 
                           kinesthetic_url=f"http://localhost:{config.KINESTHETIC_APP_PORT}",
                           readwrite_url=f"http://localhost:{config.READWRITE_APP_PORT}",
-                          visual_url=f"http://localhost:{config.VISUAL_APP_PORT}")  # Added visual URL
+                          visual_url=f"http://localhost:{config.VISUAL_APP_PORT}",
+                          user_id=user_id,
+                          user_type=user_type)
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    """Handle user login."""
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+        user_type = request.form.get('user_type')
+        
+        if not email or not password or not user_type:
+            flash('Please fill in all fields')
+            return render_template('login.html')
+        
+        try:
+            # Verify with Firebase Authentication
+            user = auth.get_user_by_email(email)
+            
+            # Store user info in session
+            session['user_id'] = user.uid
+            session['email'] = user.email
+            session['user_type'] = user_type
+            
+            # If user is a teacher, fetch profile from Firestore
+            if user_type == 'teacher':
+                # Check if the user exists in Firestore
+                teacher_ref = db.collection('teachers').document(user.uid)
+                teacher = teacher_ref.get()
+                
+                if not teacher.exists:
+                    # First time login after registration - store basic info
+                    teacher_ref.set({
+                        'email': user.email,
+                        'created_at': firestore.SERVER_TIMESTAMP
+                    })
+                
+                return redirect(url_for('dashboard'))
+            else:
+                # Student login - redirect to index
+                return redirect(url_for('index'))
+                
+        except Exception as e:
+            flash(f'Login failed: {str(e)}')
+            return render_template('login.html')
+    
+    return render_template('login.html')
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    """Handle teacher registration."""
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+        name = request.form.get('name')
+        school = request.form.get('school')
+        
+        if not email or not password or not confirm_password or not name or not school:
+            flash('Please fill in all fields')
+            return render_template('register.html')
+            
+        if password != confirm_password:
+            flash('Passwords do not match')
+            return render_template('register.html')
+        
+        try:
+            # Create user in Firebase Authentication
+            user = auth.create_user(
+                email=email,
+                password=password
+            )
+            
+            # Store additional teacher data in Firestore
+            db.collection('teachers').document(user.uid).set({
+                'name': name,
+                'email': email,
+                'school': school,
+                'created_at': firestore.SERVER_TIMESTAMP
+            })
+            
+            flash('Registration successful! Please login.')
+            return redirect(url_for('login'))
+            
+        except Exception as e:
+            flash(f'Registration failed: {str(e)}')
+            return render_template('register.html')
+    
+    return render_template('register.html')
+
+@app.route('/dashboard')
+@teacher_required
+def dashboard():
+    """Teacher dashboard."""
+    user_id = session.get('user_id')
+    
+    # Get teacher data from Firestore
+    teacher_data = db.collection('teachers').document(user_id).get().to_dict()
+    
+    return render_template('dashboard.html', 
+                          teacher=teacher_data,
+                          kinesthetic_url=f"http://localhost:{config.KINESTHETIC_APP_PORT}",
+                          readwrite_url=f"http://localhost:{config.READWRITE_APP_PORT}",
+                          visual_url=f"http://localhost:{config.VISUAL_APP_PORT}")
+
+@app.route('/logout')
+def logout():
+    """Log out the user."""
+    session.pop('user_id', None)
+    session.pop('email', None)
+    session.pop('user_type', None)
+    flash('You have been logged out')
+    return redirect(url_for('index'))
 
 @app.route('/kinesthetic')
 def kinesthetic_redirect():

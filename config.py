@@ -10,6 +10,3 @@ MAIN_APP_PORT = 5000
 KINESTHETIC_APP_PORT = 5001
 READWRITE_APP_PORT = 5002
 VISUAL_APP_PORT = 5003  # New port for visual component
-
-# Database configuration (if needed)
-DATABASE_URI = 'sqlite:///app.db'
