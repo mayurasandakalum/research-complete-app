@@ -19,6 +19,8 @@ def init_routes(app):
         # If teacher is logged in, redirect to dashboard
         if user_id and user_type == 'teacher':
             return redirect(url_for('dashboard'))
+        elif user_id and user_type == 'student':
+            return redirect(url_for('student_dashboard'))
         
         return render_template('index.html', 
                             kinesthetic_url=f"http://localhost:{config.KINESTHETIC_APP_PORT}",
@@ -43,24 +45,43 @@ def init_routes(app):
                 # Verify with Firebase Authentication
                 user = User.get_by_email(email)
                 
-                # Store user info in session
-                session['user_id'] = user.uid
-                session['email'] = user.email
-                session['user_type'] = user_type
-                
-                # If user is a teacher, fetch profile from Firestore
+                # Verify user role matches the selected type
                 if user_type == 'teacher':
-                    # Check if the user exists in Firestore
-                    teacher = Teacher.get(user.uid)
+                    # Check if the user exists as a teacher
+                    teacher = Teacher.get_by_email(email)
+                    if not teacher:
+                        flash('This account is not registered as a teacher')
+                        return render_template('login.html')
                     
+                    # Store user info in session ONLY if user is a verified teacher
+                    session['user_id'] = user.uid
+                    session['email'] = user.email
+                    session['user_type'] = 'teacher'
+                    
+                    # Check if we need to create basic teacher data
+                    teacher = Teacher.get(user.uid)
                     if not teacher:
                         # First time login after registration - store basic info
                         Teacher.create_basic(user.uid, user.email)
                     
                     return redirect(url_for('dashboard'))
+                    
+                elif user_type == 'student':
+                    # Check if the user exists as a student
+                    student = Student.get_by_email(email)
+                    if not student:
+                        flash('This account is not registered as a student')
+                        return render_template('login.html')
+                    
+                    # Store user info in session ONLY if user is a verified student
+                    session['user_id'] = user.uid
+                    session['email'] = user.email
+                    session['user_type'] = 'student'
+                    
+                    return redirect(url_for('student_dashboard'))
                 else:
-                    # Student login - redirect to index
-                    return redirect(url_for('index'))
+                    flash('Invalid user type')
+                    return render_template('login.html')
                     
             except Exception as e:
                 flash(f'Login failed: {str(e)}')
@@ -117,6 +138,35 @@ def init_routes(app):
         return render_template('dashboard.html', 
                             teacher=teacher_data,
                             students=students,
+                            kinesthetic_url=f"http://localhost:{config.KINESTHETIC_APP_PORT}",
+                            readwrite_url=f"http://localhost:{config.READWRITE_APP_PORT}",
+                            visual_url=f"http://localhost:{config.VISUAL_APP_PORT}")
+    
+    @app.route('/student_dashboard')
+    @login_required
+    def student_dashboard():
+        """Student dashboard."""
+        user_id = session.get('user_id')
+        user_type = session.get('user_type')
+        
+        # Ensure user is a student
+        if user_type != 'student':
+            flash('You need to be logged in as a student to access this page')
+            return redirect(url_for('login'))
+        
+        # Get student data from Firestore
+        student_data = Student.get(user_id)
+        if not student_data:
+            flash('Student data not found')
+            return redirect(url_for('logout'))
+        
+        # Get teacher data for this student
+        teacher_id = student_data.get('teacher_id')
+        teacher_data = Teacher.get(teacher_id) if teacher_id else None
+        
+        return render_template('student_dashboard.html', 
+                            student=student_data,
+                            teacher=teacher_data,
                             kinesthetic_url=f"http://localhost:{config.KINESTHETIC_APP_PORT}",
                             readwrite_url=f"http://localhost:{config.READWRITE_APP_PORT}",
                             visual_url=f"http://localhost:{config.VISUAL_APP_PORT}")

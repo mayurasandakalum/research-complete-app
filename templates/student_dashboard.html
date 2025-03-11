@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Student Dashboard - Learning Apps Hub</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Student Dashboard</h1>
+            <div>
+                <a href="{{ url_for('index') }}" class="auth-button" style="background-color: #3498db;">Home</a>
+                <a href="{{ url_for('logout') }}" class="auth-button">Logout</a>
+            </div>
+        </div>
+
+        <nav class="dashboard-nav">
+            <ul>
+                <li><a href="#overview" class="nav-link active">Overview</a></li>
+                <li><a href="#apps" class="nav-link">Learning Apps</a></li>
+            </ul>
+        </nav>
+
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        {% for message in messages %}
+        <div class="flash-message">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <section id="overview" class="dashboard-section active">
+            <div class="profile-info">
+                <h2>Welcome, {{ student.name if student and student.name else 'Student' }}!</h2>
+                <p><strong>Email:</strong> {{ student.email }}</p>
+                {% if teacher %}
+                <p><strong>Your Teacher:</strong> {{ teacher.name if teacher.name else teacher.email }}</p>
+                {% endif %}
+            </div>
+
+            <div class="stats">
+                <h3>System Overview</h3>
+                <div id="status">Checking system status...</div>
+            </div>
+        </section>
+
+        <section id="apps" class="dashboard-section">
+            <h2>Available Learning Applications</h2>
+
+            <div class="app-grid">
+                <div class="app-card">
+                    <h3>Kinesthetic Learning App</h3>
+                    <p>Tools and activities for kinesthetic learners who learn best through physical activities.</p>
+                    <a href="{{ kinesthetic_url }}" class="app-link">Open App</a>
+                </div>
+
+                <div class="app-card">
+                    <h3>Read/Write Learning App</h3>
+                    <p>Resources for students who prefer to learn through reading and writing exercises.</p>
+                    <a href="{{ readwrite_url }}" class="app-link">Open App</a>
+                </div>
+
+                <div class="app-card">
+                    <h3>Visual Learning App</h3>
+                    <p>Visual tools and resources for students who learn best through images and diagrams.</p>
+                    <a href="{{ visual_url }}" class="app-link">Open App</a>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Fetch and display app status
+        function updateStatus() {
+            fetch('/api/status')
+                .then(response => response.json())
+                .then(data => {
+                    let statusHtml = '<ul>';
+                    for (const [app, status] of Object.entries(data)) {
+                        statusHtml += `<li>${app}: <span style="color: ${status === 'running' ? 'green' : 'red'}">${status}</span></li>`;
+                    }
+                    statusHtml += '</ul>';
+                    document.getElementById('status').innerHTML = statusHtml;
+                })
+                .catch(error => {
+                    document.getElementById('status').innerHTML = 'Error checking system status';
+                });
+        }
+
+        // Check status on page load and every 10 seconds
+        updateStatus();
+        setInterval(updateStatus, 10000);
+
+        // Navigation functionality
+        document.addEventListener('DOMContentLoaded', function () {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('.dashboard-section');
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+
+                    // Remove active class from all links and sections
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    sections.forEach(s => s.classList.remove('active'));
+
+                    // Add active class to clicked link
+                    this.classList.add('active');
+
+                    // Show the corresponding section
+                    const targetId = this.getAttribute('href').substring(1);
+                    document.getElementById(targetId).classList.add('active');
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

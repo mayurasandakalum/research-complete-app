@@ -31,6 +31,16 @@ def teacher_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+def student_required(f):
+    """Decorator to require student role for a route."""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session or session.get('user_type') != 'student':
+            flash('You need to be logged in as a student to access this page')
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
 class User:
     @staticmethod
     def get_by_email(email):
@@ -48,6 +58,26 @@ class Teacher:
         """Get teacher data from Firestore."""
         teacher_ref = db.collection('teachers').document(user_id)
         return teacher_ref.get().to_dict()
+    
+    @staticmethod
+    def get_by_email(email):
+        """Find a teacher by email."""
+        try:
+            # Find the user by email in Firebase Auth
+            user = User.get_by_email(email)
+            
+            # Check if this user exists as a teacher in Firestore
+            teacher_ref = db.collection('teachers').document(user.uid)
+            teacher = teacher_ref.get()
+            
+            if not teacher.exists:
+                return None
+                
+            teacher_data = teacher.to_dict()
+            teacher_data['id'] = user.uid
+            return teacher_data
+        except:
+            return None
     
     @staticmethod
     def create(user_id, name, email, school):
@@ -91,6 +121,26 @@ class Student:
         student_data = student.to_dict()
         student_data['id'] = student.id
         return student_data
+    
+    @staticmethod
+    def get_by_email(email):
+        """Get a student by email."""
+        try:
+            # Find the user by email in Firebase Auth
+            user = User.get_by_email(email)
+            
+            # Check if this user exists as a student in Firestore
+            student_ref = db.collection('students').document(user.uid)
+            student = student_ref.get()
+            
+            if not student.exists:
+                return None
+                
+            student_data = student.to_dict()
+            student_data['id'] = user.uid
+            return student_data
+        except:
+            return None
     
     @staticmethod
     def create(teacher_id, name, email, password):
