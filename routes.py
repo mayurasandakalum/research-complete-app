@@ -5,7 +5,7 @@ Route handlers and view functions.
 from flask import render_template, jsonify, redirect, request, session, url_for, flash
 import requests
 import config
-from models import login_required, teacher_required, User, Teacher
+from models import login_required, teacher_required, User, Teacher, Student
 
 def init_routes(app):
     """Initialize all routes for the Flask app."""
@@ -111,11 +111,102 @@ def init_routes(app):
         # Get teacher data from Firestore
         teacher_data = Teacher.get(user_id)
         
+        # Get all students for this teacher
+        students = Student.get_all_for_teacher(user_id)
+        
         return render_template('dashboard.html', 
                             teacher=teacher_data,
+                            students=students,
                             kinesthetic_url=f"http://localhost:{config.KINESTHETIC_APP_PORT}",
                             readwrite_url=f"http://localhost:{config.READWRITE_APP_PORT}",
                             visual_url=f"http://localhost:{config.VISUAL_APP_PORT}")
+
+    @app.route('/add_student', methods=['POST'])
+    @teacher_required
+    def add_student():
+        """Add a new student for the teacher."""
+        user_id = session.get('user_id')
+        
+        name = request.form.get('student_name')
+        email = request.form.get('student_email')
+        password = request.form.get('student_password')
+        
+        if not name or not email or not password:
+            flash('Please fill in all student details')
+            return redirect(url_for('dashboard'))
+        
+        try:
+            # Create the student
+            Student.create(user_id, name, email, password)
+            flash(f'Student {name} has been added successfully')
+        except Exception as e:
+            flash(f'Failed to add student: {str(e)}')
+        
+        return redirect(url_for('dashboard'))
+
+    @app.route('/edit_student/<student_id>', methods=['GET', 'POST'])
+    @teacher_required
+    def edit_student(student_id):
+        """Edit a student's details."""
+        user_id = session.get('user_id')
+        
+        # Get student data
+        student = Student.get(student_id)
+        
+        # Check if the student belongs to this teacher
+        if not student or student.get('teacher_id') != user_id:
+            if request.method == 'POST':
+                return jsonify({'error': 'Permission denied'}), 403
+            else:
+                flash('You do not have permission to edit this student')
+                return redirect(url_for('dashboard'))
+        
+        if request.method == 'POST':
+            name = request.form.get('student_name')
+            email = request.form.get('student_email')
+            
+            try:
+                Student.update(student_id, name=name, email=email)
+                
+                # If it's an AJAX request, return a JSON response
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return jsonify({'success': True, 'message': f'Student {name} has been updated successfully'})
+                
+                flash(f'Student {name} has been updated successfully')
+                return redirect(url_for('dashboard'))
+                
+            except Exception as e:
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return jsonify({'error': str(e)}), 500
+                    
+                flash(f'Failed to update student: {str(e)}')
+                return redirect(url_for('dashboard'))
+        
+        # GET request is not needed anymore since we're using a modal
+        # Just redirect to dashboard if someone tries to access this URL directly
+        return redirect(url_for('dashboard'))
+
+    @app.route('/delete_student/<student_id>')
+    @teacher_required
+    def delete_student(student_id):
+        """Delete a student."""
+        user_id = session.get('user_id')
+        
+        # Get student data
+        student = Student.get(student_id)
+        
+        # Check if the student belongs to this teacher
+        if not student or student.get('teacher_id') != user_id:
+            flash('You do not have permission to delete this student')
+            return redirect(url_for('dashboard'))
+        
+        try:
+            Student.delete(student_id)
+            flash('Student has been deleted successfully')
+        except Exception as e:
+            flash(f'Failed to delete student: {str(e)}')
+        
+        return redirect(url_for('dashboard'))
 
     @app.route('/logout')
     def logout():

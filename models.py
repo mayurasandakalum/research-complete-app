@@ -66,3 +66,76 @@ class Teacher:
             'email': email,
             'created_at': firestore.SERVER_TIMESTAMP
         })
+
+class Student:
+    @staticmethod
+    def get_all_for_teacher(teacher_id):
+        """Get all students for a specific teacher."""
+        students_ref = db.collection('students').where('teacher_id', '==', teacher_id)
+        students = []
+        
+        for doc in students_ref.stream():
+            student_data = doc.to_dict()
+            student_data['id'] = doc.id
+            students.append(student_data)
+            
+        return students
+    
+    @staticmethod
+    def get(student_id):
+        """Get a student by ID."""
+        student_ref = db.collection('students').document(student_id)
+        student = student_ref.get()
+        if not student.exists:
+            return None
+        student_data = student.to_dict()
+        student_data['id'] = student.id
+        return student_data
+    
+    @staticmethod
+    def create(teacher_id, name, email, password):
+        """Create a new student under a teacher."""
+        try:
+            # Create user in Firebase Auth
+            user = User.create_user(email, password)
+            
+            # Store student data in Firestore
+            student_ref = db.collection('students').document(user.uid)
+            student_ref.set({
+                'name': name,
+                'email': email,
+                'teacher_id': teacher_id,
+                'created_at': firestore.SERVER_TIMESTAMP
+            })
+            
+            return user.uid
+        except Exception as e:
+            raise Exception(f"Failed to create student: {str(e)}")
+    
+    @staticmethod
+    def update(student_id, name=None, email=None):
+        """Update a student's information."""
+        update_data = {}
+        
+        if name:
+            update_data['name'] = name
+        
+        if email:
+            update_data['email'] = email
+        
+        if update_data:
+            db.collection('students').document(student_id).update(update_data)
+    
+    @staticmethod
+    def delete(student_id):
+        """Delete a student."""
+        try:
+            # Delete from Firestore
+            db.collection('students').document(student_id).delete()
+            
+            # Delete from Firebase Auth
+            auth.delete_user(student_id)
+            
+            return True
+        except Exception as e:
+            raise Exception(f"Failed to delete student: {str(e)}")

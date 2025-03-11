@@ -16,6 +16,9 @@ from routes import init_routes
 app = Flask(__name__)
 app.config['SECRET_KEY'] = config.SECRET_KEY
 
+# Initialize routes before defining any local routes
+init_routes(app)
+
 # Store the process objects for cleanup
 app_processes = []
 
@@ -137,9 +140,6 @@ def open_browser():
     """Open browser to the main app after a short delay."""
     time.sleep(2)
     webbrowser.open(f"http://localhost:{config.MAIN_APP_PORT}")
-
-# Initialize routes
-init_routes(app)
 
 if __name__ == '__main__':
     # Create necessary templates
