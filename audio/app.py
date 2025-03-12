@@ -212,38 +212,38 @@ def sin_text_to_speech(text,qid):
 
 
 # Route for rendering the main page
-@app.route("/")
-def index():
-    return render_template("Login.html")
+# @app.route("/")
+# def index():
+#     return render_template("Login.html")
 
 
-@app.route("/logout")
-def logout():
-    session["user"] = ""
-    return render_template("Login.html")
+# @app.route("/logout")
+# def logout():
+#     session["user"] = ""
+#     return render_template("Login.html")
 
 
 # Route to handle login
-@app.route("/form_login", methods=["POST", "GET"])
-def login():
-    # Get username and password from the form
-    username = request.form.get("username")
-    password = request.form.get("password")
+# @app.route("/form_login", methods=["POST", "GET"])
+# def login():
+#     # Get username and password from the form
+#     username = request.form.get("username")
+#     password = request.form.get("password")
 
-    # Validate credentials
-    if username not in database:
-        return render_template("login.html", info="Invalid Username")
-    elif database[username] != password:
-        return render_template("login.html", info="Invalid Password")
-    else:
-        session["user"] = username
-        return render_template("Home.html", name=username)
+#     # Validate credentials
+#     if username not in database:
+#         return render_template("login.html", info="Invalid Username")
+#     elif database[username] != password:
+#         return render_template("login.html", info="Invalid Password")
+#     else:
+#         session["user"] = username
+#         return render_template("Home.html", name=username)
 
 
 # Route for rendering the registration page
-@app.route("/registration")
-def registration():
-    return render_template("registration.html")
+# @app.route("/registration")
+# def registration():
+#     return render_template("registration.html")
 
 @app.route('/api/info')
 def api_info():
@@ -254,22 +254,22 @@ def api_info():
 
 
 # Route to handle registration form submission
-@app.route("/form_registration", methods=["POST"])
-def form_registration():
-    # Get username and password from the form
-    username = request.form.get("username")
-    password = request.form.get("password")
+# @app.route("/form_registration", methods=["POST"])
+# def form_registration():
+#     # Get username and password from the form
+#     username = request.form.get("username")
+#     password = request.form.get("password")
 
-    # Check if the username already exists
-    if username in database:
-        return render_template("registration.html", info="Username already exists!")
+#     # Check if the username already exists
+#     if username in database:
+#         return render_template("registration.html", info="Username already exists!")
 
-    # Add the new user to the database
-    database[username] = password
-    return render_template("login.html", info="Registration successful! Please log in.")
+#     # Add the new user to the database
+#     database[username] = password
+#     return render_template("login.html", info="Registration successful! Please log in.")
 
 
-@app.route("/home")
+@app.route("/")
 def home():
     global username
     return render_template("Home.html", name=username)
@@ -431,9 +431,9 @@ def speech_guide():
     global Aud_results
     global Aud_results_2
     global rd_lesson
-    sin_text_to_speech("යම්කිසි රූපයකින් බාගයක් එනම් දෙකෙන් එකක්, දෙකෙන් පංගුව පහත රූපයේ පරිදි පෙන්විය හැක.",911)
-    sin_text_to_speech("යම්කිසි රූපයකින් හතරෙන් පංගු පහත රූපයේ පරිදි දැක්විය හැක.",912)
-    sin_text_to_speech("අපි දැන් බලමු මල් දොලහකින් හතරෙන් පංගු හඳුනාගන්න. මල් දොළහකින් හතරෙන් එකක මල් තුනක් තියෙනවා.මල් දොළහකින් හතරෙන් දෙකක මල් හයක් තියෙනවා.මල් දොළහකින් හතරෙන් තුනක මල් නවයක් තියෙනවා. ",913)
+    # sin_text_to_speech("යම්කිසි රූපයකින් බාගයක් එනම් දෙකෙන් එකක්, දෙකෙන් පංගුව පහත රූපයේ පරිදි පෙන්විය හැක.",911)
+    # sin_text_to_speech("යම්කිසි රූපයකින් හතරෙන් පංගු පහත රූපයේ පරිදි දැක්විය හැක.",912)
+    # sin_text_to_speech("අපි දැන් බලමු මල් දොලහකින් හතරෙන් පංගු හඳුනාගන්න. මල් දොළහකින් හතරෙන් එකක මල් තුනක් තියෙනවා.මල් දොළහකින් හතරෙන් දෙකක මල් හයක් තියෙනවා.මල් දොළහකින් හතරෙන් තුනක මල් නවයක් තියෙනවා. ",913)
     # sin_text_to_speech("අපි බලමු ඉලක්කම් තුනේ සංඛ්‍යාවක් ගුණ කරන්නේ කොහොමද කියලා, ඒ සඳහා උදාහරණයක් ලෙස හාරසිය තිස් අට, දෙකෙන් ගුණ කරලා බලමු. අට දෙකෙන් ගුණකර විට දාසයයි. එවිට හය එකස්ථානයේ ලියා එක දහස් ස්ථානයට රැගෙන යයි. පසුව දෙක තුනෙන් ගුණ කරවිට හයයි. දහස්තානයේ ඉතුරු වූ එකත් සමග හතයි. එවිට හත දහස් ස්ථානයේ ලියයි. දෙක හතරෙන් ගුණ කර විට අටයි. එවිට අට සිය ස්ථානයේ ලියයි. එවිට පිළිතුර අටසිය හැත්ත හයයි.",921)
     # sin_text_to_speech("ඉහත ආකාරයටම දෙසීය තිස් දෙක, හතරෙන් ගුණ කර විට පිළිතුර පහත පරිදි නවසිය විසි අට ලැබේ.",922)
     # sin_text_to_speech("අපි දැන් බලමු හාරසිය විසිතුන, හයෙන් ගුණකර. හය තුනෙන් ගුණ කරවිට දහ අටයි. එවිට අට එකස්ථානයේ ලියා එක දහස්තානයට රැගෙන යයි. හය දෙක තුනෙන් ගුණ කර විට දහ අටයි. දහස්තානයේ ඉතිරි වූ එකත් සමඟ දහතුනයි. එවිට තුන දහස් ස්ථානයේ ලියා එක සියස්ථානයට රැගෙන යයි. හය හතරෙන් ගුණ කර විට විසිහතරයි. සියස්ථානයේ ඉතිරි එකත් සමග විසි පහයි. එවිට පහා සියස්ථානයේලියා දෙක දාහස් ස්ථානයට රැගෙනයයි. පිළිතුර දෙදහස් පන්සිය තිස් අටයි.",923)
