@@ -5,6 +5,33 @@
   font-family: Arial, sans-serif;
 }
 
+/* Revised font styling - apply more broadly */
+html,
+body,
+h1,
+h2,
+h3,
+p,
+a,
+button,
+input,
+textarea,
+.logo,
+.cta-button,
+.quiz-question,
+.quiz-option {
+  font-family: "Noto Sans Sinhala", sans-serif !important;
+  font-weight: 400;
+}
+
+/* Add specific styling for Sinhala headings */
+h1,
+h2,
+.section-intro {
+  font-family: "Noto Sans Sinhala", sans-serif !important;
+  font-weight: 700 !important; /* Make headings bolder */
+}
+
 body {
   /* Background purple removed */
   background-color: white;
