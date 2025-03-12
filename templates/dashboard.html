@@ -23,6 +23,7 @@
                 <li><a href="#overview" class="nav-link active">Overview</a></li>
                 <li><a href="#apps" class="nav-link">Learning Apps</a></li>
                 <li><a href="#students" class="nav-link">My Students</a></li>
+                <li><a href="/system_overview" class="nav-link">System Overview</a></li>
             </ul>
         </nav>
 
@@ -39,11 +40,6 @@
                 <h2>Welcome, {{ teacher.name if teacher and teacher.name else 'Teacher' }}!</h2>
                 <p><strong>Email:</strong> {{ teacher.email }}</p>
                 <p><strong>School:</strong> {{ teacher.school }}</p>
-            </div>
-
-            <div class="stats">
-                <h3>System Overview</h3>
-                <div id="status">Checking system status...</div>
             </div>
         </section>
 

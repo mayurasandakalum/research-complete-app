@@ -16,8 +16,11 @@ from routes import init_routes
 app = Flask(__name__)
 app.config['SECRET_KEY'] = config.SECRET_KEY
 
+# Add this debug line to your app initialization code
+print("Initializing routes...")
 # Initialize routes before defining any local routes
 init_routes(app)
+print("Routes initialized!")
 
 # Store the process objects for cleanup
 app_processes = []

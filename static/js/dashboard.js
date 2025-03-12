@@ -39,6 +39,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
   navLinks.forEach((link) => {
     link.addEventListener("click", function (e) {
+      // Don't prevent default for external links (those with href starting with http or containing url_for)
+      if (!this.getAttribute("href").startsWith("#")) {
+        return; // Let the browser handle the navigation
+      }
+
       e.preventDefault();
 
       // Remove active class from all links and sections

@@ -20,6 +20,8 @@
             <ul>
                 <li><a href="#overview" class="nav-link active">Overview</a></li>
                 <li><a href="#apps" class="nav-link">Learning Apps</a></li>
+                <!-- Keep this navigation link to the separate System Overview page -->
+                <li><a href="/system_overview" class="nav-link">System Overview</a></li>
             </ul>
         </nav>
 
@@ -38,11 +40,6 @@
                 {% if teacher %}
                 <p><strong>Your Teacher:</strong> {{ teacher.name if teacher.name else teacher.email }}</p>
                 {% endif %}
-            </div>
-
-            <div class="stats">
-                <h3>System Overview</h3>
-                <div id="status">Checking system status...</div>
             </div>
         </section>
 
@@ -71,51 +68,7 @@
         </section>
     </div>
 
-    <script>
-        // Fetch and display app status
-        function updateStatus() {
-            fetch('/api/status')
-                .then(response => response.json())
-                .then(data => {
-                    let statusHtml = '<ul>';
-                    for (const [app, status] of Object.entries(data)) {
-                        statusHtml += `<li>${app}: <span style="color: ${status === 'running' ? 'green' : 'red'}">${status}</span></li>`;
-                    }
-                    statusHtml += '</ul>';
-                    document.getElementById('status').innerHTML = statusHtml;
-                })
-                .catch(error => {
-                    document.getElementById('status').innerHTML = 'Error checking system status';
-                });
-        }
-
-        // Check status on page load and every 10 seconds
-        updateStatus();
-        setInterval(updateStatus, 10000);
-
-        // Navigation functionality
-        document.addEventListener('DOMContentLoaded', function () {
-            const navLinks = document.querySelectorAll('.nav-link');
-            const sections = document.querySelectorAll('.dashboard-section');
-
-            navLinks.forEach(link => {
-                link.addEventListener('click', function (e) {
-                    e.preventDefault();
-
-                    // Remove active class from all links and sections
-                    navLinks.forEach(l => l.classList.remove('active'));
-                    sections.forEach(s => s.classList.remove('active'));
-
-                    // Add active class to clicked link
-                    this.classList.add('active');
-
-                    // Show the corresponding section
-                    const targetId = this.getAttribute('href').substring(1);
-                    document.getElementById(targetId).classList.add('active');
-                });
-            });
-        });
-    </script>
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 </body>
 
 </html>

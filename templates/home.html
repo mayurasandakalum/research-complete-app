@@ -29,6 +29,8 @@
                     <a href="#features">Features</a>
                     <a href="#learning-styles">Learning Styles</a>
                     <a href="#contact">Contact Us</a>
+                    <!-- Add link to system overview -->
+                    <a href="/system_overview">System Overview</a>
                 </nav>
             </header>
 
@@ -283,27 +285,6 @@
                 });
             });
         });
-
-        // Fetch and display app status
-        function updateStatus() {
-            fetch('/api/status')
-                .then(response => response.json())
-                .then(data => {
-                    let statusHtml = '<ul>';
-                    for (const [app, status] of Object.entries(data)) {
-                        statusHtml += `<li>${app}: <span style="color: ${status === 'running' ? 'green' : 'red'}">${status}</span></li>`;
-                    }
-                    statusHtml += '</ul>';
-                    document.getElementById('status').innerHTML = statusHtml;
-                })
-                .catch(error => {
-                    document.getElementById('status').innerHTML = 'Error checking system status';
-                });
-        }
-
-        // Check status on page load and every 10 seconds
-        updateStatus();
-        setInterval(updateStatus, 10000);
     </script>
 </body>
 

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>System Overview - Learning Apps Hub</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <!-- Include jQuery if needed by datepicker -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>System Overview</h1>
+            <div>
+                {% if user_type == 'teacher' %}
+                <a href="/dashboard" class="auth-button" style="background-color: #3498db;">Dashboard</a>
+                {% elif user_type == 'student' %}
+                <a href="/student_dashboard" class="auth-button" style="background-color: #3498db;">Dashboard</a>
+                {% else %}
+                <!-- Show Home link if user is not logged in -->
+                <a href="/" class="auth-button" style="background-color: #3498db;">Home</a>
+                {% endif %}
+
+                {% if user_type %}
+                <!-- Only show logout if user is logged in -->
+                <a href="/logout" class="auth-button">Logout</a>
+                {% else %}
+                <!-- Show login link if user is not logged in -->
+                <a href="/login" class="auth-button" style="background-color: #27ae60;">Login</a>
+                {% endif %}
+            </div>
+        </div>
+
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        {% for message in messages %}
+        <div class="flash-message">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <section class="dashboard-section active">
+            <h2>System Overview</h2>
+            <div class="stats">
+                <h3>Application Status</h3>
+                <div id="status">Checking system status...</div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Add inline script to ensure the status is updated -->
+    <script>
+        // Fetch and display app status
+        function updateStatus() {
+            fetch('/api/status')
+                .then(response => response.json())
+                .then(data => {
+                    let statusHtml = '<ul>';
+                    for (const [app, status] of Object.entries(data)) {
+                        statusHtml += `<li>${app}: <span style="color: ${status === 'running' ? 'green' : 'red'}">${status}</span></li>`;
+                    }
+                    statusHtml += '</ul>';
+                    document.getElementById('status').innerHTML = statusHtml;
+                })
+                .catch(error => {
+                    console.error('Error fetching status:', error);
+                    document.getElementById('status').innerHTML = 'Error checking system status';
+                });
+        }
+
+        // Check status on page load and every 10 seconds
+        document.addEventListener('DOMContentLoaded', function () {
+            updateStatus();
+            setInterval(updateStatus, 10000);
+        });
+    </script>
+</body>
+
+</html>

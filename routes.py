@@ -345,3 +345,15 @@ def init_routes(app):
             status['visual'] = 'not running'
         
         return jsonify(status)
+    
+    @app.route('/system_overview')
+    def system_overview():
+        """System overview page showing status of all applications."""
+        user_id = session.get('user_id')
+        user_type = session.get('user_type')
+        
+        return render_template('system_overview.html', 
+                              user_type=user_type)
+    
+    # Ensure this function is registered, debug it
+    app.logger.info("Registered route: /system_overview")
