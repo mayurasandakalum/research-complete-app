@@ -291,10 +291,10 @@ def init_routes(app):
     @app.route('/logout')
     def logout():
         """Log out the user."""
-        session.pop('user_id', None)
-        session.pop('email', None)
-        session.pop('user_type', None)
+        # Clear the entire session instead of individual keys
+        session.clear()
         flash('You have been logged out')
+        # Explicit redirect to login page
         return redirect(url_for('login'))
 
     @app.route('/kinesthetic')
