@@ -3,6 +3,15 @@
 from flask import Flask, render_template, request, jsonify, session
 from flask_session import Session
 import os
+import sys
+
+# Fix the import mechanism for the config module - MOVED THIS UP
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.insert(0, parent_dir)  # Use insert instead of append to prioritize this path
+
+import config  # Now this will work
+
 import torch
 import torch.nn.functional as F
 from sentence_transformers import SentenceTransformer
@@ -11,20 +20,13 @@ import re
 import base64
 from get_letters import get_text
 from collections import Counter
-import sys
 import io
 import wave
-import config
 
 # Initialize the app with template and static folder configurations
 app = Flask(__name__)
 app.config["SESSION_TYPE"] = "filesystem"  # Stores session data locally
 Session(app)
-
-# Fix the import mechanism for the config module
-current_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.dirname(current_dir)
-sys.path.insert(0, parent_dir)  # Use insert instead of append to prioritize this path
 
 # Make all paths absolute for consistency
 STATIC_FOLDER = os.path.join(current_dir, "static")
