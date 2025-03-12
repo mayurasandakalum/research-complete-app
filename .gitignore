@@ -16,9 +16,6 @@ ENV/
 # Flask session files
 flask_session/
 
-# Firebase credentials
-*-firebase-adminsdk-*.json
-
 # Model files (too large for Git)
 whisper-small-sinhala-finetuned/
 
