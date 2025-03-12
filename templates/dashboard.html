@@ -84,44 +84,9 @@
         <section id="students" class="dashboard-section">
             <h2>Manage Students</h2>
 
-            <div class="student-form">
-                <h3>Add New Student</h3>
-                <form action="{{ url_for('add_student') }}" method="post">
-                    <div class="form-group">
-                        <label for="student_name">Student Name:</label>
-                        <input type="text" id="student_name" name="student_name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="student_email">Email:</label>
-                        <input type="email" id="student_email" name="student_email" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="student_password">Password:</label>
-                        <input type="password" id="student_password" name="student_password" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="student_gender">Gender:</label>
-                        <select id="student_gender" name="student_gender" required>
-                            <option value="">Select gender</option>
-                            <option value="male">Male</option>
-                            <option value="female">Female</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="student_birthday">Birthday:</label>
-                        <input type="text" id="student_birthday" name="student_birthday" class="datepicker" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="student_grade">Grade:</label>
-                        <select id="student_grade" name="student_grade" required>
-                            <option value="">Select grade</option>
-                            <option value="grade4">Grade 4</option>
-                            <option value="grade5">Grade 5</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="submit-btn">Add Student</button>
-                </form>
+            <!-- Replace form with button to open modal -->
+            <div class="student-actions">
+                <button id="openAddStudentModal" class="submit-btn">Add New Student</button>
             </div>
 
             <div class="student-list">
@@ -163,6 +128,50 @@
                 {% endif %}
             </div>
         </section>
+    </div>
+
+    <!-- Add Student Modal -->
+    <div id="addStudentModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="closeAddModal">&times;</span>
+            <h2>Add New Student</h2>
+            <form action="{{ url_for('add_student') }}" method="post">
+                <div class="form-group">
+                    <label for="student_name">Student Name:</label>
+                    <input type="text" id="student_name" name="student_name" required>
+                </div>
+                <div class="form-group">
+                    <label for="student_email">Email:</label>
+                    <input type="email" id="student_email" name="student_email" required>
+                </div>
+                <div class="form-group">
+                    <label for="student_password">Password:</label>
+                    <input type="password" id="student_password" name="student_password" required>
+                </div>
+                <div class="form-group">
+                    <label for="student_gender">Gender:</label>
+                    <select id="student_gender" name="student_gender" required>
+                        <option value="">Select gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="student_birthday">Birthday:</label>
+                    <input type="text" id="student_birthday" name="student_birthday" class="datepicker" required>
+                </div>
+                <div class="form-group">
+                    <label for="student_grade">Grade:</label>
+                    <select id="student_grade" name="student_grade" required>
+                        <option value="">Select grade</option>
+                        <option value="grade4">Grade 4</option>
+                        <option value="grade5">Grade 5</option>
+                    </select>
+                </div>
+                <button type="submit" class="submit-btn">Add Student</button>
+            </form>
+        </div>
     </div>
 
     <!-- Edit Student Modal -->

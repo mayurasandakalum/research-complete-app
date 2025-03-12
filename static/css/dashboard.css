@@ -542,6 +542,22 @@ body {
   }
 }
 
+/* Added styles for the student actions section */
+.student-actions {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.student-actions .submit-btn {
+  background-color: #6366f1;
+  padding: 12px 24px;
+}
+
+.student-actions .submit-btn:hover {
+  background-color: #4f46e5;
+}
+
 @media (max-width: 768px) {
   .container {
     padding: 15px;

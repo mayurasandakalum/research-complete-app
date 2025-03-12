@@ -59,69 +59,99 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // Modal functionality
-  const modal = document.getElementById("editStudentModal");
-  const closeBtn = document.querySelector(".close-btn");
+  // Add Student Modal functionality
+  const addStudentModal = document.getElementById("addStudentModal");
+  const openAddStudentBtn = document.getElementById("openAddStudentModal");
+  const closeAddModalBtn = document.getElementById("closeAddModal");
+
+  // Open Add Student modal when button is clicked
+  if (openAddStudentBtn) {
+    openAddStudentBtn.addEventListener("click", function () {
+      addStudentModal.style.display = "block";
+      // Ensure datepicker is initialized for the birthday field
+      $("#student_birthday").datepicker("refresh");
+    });
+  }
+
+  // Close Add Student modal when close button is clicked
+  if (closeAddModalBtn) {
+    closeAddModalBtn.addEventListener("click", function () {
+      addStudentModal.style.display = "none";
+    });
+  }
+
+  // Modal functionality for Edit Student
+  const editModal = document.getElementById("editStudentModal");
+  const closeBtn = document.querySelector("#editStudentModal .close-btn");
   const editForm = document.getElementById("editStudentForm");
 
-  // Close the modal when clicking the close button
-  closeBtn.addEventListener("click", function () {
-    modal.style.display = "none";
-  });
+  // Close the edit modal when clicking the close button
+  if (closeBtn) {
+    closeBtn.addEventListener("click", function () {
+      editModal.style.display = "none";
+    });
+  }
 
-  // Close the modal when clicking outside of it
+  // Close modals when clicking outside of them
   window.addEventListener("click", function (event) {
-    if (event.target === modal) {
-      modal.style.display = "none";
+    if (event.target === addStudentModal) {
+      addStudentModal.style.display = "none";
+    }
+    if (event.target === editModal) {
+      editModal.style.display = "none";
     }
   });
 
   // Handle the edit form submission
-  editForm.addEventListener("submit", function (e) {
-    e.preventDefault();
+  if (editForm) {
+    editForm.addEventListener("submit", function (e) {
+      e.preventDefault();
 
-    const studentId = document.getElementById("edit_student_id").value;
-    const studentName = document.getElementById("edit_student_name").value;
-    const studentEmail = document.getElementById("edit_student_email").value;
-    const studentGender = document.getElementById("edit_student_gender").value;
-    const studentBirthday = document.getElementById(
-      "edit_student_birthday"
-    ).value;
-    const studentGrade = document.getElementById("edit_student_grade").value;
+      const studentId = document.getElementById("edit_student_id").value;
+      const studentName = document.getElementById("edit_student_name").value;
+      const studentEmail = document.getElementById("edit_student_email").value;
+      const studentGender = document.getElementById(
+        "edit_student_gender"
+      ).value;
+      const studentBirthday = document.getElementById(
+        "edit_student_birthday"
+      ).value;
+      const studentGrade = document.getElementById("edit_student_grade").value;
 
-    // Create FormData object and append all fields, even if empty
-    const formData = new FormData();
-    formData.append("student_name", studentName);
-    formData.append("student_email", studentEmail);
-    formData.append("student_gender", studentGender);
-    formData.append("student_birthday", studentBirthday);
-    formData.append("student_grade", studentGrade);
+      // Create FormData object and append all fields, even if empty
+      const formData = new FormData();
+      formData.append("student_name", studentName);
+      formData.append("student_email", studentEmail);
+      formData.append("student_gender", studentGender);
+      formData.append("student_birthday", studentBirthday);
+      formData.append("student_grade", studentGrade);
 
-    // Debug - optional, remove in production
-    console.log("Updating student with:");
-    console.log("Gender:", studentGender);
-    console.log("Birthday:", studentBirthday);
-    console.log("Grade:", studentGrade);
+      // Debug - optional, remove in production
+      console.log("Updating student with:");
+      console.log("Gender:", studentGender);
+      console.log("Birthday:", studentBirthday);
+      console.log("Grade:", studentGrade);
 
-    fetch(`/edit_student/${studentId}`, {
-      method: "POST",
-      body: formData,
-    })
-      .then((response) => {
-        if (response.ok) {
-          // Reload the page to show updated data
-          window.location.reload();
-        } else {
-          return response.json().then((data) => {
-            throw new Error(data.error || "Failed to update student");
-          });
-        }
+      fetch(`/edit_student/${studentId}`, {
+        method: "POST",
+        body: formData,
       })
-      .catch((error) => {
-        alert("Error: " + error.message);
-        console.error("Error:", error);
-      });
-  });
+        .then((response) => {
+          if (response.ok) {
+            // Reload the page to show updated data
+            window.location.reload();
+          } else {
+            return response.json().then((data) => {
+              throw new Error(data.error || "Failed to update student");
+            });
+          }
+        })
+        .catch((error) => {
+          alert("Error: " + error.message);
+          console.error("Error:", error);
+        });
+    });
+  }
 });
 
 // Function to open the edit modal
