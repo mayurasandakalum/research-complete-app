@@ -2,13 +2,25 @@
 <html>
 
 <head>
-    <title>Login - Learning Apps Hub</title>
+    <title>Login - Math Learning Hub</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 
 <body>
+    <!-- Background grid -->
+    <div class="grid-bg"></div>
+
+    <!-- Decorative elements -->
+    <div class="sketch-line top-left-sketch"></div>
+    <div class="sketch-line bottom-right-sketch"></div>
+    <div class="deco-item deco-plus">+</div>
+    <div class="deco-item deco-multiply">×</div>
+    <div class="deco-item deco-equals">=</div>
+    <div class="deco-item deco-number-5">5</div>
+
     <div class="container">
-        <h1>Login</h1>
+        <h1>Welcome to Math Learning Hub</h1>
 
         {% with messages = get_flashed_messages() %}
         {% if messages %}

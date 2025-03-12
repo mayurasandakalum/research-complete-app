@@ -88,6 +88,7 @@ label {
   color: #4f46e5;
 }
 
+input[type="text"],
 input[type="email"],
 input[type="password"] {
   width: 100%;
@@ -99,28 +100,12 @@ input[type="password"] {
   transition: all 0.3s ease;
 }
 
+input[type="text"]:focus,
 input[type="email"]:focus,
 input[type="password"]:focus {
   border-color: #6366f1;
   outline: none;
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-}
-
-.radio-group {
-  margin: 15px 0;
-  display: flex;
-  gap: 25px;
-}
-
-.radio-option {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-}
-
-.radio-option input {
-  margin-right: 8px;
-  accent-color: #6366f1;
 }
 
 button {
@@ -204,6 +189,12 @@ button:hover {
   bottom: 15%;
   left: 10%;
   font-size: 38px;
+}
+
+.deco-divide {
+  top: 60%;
+  right: 15%;
+  font-size: 32px;
 }
 
 @media (max-width: 768px) {
