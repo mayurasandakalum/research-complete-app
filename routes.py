@@ -180,14 +180,26 @@ def init_routes(app):
         name = request.form.get('student_name')
         email = request.form.get('student_email')
         password = request.form.get('student_password')
+        gender = request.form.get('student_gender')
+        birthday = request.form.get('student_birthday')
+        grade = request.form.get('student_grade')
         
         if not name or not email or not password:
-            flash('Please fill in all student details')
+            flash('Please fill in all required student details')
             return redirect(url_for('dashboard'))
         
         try:
-            # Create the student
-            Student.create(user_id, name, email, password)
+            # Create the student with new fields
+            # Even if gender/birthday/grade are empty strings, pass them anyway
+            Student.create(
+                user_id, 
+                name, 
+                email, 
+                password,
+                gender=gender if gender else None,
+                birthday=birthday if birthday else None,
+                grade=grade if grade else None
+            )
             flash(f'Student {name} has been added successfully')
         except Exception as e:
             flash(f'Failed to add student: {str(e)}')
@@ -214,9 +226,24 @@ def init_routes(app):
         if request.method == 'POST':
             name = request.form.get('student_name')
             email = request.form.get('student_email')
+            gender = request.form.get('student_gender')
+            birthday = request.form.get('student_birthday')
+            grade = request.form.get('student_grade')
+            
+            # Debug - optional, remove in production
+            app.logger.info(f"Edit student data - Gender: {gender}, Birthday: {birthday}, Grade: {grade}")
             
             try:
-                Student.update(student_id, name=name, email=email)
+                # Always pass the values to update, even if they're empty strings
+                # The model will handle them appropriately
+                Student.update(
+                    student_id, 
+                    name=name if name else None, 
+                    email=email if email else None,
+                    gender=gender if gender else None,
+                    birthday=birthday if birthday else None,
+                    grade=grade if grade else None
+                )
                 
                 # If it's an AJAX request, return a JSON response
                 if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -226,6 +253,7 @@ def init_routes(app):
                 return redirect(url_for('dashboard'))
                 
             except Exception as e:
+                app.logger.error(f"Error updating student: {str(e)}")
                 if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                     return jsonify({'error': str(e)}), 500
                     

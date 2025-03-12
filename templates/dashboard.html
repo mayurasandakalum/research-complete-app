@@ -4,6 +4,8 @@
 <head>
     <title>Teacher Dashboard - Learning Apps Hub</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <!-- Add datepicker styles -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
 </head>
 
 <body>
@@ -87,6 +89,27 @@
                         <label for="student_password">Password:</label>
                         <input type="password" id="student_password" name="student_password" required>
                     </div>
+                    <div class="form-group">
+                        <label for="student_gender">Gender:</label>
+                        <select id="student_gender" name="student_gender" required>
+                            <option value="">Select gender</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="student_birthday">Birthday:</label>
+                        <input type="text" id="student_birthday" name="student_birthday" class="datepicker" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="student_grade">Grade:</label>
+                        <select id="student_grade" name="student_grade" required>
+                            <option value="">Select grade</option>
+                            <option value="grade4">Grade 4</option>
+                            <option value="grade5">Grade 5</option>
+                        </select>
+                    </div>
                     <button type="submit" class="submit-btn">Add Student</button>
                 </form>
             </div>
@@ -99,6 +122,9 @@
                         <tr>
                             <th>Name</th>
                             <th>Email</th>
+                            <th>Gender</th>
+                            <th>Birthday</th>
+                            <th>Grade</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -107,9 +133,13 @@
                         <tr>
                             <td>{{ student.name }}</td>
                             <td>{{ student.email }}</td>
+                            <td>{{ student.gender|capitalize if student.gender else 'N/A' }}</td>
+                            <td>{{ student.birthday if student.birthday else 'N/A' }}</td>
+                            <td>{{ student.grade|replace('grade', 'Grade ')|capitalize if student.grade else 'N/A' }}
+                            </td>
                             <td>
                                 <button class="action-btn edit"
-                                    onclick="openEditModal('{{ student.id }}', '{{ student.name }}', '{{ student.email }}')">Edit</button>
+                                    onclick="openEditModal('{{ student.id }}', '{{ student.name }}', '{{ student.email }}', '{{ student.gender }}', '{{ student.birthday }}', '{{ student.grade }}')">Edit</button>
                                 <a href="{{ url_for('delete_student', student_id=student.id) }}"
                                     class="action-btn delete"
                                     onclick="return confirm('Are you sure you want to delete this student?')">Delete</a>
@@ -140,12 +170,46 @@
                     <label for="edit_student_email">Email:</label>
                     <input type="email" id="edit_student_email" name="student_email" required>
                 </div>
+                <div class="form-group">
+                    <label for="edit_student_gender">Gender:</label>
+                    <select id="edit_student_gender" name="student_gender">
+                        <option value="">Select gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit_student_birthday">Birthday:</label>
+                    <input type="text" id="edit_student_birthday" name="student_birthday" class="datepicker">
+                </div>
+                <div class="form-group">
+                    <label for="edit_student_grade">Grade:</label>
+                    <select id="edit_student_grade" name="student_grade">
+                        <option value="">Select grade</option>
+                        <option value="grade4">Grade 4</option>
+                        <option value="grade5">Grade 5</option>
+                    </select>
+                </div>
                 <button type="submit" class="submit-btn">Update Student</button>
             </form>
         </div>
     </div>
 
+    <!-- Add jQuery and jQuery UI for datepicker -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
     <script>
+        // Initialize datepickers
+        $(function () {
+            $(".datepicker").datepicker({
+                dateFormat: 'yy-mm-dd',
+                changeMonth: true,
+                changeYear: true,
+                yearRange: "-20:+0" // Allow selecting dates from 20 years ago to today
+            });
+        });
+
         // Fetch and display app status
         function updateStatus() {
             fetch('/api/status')
@@ -213,10 +277,23 @@
                 const studentId = document.getElementById('edit_student_id').value;
                 const studentName = document.getElementById('edit_student_name').value;
                 const studentEmail = document.getElementById('edit_student_email').value;
+                const studentGender = document.getElementById('edit_student_gender').value;
+                const studentBirthday = document.getElementById('edit_student_birthday').value;
+                const studentGrade = document.getElementById('edit_student_grade').value;
 
+                // Create FormData object and append all fields, even if empty
                 const formData = new FormData();
                 formData.append('student_name', studentName);
                 formData.append('student_email', studentEmail);
+                formData.append('student_gender', studentGender);
+                formData.append('student_birthday', studentBirthday);
+                formData.append('student_grade', studentGrade);
+
+                // Debug - optional, remove in production
+                console.log('Updating student with:');
+                console.log('Gender:', studentGender);
+                console.log('Birthday:', studentBirthday);
+                console.log('Grade:', studentGrade);
 
                 fetch(`/edit_student/${studentId}`, {
                     method: 'POST',
@@ -227,22 +304,40 @@
                             // Reload the page to show updated data
                             window.location.reload();
                         } else {
-                            alert('Failed to update student. Please try again.');
+                            return response.json().then(data => {
+                                throw new Error(data.error || 'Failed to update student');
+                            });
                         }
                     })
                     .catch(error => {
-                        alert('An error occurred. Please try again.');
+                        alert('Error: ' + error.message);
                         console.error('Error:', error);
                     });
             });
         });
 
         // Function to open the edit modal
-        function openEditModal(id, name, email) {
+        function openEditModal(id, name, email, gender, birthday, grade) {
             const modal = document.getElementById('editStudentModal');
             document.getElementById('edit_student_id').value = id;
             document.getElementById('edit_student_name').value = name;
             document.getElementById('edit_student_email').value = email;
+
+            // Fix handling of gender, birthday and grade fields
+            const genderField = document.getElementById('edit_student_gender');
+            genderField.value = gender || ''; // Set empty string if undefined
+
+            const birthdayField = document.getElementById('edit_student_birthday');
+            birthdayField.value = birthday || ''; // Set empty string if undefined
+
+            const gradeField = document.getElementById('edit_student_grade');
+            gradeField.value = grade || ''; // Set empty string if undefined
+
+            // Refresh/initialize the datepicker
+            if ($(birthdayField).hasClass('hasDatepicker')) {
+                $(birthdayField).datepicker('setDate', birthday);
+            }
+
             modal.style.display = 'block';
         }
     </script>

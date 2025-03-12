@@ -159,6 +159,14 @@ body {
   border-radius: 3px;
 }
 
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+}
+
 .submit-btn {
   padding: 10px 15px;
   background-color: #27ae60;
@@ -257,4 +265,28 @@ body {
 
 .action-btn.delete {
   background-color: #e74c3c;
+}
+
+/* Datepicker customization */
+.ui-datepicker {
+  font-size: 14px;
+  font-family: Arial, sans-serif;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  padding: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.ui-datepicker-header {
+  background-color: #f2f2f2;
+  border-bottom: 1px solid #ddd;
+  padding: 5px;
+  margin-bottom: 5px;
+}
+
+.ui-datepicker-prev,
+.ui-datepicker-next {
+  cursor: pointer;
+  padding: 0 5px;
 }

@@ -143,7 +143,7 @@ class Student:
             return None
     
     @staticmethod
-    def create(teacher_id, name, email, password):
+    def create(teacher_id, name, email, password, gender=None, birthday=None, grade=None):
         """Create a new student under a teacher."""
         try:
             # Create user in Firebase Auth
@@ -155,6 +155,9 @@ class Student:
                 'name': name,
                 'email': email,
                 'teacher_id': teacher_id,
+                'gender': gender,
+                'birthday': birthday,
+                'grade': grade,
                 'created_at': firestore.SERVER_TIMESTAMP
             })
             
@@ -163,15 +166,27 @@ class Student:
             raise Exception(f"Failed to create student: {str(e)}")
     
     @staticmethod
-    def update(student_id, name=None, email=None):
+    def update(student_id, name=None, email=None, gender=None, birthday=None, grade=None):
         """Update a student's information."""
         update_data = {}
         
-        if name:
+        # Only include non-None values in update
+        if name is not None:
             update_data['name'] = name
         
-        if email:
+        if email is not None:
             update_data['email'] = email
+            
+        # Include these fields even if they're empty strings
+        # This allows clearing a previously set value
+        if gender is not None:
+            update_data['gender'] = gender
+            
+        if birthday is not None:
+            update_data['birthday'] = birthday
+            
+        if grade is not None:
+            update_data['grade'] = grade
         
         if update_data:
             db.collection('students').document(student_id).update(update_data)
