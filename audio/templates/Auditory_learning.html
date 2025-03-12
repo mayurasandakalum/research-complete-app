@@ -14,9 +14,10 @@
       /* -------------------------
        BODY & GENERAL STYLES
     ------------------------- */
-      body {
+    body {
         font-family: Arial, sans-serif;
-        background-image: url("../Images/auditory.jpg");
+        /* background-image: url("../Images/auditory.jpg"); */
+        background: linear-gradient(135deg,rgb(138, 140, 250),rgb(202, 148, 253),rgb(253, 150, 202));
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
@@ -70,7 +71,8 @@
         width: 60%;
         max-width: 600px;
         height: auto;
-        background: linear-gradient(135deg, #f2f5f5, #3ec8db);
+        /* background: linear-gradient(135deg, #f2f5f5, #3ec8db); */
+        background: rgba(255, 255, 255, 0.95);
         border-radius: 30px;
         padding: 20px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -94,10 +96,15 @@
 
       /* Lesson/Level styling */
       .lesson-level-container {
-        margin-top: 10px;
+        /* margin-top: 10px;
         font-family: serif;
         font-size: 16px;
-        color: #444;
+        color: #444; */
+        font-size: 15px;
+        font-weight: 100;
+        color: #2b3172;
+        padding-bottom: 5px;
+        border-bottom: 2px solid #ddd;
       }
       .lesson-level-container p {
         margin: 5px 0;
@@ -190,6 +197,21 @@
         filter: brightness(90%);
       }
 
+      .replay {
+        margin-top: 15px;
+        font-family: serif;
+        background-color: #f39c12;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        padding: 8px 16px;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+      .replay:hover {
+        filter: brightness(90%);
+      }
+
       /* -------------------------
        FEEDBACK
     ------------------------- */
@@ -243,6 +265,7 @@
         font-family: Cambria, Cochin, Georgia, Times, "Times New Roman", serif;
         margin-top: 10px;
       }
+
     </style>
   </head>
 
@@ -260,64 +283,64 @@
       <div class="title">Auditory Learning</div>
       <a href="logout.html" class="logout-btn">Logout</a>
     </nav>
-
-    <!-- Chatbox with Character Icon -->
-    <div class="chat-container">
-      <!-- Character Icon (optional if needed) -->
-      <!-- <img src="/static/Images/Q_man.png" alt="Character" class="character-icon"> -->
-      <!-- Display Lesson and Level -->
-      <div class="lesson-level-container">
-        <p>
-          <strong>Lesson:</strong>
-          <span id="lesson">{{ question['Lesson'] }}</span>
-        </p>
-        <p>
-          <strong>Level:</strong>
-          <span id="level">{{ question['Level'] }}</span>
-        </p>
-      </div>
-
-      <div class="question-area">
-        <!-- Dynamic question text -->
-        <span data-question-id="{{ question['ID'] }}"></span>
-        <div class="image-area">
-          {% if image %}
-          <img
-            src="{{ url_for('static', filename=image) }}"
-            alt="Related Image"
-            style="height: 100px; width: 100px"
-          />
-          {% endif %}
+    <!-- <div class="wrapper"> -->
+      <!-- Chatbox with Character Icon -->
+      <div class="chat-container">
+        <!-- Character Icon (optional if needed) -->
+        <!-- <img src="/static/Images/Q_man.png" alt="Character" class="character-icon"> -->
+        <!-- Display Lesson and Level -->
+        <div class="lesson-level-container">
+          <p>
+            <strong>Lesson:</strong>
+            <span id="lesson">{{ question['Lesson'] }}</span>
+          </p>
+          <p>
+            <strong>Level:</strong>
+            <span id="level">{{ question['Level'] }}</span>
+          </p>
         </div>
+
+        <div class="question-area">
+          <!-- Dynamic question text -->
+          <span data-question-id="{{ question['ID'] }}"></span>
+          <div class="image-area">
+            {% if image %}
+            <img
+              src="{{ url_for('static', filename=image) }}"
+              alt="Related Image"
+              style="height: 100px; width: 100px"
+            />
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Recording Controls -->
+        <div class="controls">
+          <button id="recordBtn"><i class="fas fa-microphone"></i> Record</button>
+          <!-- Stopped button below (hidden by default) -->
+          <!-- <button id="stopBtn" class="stop" style="display: none;">
+          <i class="fas fa-stop"></i> Stop
+        </button> -->
+          <button id="playBtn" style="display: none">
+            <i class="fas fa-play"></i> Play
+          </button>
+        </div>
+
+        <!-- Retake and Submit Buttons -->
+        <div class="extra-controls">
+          <button id="retakeBtn" disabled>Retake Answer</button>
+          <button id="submitBtn" class="submit" disabled>Submit Answer</button>
+        </div>
+
+        <!-- Next Question Button -->
+        <button id="next" class="next">Next</button>
+
+        <button id="replay" class="replay">Replay</button>
+
+        <!-- Feedback -->
+        <div class="feedback" id="feedback"></div>
       </div>
-
-      <!-- Recording Controls -->
-      <div class="controls">
-        <button id="recordBtn"><i class="fas fa-microphone"></i> Record</button>
-        <!-- Stopped button below (hidden by default) -->
-        <!-- <button id="stopBtn" class="stop" style="display: none;">
-        <i class="fas fa-stop"></i> Stop
-      </button> -->
-        <button id="playBtn" style="display: none">
-          <i class="fas fa-play"></i> Play
-        </button>
-      </div>
-
-      <!-- Retake and Submit Buttons -->
-      <div class="extra-controls">
-        <button id="retakeBtn" disabled>Retake Answer</button>
-        <button id="submitBtn" class="submit" disabled>Submit Answer</button>
-      </div>
-
-      <!-- Next Question Button -->
-      <button id="next" class="next">Next</button>
-
-      <button id="replay" class="replay">Replay</button>
-
-      <!-- Feedback -->
-      <div class="feedback" id="feedback"></div>
-    </div>
-
+<!-- </div> -->
     <!-- Footer -->
     <footer class="footer">
       <div class="footer-content">

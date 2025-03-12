@@ -46,51 +46,6 @@ os.makedirs(IMAGES_FOLDER, exist_ok=True)
 TEMPLATES_FOLDER = os.path.join(current_dir, "templates")
 os.makedirs(TEMPLATES_FOLDER, exist_ok=True)
 
-# # Create submit_audio_form.html if it doesn't exist
-# submit_audio_form_path = os.path.join(TEMPLATES_FOLDER, "submit_audio_form.html")
-# if not os.path.exists(submit_audio_form_path):
-#     with open(submit_audio_form_path, "w", encoding="utf-8") as f:
-#         f.write("""
-# <!DOCTYPE html>
-# <html>
-# <head>
-#     <title>Submit Audio</title>
-# </head>
-# <body>
-#     <h1>Submit Audio</h1>
-#     <p>This is a simple form to submit audio for question ID: {{ question_id }}</p>
-#     <form action="/submit_audio" method="post" enctype="multipart/form-data">
-#         <input type="file" name="audio" accept="audio/*">
-#         <input type="hidden" name="questionID" value="{{ question_id }}">
-#         <button type="submit">Submit</button>
-#     </form>
-# </body>
-# </html>
-#         """)
-
-# # Check if the background image exists, create a placeholder if not
-# auditory_bg_path = os.path.join(IMAGES_FOLDER, "auditory.jpg")
-# if not os.path.exists(auditory_bg_path):
-#     try:
-#         # Generate a simple gradient as a placeholder
-#         from PIL import Image, ImageDraw
-#         img = Image.new('RGB', (800, 600), color=(255, 255, 255))
-#         draw = ImageDraw.Draw(img)
-#         for y in range(600):
-#             # Create a simple blue gradient
-#             color = (200, 220, 255 - int(y * 0.2))
-#             draw.line([(0, y), (800, y)], fill=color)
-#         img.save(auditory_bg_path)
-#         print(f"Created placeholder background image: {auditory_bg_path}")
-#     except Exception as e:
-#         print(f"Could not create background image: {e}")
-
-# try:
-#     import config
-# except ImportError:
-#     print(f"Error: Cannot import config module. Looking in: {parent_dir}")
-#     print(f"Python path: {sys.path}")
-#     raise
 
 # app.config['SECRET_KEY'] = config.SECRET_KEY
 
@@ -111,131 +66,6 @@ model_st = SentenceTransformer("Ransaka/bert-small-sentence-transformer")
 
 UPLOAD_FOLDER = os.path.join('static', 'aud_records')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
-# Flag to indicate if ffmpeg is available
-# FFMPEG_AVAILABLE = False
-# try:
-#     import subprocess
-#     result = subprocess.run(["ffmpeg", "-version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-#     FFMPEG_AVAILABLE = (result.returncode == 0)
-#     print("ffmpeg is available in the system")
-# except Exception:
-#     print("ffmpeg is not available, will use Python fallback for audio conversion")
-
-# Flag to indicate if we're running with Firebase or in offline mode
-# OFFLINE_MODE = False
-
-# Initialize Firebase with better error handling
-# try:
-#     import firebase_admin
-#     from firebase_admin import credentials, firestore
-    
-#     firebase_cred_path = os.path.join(current_dir, "learn-pal-firebase-adminsdk-ugedp-fcb865a7d8.json")
-#     if os.path.exists(firebase_cred_path):
-#         cred = credentials.Certificate(firebase_cred_path)
-#         firebase_admin.initialize_app(cred)
-#         db = firestore.client()
-#         print(f"Successfully initialized Firebase with credentials from {firebase_cred_path}")
-#     else:
-#         print(f"Firebase credentials file not found at {firebase_cred_path}")
-#         print("Running in OFFLINE MODE - Firebase features will be simulated")
-#         OFFLINE_MODE = True
-#         db = None
-# except Exception as e:
-#     print(f"Error initializing Firebase: {e}")
-#     print("Running in OFFLINE MODE - Firebase features will be simulated")
-#     OFFLINE_MODE = True
-#     db = None
-
-# # Import get_letters only if model is loaded successfully
-# if model is not None:
-#     try:
-#         from get_letters import get_text
-#     except ImportError:
-#         print("Warning: Could not import get_letters module. Writing recognition will not work.")
-#         def get_text(*args, **kwargs):
-#             return "OCR module not available"
-
-# # Mock Firebase collections for offline mode
-# if OFFLINE_MODE:
-#     class MockFirestore:
-#         def __init__(self):
-#             self.audio_questions = {
-#                 "1": {"Question": "Sample question 1", "Answer": "Sample answer 1", "Lesson": "lesson1", "ID": 1},
-#                 "2": {"Question": "Sample question 2", "Answer": "Sample answer 2", "Lesson": "lesson1", "ID": 2},
-#                 "3": {"Question": "Sample question 3", "Answer": "Sample answer 3", "Lesson": "lesson2", "ID": 3},
-#             }
-#             self.write_questions = {
-#                 "1": {"Question": "Write sample 1", "Answer": "Written answer 1", "Lesson": "lesson1", "ID": 1},
-#                 "2": {"Question": "Write sample 2", "Answer": "Written answer 2", "Lesson": "lesson1", "ID": 2},
-#                 "3": {"Question": "Write sample 3", "Answer": "Written answer 3", "Lesson": "lesson2", "ID": 3},
-#             }
-#             self.results = []
-            
-#         def collection(self, name):
-#             return MockCollection(self, name)
-    
-#     class MockCollection:
-#         def __init__(self, db, name):
-#             self.db = db
-#             self.name = name
-            
-#         def document(self, doc_id):
-#             return MockDocument(self.db, self.name, doc_id)
-            
-#         def add(self, data):
-#             self.db.results.append(data)
-#             return True
-            
-#         def where(self, field, op, value):
-#             return MockQuery(self.db, self.name, field, op, value)
-    
-#     class MockDocument:
-#         def __init__(self, db, collection_name, doc_id):
-#             self.db = db
-#             self.collection = collection_name
-#             self.id = doc_id
-        
-#         def get(self):
-#             return MockDocumentSnapshot(self.db, self.collection, self.id)
-    
-#     class MockDocumentSnapshot:
-#         def __init__(self, db, collection, doc_id):
-#             self.db = db
-#             self.collection = collection
-#             self.id = doc_id
-#             self._exists = False
-#             self._data = {}
-            
-#             if collection == "audio_questions" and doc_id in db.audio_questions:
-#                 self._exists = True
-#                 self._data = db.audio_questions[doc_id]
-#             elif collection == "write_questions" and doc_id in db.write_questions:
-#                 self._exists = True
-#                 self._data = db.write_questions[doc_id]
-        
-#         @property
-#         def exists(self):
-#             return self._exists
-            
-#         def to_dict(self):
-#             return self._data
-    
-#     class MockQuery:
-#         def __init__(self, db, collection, field, op, value):
-#             self.db = db
-#             self.collection = collection
-#             self.field = field
-#             self.op = op
-#             self.value = value
-        
-#         def stream(self):
-#             results = []
-#             # Just return empty results since this is a mock
-#             return results
-    
-#     # Use our mock Firestore
-#     db = MockFirestore()
 
 # Initialize Firebase
 # cred = credentials.Certificate(".audio/learn-pal-firebase-adminsdk-ugedp-fcb865a7d8.json")
@@ -273,9 +103,7 @@ AudQuestionID = 1
 no_q = 5
 username = ""
 Aud_data = {}
-# Wr_results = ["lesson1","lesson1","lesson1","lesson2","lesson2","lesson2","lesson3"]
 # Aud_results = ["lesson1","lesson1","lesson2","lesson2","lesson2","lesson2","lesson2","lesson3","lesson3","lesson3","lesson3","lesson3","lesson3","lesson3","lesson3","lesson3","lesson3"]
-# Wr_results_2 = ["lesson3","lesson3","lesson3","lesson3"]
 # Aud_results_2 = ["lesson1","lesson1","lesson1"]
 Aud_results = []
 Aud_results_2 = []
@@ -601,14 +429,23 @@ def speech_guide():
     global Aud_results
     global Aud_results_2
     global rd_lesson
+    sin_text_to_speech("යම්කිසි රූපයකින් බාගයක් එනම් දෙකෙන් එකක්, දෙකෙන් පංගුව පහත රූපයේ පරිදි පෙන්විය හැක.",911)
+    sin_text_to_speech("යම්කිසි රූපයකින් හතරෙන් පංගු පහත රූපයේ පරිදි දැක්විය හැක.",912)
+    sin_text_to_speech("අපි දැන් බලමු මල් දොලහකින් හතරෙන් පංගු හඳුනාගන්න. මල් දොළහකින් හතරෙන් එකක මල් තුනක් තියෙනවා.මල් දොළහකින් හතරෙන් දෙකක මල් හයක් තියෙනවා.මල් දොළහකින් හතරෙන් තුනක මල් නවයක් තියෙනවා. ",913)
     # sin_text_to_speech("අපි බලමු ඉලක්කම් තුනේ සංඛ්‍යාවක් ගුණ කරන්නේ කොහොමද කියලා, ඒ සඳහා උදාහරණයක් ලෙස හාරසිය තිස් අට, දෙකෙන් ගුණ කරලා බලමු. අට දෙකෙන් ගුණකර විට දාසයයි. එවිට හය එකස්ථානයේ ලියා එක දහස් ස්ථානයට රැගෙන යයි. පසුව දෙක තුනෙන් ගුණ කරවිට හයයි. දහස්තානයේ ඉතුරු වූ එකත් සමග හතයි. එවිට හත දහස් ස්ථානයේ ලියයි. දෙක හතරෙන් ගුණ කර විට අටයි. එවිට අට සිය ස්ථානයේ ලියයි. එවිට පිළිතුර අටසිය හැත්ත හයයි.",921)
     # sin_text_to_speech("ඉහත ආකාරයටම දෙසීය තිස් දෙක, හතරෙන් ගුණ කර විට පිළිතුර පහත පරිදි නවසිය විසි අට ලැබේ.",922)
     # sin_text_to_speech("අපි දැන් බලමු හාරසිය විසිතුන, හයෙන් ගුණකර. හය තුනෙන් ගුණ කරවිට දහ අටයි. එවිට අට එකස්ථානයේ ලියා එක දහස්තානයට රැගෙන යයි. හය දෙකෙන් ගුණ කර විට දොළහයි. දහස්තානයේ ඉතිරි එකත් සමඟ දහතුනයි. එවිට තුන දහස් ස්ථානයේ ලියා එක සියස්ථානයට රැගෙන යයි. හය හතරෙන් ගුණ කර විට විසිහතරයි. සියස්ථානයේ ඉතිරි එකත් සමග විසි පහයි. එවිට පහා සියස්ථානයේලියා දෙක දාහස් ස්ථානයට රැගෙනයයි. පිළිතුර දෙදහස් පන්සිය තිස් අටයි.",923)
     # sin_text_to_speech("ඉහත ආකාරයටම දෙසිය පනස්තුන හතෙන් ගුණ කර විට පහත පරිදි පිළිතුර එක්දහස් හත්සිය හැත්තෑ එකක් ලැබේ..",924)
     # sin_text_to_speech("අපි දැන් බලමු පන්සිය හතලිස් අට, අටෙන් ගුණ කරලා.අට අටෙන් ගුණ කර විට හැට හතරයි. හතර එකස්ථානයේලියා හය දහස්තානයට රැගෙන යයි. අට හතරෙන් ගුණ කර වෙත තිස් දෙකයි. දහස්තානයේ ඉතිරි හයත් සමඟ තිස් අටයි. අට දහස්තානයේ ලියා තුන සියස්ථානයට රැගෙන යයි. අට පහෙන් ගුණ කරවිට හතළිහයි. සියස්ථානයේ ඉතිරි තුනත් සමග හතළිස් තුනයි. තුන සියස්ථානයේ ලියා හතර දාහස්ථානයේ ලියයි. එවිට පිළිතුර හාර දහස් තුන්සිය අසූ හතරයි.",925)
+    # sin_text_to_speech("ඉහත ආකාරයට දෙසිය පනස් තුන නවයෙන් ගුණ කර විට දෙදහස් දෙසිය හැත්ත හතක් ලැබේ.",926)
     # sin_text_to_speech("අපි බෙදීම උදාහරණවලින් ඉගෙන ගනිමු. මුලින්ම අපි දෙකෙන් බෙදන්න ඉගෙන ගමු. දෙසිය විසි හය , දෙකෙන් බෙදන්න ඉගෙන ගමු. පහත ආකාරයට අපිට දෙකෙන් බෙදන්න පුළුවන්. එවිට පිළිතුර එකසිය දහතුනයි.",931)
     # sin_text_to_speech("දැන් අපි බලමු හතළිස් අට තුනෙන් බෙදන්නේ කොහොමද කියලා.සියස්ථානයේ හතරට තුනේ ඒවා එකයි. එම එක හතරට උඩින් ලියනවා. පසුව එම එක තුනෙන් ගුණ කර විට පිළිතුර තුන හතරට පහළින් ලියනවා. හතරෙන් තුනක් අඩු කර විට පිළිතුර එක පහලින් ලියනවා. පසුව එක ස්ථානයේ ඇති අට එම එක අසලට ගෙන දහ අටට තුනේ ඒවා බලනවා. එවිට පිළිතුර හය එකස්ථානයේ අටට ඉහළින් ලියනවා. එම හය තුනෙන් ගුණ කරවිට පිළිතුර දහ අට පහලින් ලියනවා. දැන් අපිට පේනවා හතළිස් අට තුනෙන් බෙදූ විට පිළිතුර දාසයක් සහ ඉතුරු බිංදුවක් ලෙස ලැබෙනවා.",932)
-    sin_text_to_speech("අපි දැන් බලමු හතරෙන් බෙදන්නේ කොහොමද කියලා. ඉහත ඉගෙන ගත් ආකාරයටම පන්සිය හැත්තෑව හතරෙන් බෙදූ බෙදූ විට පිළිතුර එකසිය හතලිස් දෙකයි ඉතුරු දෙකක් පහත පරිදි ලැබේ",933)
+    # sin_text_to_speech("අපි දැන් බලමු හතරෙන් බෙදන්නේ කොහොමද කියලා. ඉහත ඉගෙන ගත් ආකාරයටම පන්සිය හැත්තෑව හතරෙන් බෙදූ විට පිළිතුර එකසිය හතලිස් දෙකයි ඉතුරු දෙකක් පහත පරිදි ලැබේ",933)
+    # sin_text_to_speech("අපි දැන් බලමු දෙසිය හැට පහ, පහෙන් බෙදුවාම පිළිතුර කීයක් එනවද කියලා.ඔබට දැන් පේනවා පිළිතුර පනස්තුනක් විදිහට ලැබිලා තියෙනවා.",934)
+    # sin_text_to_speech("පෙර අප ඉගෙන ගත් ආකාරයටම අසූ හතර හයෙන් බෙදූවිට පිළිතුර දහ හතරක් ලෙස ලැබෙනවා.",935)
+    # sin_text_to_speech("ඕනම සංඛ්‍යාවක් හතෙන් බෙදන්නේ කොහොමද කියලා අපි දැන් බලමු. දැන් අපි බලමු හත්සිය හැත්ත දෙක හතෙන් බෙදන්න. මෙම ආකාරයට අපිට හතෙන් බෙදන්න පුළුවන්.",936)
+    # sin_text_to_speech("අටසිය විසි හය අටෙන් බෙදූ විට පිළිතුර එකසිය තුනයි ඉතුරු දෙකක් පහත පරිදි ලැබෙනවා.",937)
+    # sin_text_to_speech("ඕනම සංඛ්‍යාවක් නවයෙන් බෙදන්නේ කොහොමද කියල අපි දැන් බලමු. අපි දැන් බලමු නවසිය පනස් හය නවයෙන් බෙදන්න. පහත ආකාරයට අපිට නවයෙන් බෙදන්න පුළුවන්. එවිට පිළිතුර එකසිය හයයි ඉතුරු දෙකයි.",938)
     counts = Counter(Aud_results)
     counts_dict = dict(counts)
     if rd_lesson > 0:

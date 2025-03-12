@@ -9,7 +9,7 @@ from sentence_transformers import SentenceTransformer
 import random
 import re
 import base64
-from write_model.get_letters import get_text
+from get_letters import get_text
 from collections import Counter
 import sys
 import io
