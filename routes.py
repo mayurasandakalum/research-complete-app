@@ -5,6 +5,8 @@ Route handlers and view functions.
 from flask import render_template, jsonify, redirect, request, session, url_for, flash
 import requests
 import config
+import psutil
+import datetime
 from models import login_required, teacher_required, User, Teacher, Student
 
 def init_routes(app):
@@ -345,6 +347,55 @@ def init_routes(app):
             status['visual'] = 'not running'
         
         return jsonify(status)
+    
+    @app.route('/api/system_metrics')
+    def system_metrics():
+        """API endpoint to get real-time system metrics."""
+        try:
+            # Get CPU usage
+            cpu_percent = psutil.cpu_percent(interval=1)
+            
+            # Get memory usage
+            memory = psutil.virtual_memory()
+            memory_percent = memory.percent
+            
+            # Get system uptime
+            boot_time = datetime.datetime.fromtimestamp(psutil.boot_time())
+            uptime = datetime.datetime.now() - boot_time
+            uptime_hours = round(uptime.total_seconds() / 3600, 1)  # Convert to hours
+            
+            # Get number of active processes as a proxy for "users"
+            active_processes = len(psutil.pids())
+            
+            # Get historical CPU and memory data for chart (last 10 minutes)
+            # In a real implementation, you would store and retrieve this from a time-series database
+            # For now, we'll just return the current value repeated
+            cpu_history = [cpu_percent] * 10
+            memory_history = [memory_percent] * 10
+            
+            # Get active users by time period (mock data, would be from database in real app)
+            user_activity = [active_processes // 5] * 6  # Divide by 5 for demonstration
+            
+            return jsonify({
+                'cpu': {
+                    'current': cpu_percent,
+                    'history': cpu_history
+                },
+                'memory': {
+                    'current': memory_percent,
+                    'history': memory_history
+                },
+                'uptime': {
+                    'hours': uptime_hours,
+                    'formatted': f"{int(uptime_hours)}h {int((uptime_hours % 1) * 60)}m"
+                },
+                'active_processes': active_processes,
+                'user_activity': user_activity
+            })
+            
+        except Exception as e:
+            app.logger.error(f"Error getting system metrics: {str(e)}")
+            return jsonify({'error': str(e)}), 500
     
     @app.route('/system_overview')
     def system_overview():
