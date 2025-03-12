@@ -3,7 +3,7 @@
 
 <head>
     <title>System Overview - Learning Apps Hub</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/system_overview.css') }}">
     <!-- Include jQuery if needed by datepicker -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
@@ -40,39 +40,106 @@
         {% endif %}
         {% endwith %}
 
-        <section class="dashboard-section active">
-            <h2>System Overview</h2>
-            <div class="stats">
-                <h3>Application Status</h3>
-                <div id="status">Checking system status...</div>
-            </div>
-        </section>
+        <div class="system-container">
+            <section class="dashboard-section active">
+                <h2>System Overview</h2>
+
+                <div class="status-card">
+                    <div class="status-header">
+                        <h3>Application Status</h3>
+                        <button id="refresh-status" class="refresh-button">
+                            <span>Refresh</span>
+                            <span id="loading-spinner" class="loading-spinner" style="display: none;"></span>
+                        </button>
+                    </div>
+                    <div id="status">Checking system status...</div>
+                </div>
+
+                <div class="system-metrics">
+                    <div class="metric-card">
+                        <div class="metric-value" id="metric-users">-</div>
+                        <div class="metric-label">Active Users</div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-value" id="metric-uptime">-</div>
+                        <div class="metric-label">System Uptime</div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-value" id="metric-memory">-</div>
+                        <div class="metric-label">Memory Usage</div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-value" id="metric-cpu">-</div>
+                        <div class="metric-label">CPU Load</div>
+                    </div>
+                </div>
+            </section>
+        </div>
     </div>
 
-    <!-- Add inline script to ensure the status is updated -->
+    <!-- Add interactive scripts -->
     <script>
         // Fetch and display app status
         function updateStatus() {
+            const loadingSpinner = document.getElementById('loading-spinner');
+            loadingSpinner.style.display = 'inline-block';
+
             fetch('/api/status')
                 .then(response => response.json())
                 .then(data => {
-                    let statusHtml = '<ul>';
+                    let statusHtml = '<ul class="status-list">';
                     for (const [app, status] of Object.entries(data)) {
-                        statusHtml += `<li>${app}: <span style="color: ${status === 'running' ? 'green' : 'red'}">${status}</span></li>`;
+                        const statusClass = status === 'running' ? 'status-running' : 'status-stopped';
+                        statusHtml += `
+                            <li class="status-item">
+                                <span class="app-name">${app}</span>
+                                <span class="${statusClass}">${status}</span>
+                            </li>
+                        `;
                     }
                     statusHtml += '</ul>';
                     document.getElementById('status').innerHTML = statusHtml;
+
+                    // Update metrics with sample data (replace with actual API calls)
+                    updateMetrics();
                 })
                 .catch(error => {
                     console.error('Error fetching status:', error);
                     document.getElementById('status').innerHTML = 'Error checking system status';
+                })
+                .finally(() => {
+                    loadingSpinner.style.display = 'none';
                 });
         }
 
-        // Check status on page load and every 10 seconds
+        function updateMetrics() {
+            // This would normally fetch from an API endpoint
+            // Using mock data for demonstration
+            document.getElementById('metric-users').textContent = Math.floor(Math.random() * 100);
+            document.getElementById('metric-uptime').textContent = Math.floor(Math.random() * 24) + 'h';
+            document.getElementById('metric-memory').textContent = Math.floor(Math.random() * 90) + '%';
+            document.getElementById('metric-cpu').textContent = Math.floor(Math.random() * 100) + '%';
+
+            // Add animation to metrics to highlight changes
+            document.querySelectorAll('.metric-value').forEach(el => {
+                el.style.animation = 'none';
+                el.offsetHeight; // Trigger reflow
+                el.style.animation = 'fadeIn 0.5s';
+            });
+        }
+
+        // Check status on page load
         document.addEventListener('DOMContentLoaded', function () {
             updateStatus();
-            setInterval(updateStatus, 10000);
+
+            // Add event listener for manual refresh
+            document.getElementById('refresh-status').addEventListener('click', updateStatus);
+
+            // Auto-refresh every 30 seconds
+            setInterval(updateStatus, 30000);
         });
     </script>
 </body>
