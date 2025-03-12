@@ -22,7 +22,7 @@ def init_routes(app):
         elif user_id and user_type == 'student':
             return redirect(url_for('student_dashboard'))
         
-        return render_template('index.html', 
+        return render_template('home.html', 
                             kinesthetic_url=f"http://localhost:{config.KINESTHETIC_APP_PORT}",
                             readwrite_url=f"http://localhost:{config.READWRITE_APP_PORT}",
                             visual_url=f"http://localhost:{config.VISUAL_APP_PORT}",
