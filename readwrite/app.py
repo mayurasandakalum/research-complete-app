@@ -28,13 +28,11 @@ sys.path.insert(0, parent_dir)  # Use insert instead of append to prioritize thi
 
 # Make all paths absolute for consistency
 STATIC_FOLDER = os.path.join(current_dir, "static")
-AUDIO_FOLDER = os.path.join(STATIC_FOLDER, "aud_records")
 WRITE_IMG_FOLDER = os.path.join(STATIC_FOLDER, "write_img")
 IMAGES_FOLDER = os.path.join(STATIC_FOLDER, "Images")
 
 # Create necessary directories
 os.makedirs(STATIC_FOLDER, exist_ok=True)
-os.makedirs(AUDIO_FOLDER, exist_ok=True)
 os.makedirs(WRITE_IMG_FOLDER, exist_ok=True)
 os.makedirs(IMAGES_FOLDER, exist_ok=True)
 
@@ -42,7 +40,7 @@ os.makedirs(IMAGES_FOLDER, exist_ok=True)
 TEMPLATES_FOLDER = os.path.join(current_dir, "templates")
 os.makedirs(TEMPLATES_FOLDER, exist_ok=True)
 
-database = {"sathira": "123"}  # username: password
+database = {"isu": "123"}  # username: password
 
 
 model_st = SentenceTransformer("Ransaka/bert-small-sentence-transformer")
@@ -72,86 +70,6 @@ except Exception as e:
     OFFLINE_MODE = True
     db = None
 
-# # Mock Firebase collections for offline mode
-# if OFFLINE_MODE:
-#     class MockFirestore:
-#         def __init__(self):
-#             self.audio_questions = {
-#                 "1": {"Question": "Sample question 1", "Answer": "Sample answer 1", "Lesson": "lesson1", "ID": 1},
-#                 "2": {"Question": "Sample question 2", "Answer": "Sample answer 2", "Lesson": "lesson1", "ID": 2},
-#                 "3": {"Question": "Sample question 3", "Answer": "Sample answer 3", "Lesson": "lesson2", "ID": 3},
-#             }
-#             self.write_questions = {
-#                 "1": {"Question": "Write sample 1", "Answer": "Written answer 1", "Lesson": "lesson1", "ID": 1},
-#                 "2": {"Question": "Write sample 2", "Answer": "Written answer 2", "Lesson": "lesson1", "ID": 2},
-#                 "3": {"Question": "Write sample 3", "Answer": "Written answer 3", "Lesson": "lesson2", "ID": 3},
-#             }
-#             self.results = []
-            
-#         def collection(self, name):
-#             return MockCollection(self, name)
-    
-#     class MockCollection:
-#         def __init__(self, db, name):
-#             self.db = db
-#             self.name = name
-            
-#         def document(self, doc_id):
-#             return MockDocument(self.db, self.name, doc_id)
-            
-#         def add(self, data):
-#             self.db.results.append(data)
-#             return True
-            
-#         def where(self, field, op, value):
-#             return MockQuery(self.db, self.name, field, op, value)
-    
-#     class MockDocument:
-#         def __init__(self, db, collection_name, doc_id):
-#             self.db = db
-#             self.collection = collection_name
-#             self.id = doc_id
-        
-#         def get(self):
-#             return MockDocumentSnapshot(self.db, self.collection, self.id)
-    
-#     class MockDocumentSnapshot:
-#         def __init__(self, db, collection, doc_id):
-#             self.db = db
-#             self.collection = collection
-#             self.id = doc_id
-#             self._exists = False
-#             self._data = {}
-            
-#             if collection == "audio_questions" and doc_id in db.audio_questions:
-#                 self._exists = True
-#                 self._data = db.audio_questions[doc_id]
-#             elif collection == "write_questions" and doc_id in db.write_questions:
-#                 self._exists = True
-#                 self._data = db.write_questions[doc_id]
-        
-#         @property
-#         def exists(self):
-#             return self._exists
-            
-#         def to_dict(self):
-#             return self._data
-    
-#     class MockQuery:
-#         def __init__(self, db, collection, field, op, value):
-#             self.db = db
-#             self.collection = collection
-#             self.field = field
-#             self.op = op
-#             self.value = value
-        
-#         def stream(self):
-#             results = []
-#             # Just return empty results since this is a mock
-#             return results
-    
-#     # Use our mock Firestore
-#     db = MockFirestore()
 
 # Global variable to track the current question ID
 WrQuestionID = 1
