@@ -47,7 +47,8 @@ def index():
     return render_template('index.html', 
                           kinesthetic_url=f"http://localhost:{config.KINESTHETIC_APP_PORT}",
                           readwrite_url=f"http://localhost:{config.READWRITE_APP_PORT}",
-                          visual_url=f"http://localhost:{config.VISUAL_APP_PORT}")  # Added visual URL
+                          visual_url=f"http://localhost:{config.VISUAL_APP_PORT}",  # Added visual URL
+                          audio_url=f"http://localhost:{config.AUDIO_APP_PORT}")  
 
 @app.route('/kinesthetic')
 def kinesthetic_redirect():
@@ -64,6 +65,11 @@ def visual_redirect():
     """Redirect to the visual app."""
     return redirect(f"http://localhost:{config.VISUAL_APP_PORT}")
 
+@app.route('/audio')
+def audio_redirect():
+    """Redirect to the audio app."""
+    return redirect(f"http://localhost:{config.AUDIO_APP_PORT}")
+
 @app.route('/api/status')
 def api_status():
     """API endpoint to check the status of all apps."""
@@ -71,7 +77,8 @@ def api_status():
         'main': 'running',
         'kinesthetic': 'unknown',
         'readwrite': 'unknown',
-        'visual': 'unknown'  # Added visual status
+        'visual': 'unknown',  # Added visual status
+        'audio': 'unknown'
     }
     
     # Check kinesthetic app
@@ -90,6 +97,7 @@ def api_status():
     except:
         status['readwrite'] = 'not running'
     
+
     # Check visual app
     try:
         response = requests.get(f"http://localhost:{config.VISUAL_APP_PORT}/api/info")
@@ -97,8 +105,17 @@ def api_status():
             status['visual'] = 'running'
     except:
         status['visual'] = 'not running'
+
+    # Check audio app
+    try:
+        response = requests.get(f"http://localhost:{config.AUDIO_APP_PORT}/api/info")
+        if response.status_code == 200:
+            status['audio'] = 'running'
+    except:
+        status['audio'] = 'not running'
     
     return jsonify(status)
+
 
 def create_templates_folder():
     """Create templates folder if it doesn't exist."""
@@ -152,6 +169,7 @@ def create_main_template():
             <a class="app-link" href="{{ kinesthetic_url }}">Kinesthetic Learning App</a>
             <a class="app-link" href="{{ readwrite_url }}">Read/Write Learning App</a>
             <a class="app-link" href="{{ visual_url }}">Visual Learning App</a>
+            <a class="app-link" href="{{ audio_url }}">Audio Learning App</a>
         </div>
         
         <h2>System Status</h2>
@@ -210,12 +228,14 @@ if __name__ == '__main__':
     kinesthetic_process = launch_app('kinesthetic/app.py', config.KINESTHETIC_APP_PORT)
     readwrite_process = launch_app('readwrite/app.py', config.READWRITE_APP_PORT)
     visual_process = launch_app('visual/app.py', config.VISUAL_APP_PORT)  # Launch visual app
-    
+    audio_process = launch_app('audio/app.py', config.AUDIO_APP_PORT)
+
     # Wait for the apps to be ready
     kinesthetic_url = f"http://localhost:{config.KINESTHETIC_APP_PORT}"
     readwrite_url = f"http://localhost:{config.READWRITE_APP_PORT}"
     visual_url = f"http://localhost:{config.VISUAL_APP_PORT}"  # Add visual URL
-    
+    audio_url = f"http://localhost:{config.AUDIO_APP_PORT}"
+
     # Start a thread to open the browser when the apps are ready
     browser_thread = threading.Thread(target=open_browser)
     browser_thread.daemon = True

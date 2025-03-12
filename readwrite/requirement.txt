@@ -1,4 +1,14 @@
-blinker=1.9.0=pypi_0
+Flask
+firebase_admin
+torch
+torchaudio
+torchvision
+transformers
+sentence-transformers
+gTTS
+soundfile
+flask_session
+opencv-pythonblinker=1.9.0=pypi_0
 bzip2=1.0.8=h99b78c6_7
 ca-certificates=2024.12.14=hf0a4a13_0
 cachecontrol=0.14.2=pypi_0

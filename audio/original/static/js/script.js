@@ -1,10 +1,10 @@
-// JavaScript for Read/Write app
-console.log('Read/Write app initialized');
+// JavaScript for Audio app
+console.log('Audio app initialized');
 
-// Example function for future read/write interactions
+// Example function for future Audio interactions
 function initReadWriteExercises() {
-    // This would be populated with actual read/write quiz code
-    console.log('Ready for read/write exercises');
+    // This would be populated with actual audio quiz code
+    console.log('Ready for audio exercises');
 }
 
-document.addEventListener('DOMContentLoaded', initReadWriteExercises);
+document.addEventListener('DOMContentLoaded', initAudioExercises);
