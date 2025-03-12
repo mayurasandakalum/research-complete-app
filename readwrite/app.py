@@ -140,9 +140,9 @@ def is_similar(target, source):
     return similarity
 
 # Route for rendering the main page
-@app.route("/")
-def index():
-    return render_template("Login.html")
+# @app.route("/")
+# def index():
+#     return render_template("Login.html")
 
 @app.route("/logout")
 def logout():
@@ -173,7 +173,7 @@ def api_info():
         'status': 'running'
     })
 
-@app.route("/home")
+@app.route("/")
 def home():
     global username
     return render_template("Home.html", name=username)
