@@ -45,21 +45,28 @@
             margin:20px;
         }
 
-        . .lesson-level-container {
-            font-size: 15px;
+        .lesson-level-container {
+            font-size: 16px;
             font-weight: 100;
-            color: #2b3172;
+            color:rgb(91, 6, 85);
             padding-bottom: 5px;
-            border-bottom: 2px solid #ddd;
+    
         }
 
         .question-area {
-            margin-top: 20px;
-            font-size: 20px;
+            margin-top: 10px;
+            font-size: 22px;
             font-weight: bold;
             color: #333;
-            padding-bottom: 20px;
+            padding: 50px;
+            border-radius: 10px; /* Rounded corners for a smoother look */
+            border: 2px solid rgb(139, 106, 133); /* Green border for a clean look */
+            background:rgb(247, 245, 247); /* Light background to make the text stand out */
+            box-shadow: 0 30px 30px rgba(6, 6, 6, 0.1); /* Soft shadow for depth */
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease; /* Smooth transitions */
+            margin-bottom:30px;
         }
+        
 
         /* Drawing Canvas */
         .canvas-container {
@@ -100,8 +107,8 @@
         
         /* --- Button Colors --- */
         .clear-btn {
-            border-color:rgb(236, 75, 91);
-            background-color:rgb(249, 44, 68);
+            border: 2px solid rgb(83, 1, 11);
+            background-color:rgb(194, 22, 36);
             color: white;
         }
         
@@ -111,23 +118,23 @@
         }
         
         .next-btn {
-            background-color:rgb(13, 167, 49);
+            background-color:rgb(16, 154, 48);
             color: white;
         }
         
         /* --- Hover Effects --- */
         .clear-btn:hover {
-            background-color:rgb(250, 72, 90);
+            background-color:rgb(215, 83, 96);
             border-color:rgb(236, 75, 91);
         }
         
         .submit-btn:hover {
-            background-color: #0056b3;
-            border-color:rgb(14, 91, 174);
+            background-color:rgb(54, 116, 182);
+            border-color:rgb(118, 161, 208);
         }
         
         .next-btn:hover {
-            background-color:rgb(29, 209, 68);
+            background-color:rgb(27, 170, 58);
             border-color:rgb(34, 189, 70);
         }
         
@@ -168,18 +175,14 @@
         /* Navbar */
         .navbar {
             display: flex;
-            align-items: center;
             justify-content: space-between;
             width: 100%;
-            padding: 15px 30px;
+            padding: 15px 20px;
             background-color: transparent;
             color: #fff;
         }
 
-        .logo img {
-            height: 40px;
-        }
-
+       
         .logout-btn {
             color: #fff;
             background-color: #ff3b30;
@@ -195,24 +198,72 @@
             font-weight: bold;
             font-family: 'Lucida Sans', sans-serif;
             color: #333;
+            align-items: center;
+            left-margin: 
         }
 
         .radio-group {
             display: flex;
             justify-content: center;
+            gap: 15px; /* Adds spacing between options */
             margin: 15px 0;
         }
         
         .radio-group label {
-            margin: 0 10px;
-            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px; /* Spacing between radio button and text */
+            font-size: 18px;
+            width: 100px;
             cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 8px;
+            background-color:rgb(238, 233, 237); /* Light background */
+            border: 2px solid #ddd; /* Subtle border */
+            transition: all 0.3s ease;
         }
+        
+        .radio-group input[type="radio"] {
+            appearance: none;
+            width: 20px;
+            height: 18px;
+            border: 2px solid rgb(128, 1, 90); /* Green border */
+            border-radius: 50%;
+            display: inline-block;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+        }
+        
+        .radio-group input[type="radio"]:checked {
+            background-color:rgb(78, 27, 76);
+            border-color:rgb(85, 6, 48);
+        }
+        
+        .radio-group input[type="radio"]:checked::before {
+            content: "";
+            width: 10px;
+            height: 10px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .radio-group label:hover {
+            background-color:rgb(227, 223, 227); /* Light green on hover */
+            border-color:rgb(202, 185, 200);
+        }
+        
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
-    <!-- Navbar -->
+     
     <nav class="navbar">
+        <!-- Navbar
         <div class="logo">
             <a href="/home">
                 <img
@@ -221,7 +272,7 @@
                     style="width:150px;height:150px;border-radius: 50%;"
                 />
             </a>
-        </div>
+        </div>-->
         <div class="title">Read/Write Learning</div>
         <a href="logout.html" class="logout-btn">Logout</a>
     </nav>
@@ -255,12 +306,17 @@
                 <button id="submitBtn" class="submit-btn">Submit Answer</button>
                 <button id="next" class="next-btn">Next</button>
             </div>
+
+            
         </div>
 
                     <!-- Drawing Area -->
                     <div class="canvas-container">
                         <canvas id="answerCanvas"></canvas>
                     </div>
+
+    
+
     </div>
 
     <!-- Footer -->
@@ -275,117 +331,142 @@
     <script>
         const canvas = document.getElementById('answerCanvas');
         let signaturePad;
-
-        // Function to handle canvas resizing properly
+    
         function resizeCanvas() {
-          const ratio = 1
-          
-          // Scale the canvas so the drawing coordinates
-          // match the visible size in the browser
-          canvas.width = canvas.offsetWidth * ratio;
-          canvas.height = canvas.offsetHeight * ratio;
-          canvas.getContext('2d').scale(ratio, ratio);
-
-          // Clear and re-init signature pad if needed
-          if (signaturePad) {
-            signaturePad.clear();
-          }
+            const ratio = 1;
+            canvas.width = canvas.offsetWidth * ratio;
+            canvas.height = canvas.offsetHeight * ratio;
+            canvas.getContext('2d').scale(ratio, ratio);
+            
+            if (signaturePad) {
+                signaturePad.clear();
+            }
         }
-
-        // Initialize SignaturePad once the DOM is ready
+    
         document.addEventListener('DOMContentLoaded', () => {
-            // Resize the canvas to match container on load
             resizeCanvas();
-
+    
             signaturePad = new SignaturePad(canvas, {
                 minWidth: 1,
                 maxWidth: 2.5,
-                backgroundColor: "rgb(255, 255, 255)", // Ensures a white background
+                backgroundColor: "rgb(255, 255, 255)",
                 penColor: "rgb(0, 0, 0)",
             });
-
-            // If the window is resized, fix the canvas size again
+    
             window.addEventListener('resize', resizeCanvas);
-
+    
             function getSelectedInputType() {
                 return document.querySelector('input[name="inputType"]:checked').value === "number";
             }
-
+    
             // Clear button
             document.getElementById('clearBtn').addEventListener('click', () => {
                 signaturePad.clear();
             });
-
-            // Submit button
+    
+            // Submit button with improved pop-up
             document.getElementById('submitBtn').addEventListener('click', () => {
                 if (signaturePad.isEmpty()) {
-                    alert("Please draw something first.");
-                    return;
-                  }
-                  // Get base64 image data (PNG format)
-                  const dataURL = signaturePad.toDataURL("image/png");
-                    fetch("/submit_write", {
-                      method: "POST",
-                      headers: {
-                        "Content-Type": "application/json",
-                      },
-                      body: JSON.stringify({ image: dataURL,number:getSelectedInputType() }),
-                    }).then((response) => response.json())
-                    .then((data) => {
-                      if (data.success) {
-                        if(data.correct){
-                            alert("ඔබගේ පිළිතුර නිවැරදියි.")
-                        }else{
-                            let msg= "ඔබගේ පිළිතුර වැරදියි. නිවැරදි පිළිතුර * "+data.answer+" *"
-                            alert(msg)
-                        }          
-                      } else {
-                        alert(data.message || 'No more questions available.');
-                      }
-                    })
-                    .catch((error) => {
-                      console.error('Error fetching the next question:', error);
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'අවවාදයයි!',
+                        text: 'කරුණාකර පළමුව ප්‍රතිචාරයක් ලබාදෙන්න.',
+                        confirmButtonText: 'හරි',
                     });
+                    return;
+                }
+    
+                const dataURL = signaturePad.toDataURL("image/png");
+    
+                fetch("/submit_write", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ image: dataURL, number: getSelectedInputType() }),
+                })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.success) {
+                        if (data.correct) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'නිවැරදියි!',
+                                text: 'ඔබගේ පිළිතුර නිවැරදියි.',
+                                confirmButtonText: 'හරි',
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'වැරදියි!',
+                                html: `ඔබගේ පිළිතුර වැරදියි.<br> නිවැරදි පිළිතුර: <b>${data.answer}</b>`,
+                                confirmButtonText: 'නැවත උත්සාහ කරන්න',
+                            });
+                        }
+                    } else {
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'දෝශයකි!',
+                            text: data.message || 'ප්‍රශ්න අවසානයට පැමිණියෙමු.',
+                            confirmButtonText: 'හරි',
+                        });
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'දෝශයකි!',
+                        text: 'දෝශයක් සිදු විය. කරුණාකර නැවත උත්සාහ කරන්න.',
+                        confirmButtonText: 'හරි',
+                    });
+                });
             });
-
-            // Next button
+    
+            // Next button with improved pop-up
             document.getElementById('next').addEventListener('click', () => {
                 fetch('/next_question_rw')
                     .then(response => response.json())
                     .then((data) => {
                         if (data.success) {
-                          const questionData = data.question; 
-                          const questionArea = document.querySelector('.question-area span');
-                          questionArea.textContent = questionData.Question;
-                          questionArea.dataset.questionId = questionData.ID;
-            
-                          // Update Lesson and Level
-                          document.getElementById('lesson').textContent = questionData.Lesson;
-                          document.getElementById('level').textContent = questionData.Level;
-            
-                          // Update image if available
-                          const imageArea = document.querySelector('.image-area');
-                          if (data.Image) {
-                            imageArea.innerHTML = `<img src="${data.Image}" alt="Related Image" />`;
-                          } else {
-                            imageArea.innerHTML = '';
-                          }
-                            // Clear the canvas for the next question
+                            const questionData = data.question;
+                            document.querySelector('.question-area span').textContent = questionData.Question;
+                            document.getElementById('lesson').textContent = questionData.Lesson;
+                            document.getElementById('level').textContent = questionData.Level;
+    
+                            const imageArea = document.querySelector('.image-area');
+                            if (data.Image) {
+                                imageArea.innerHTML = `<img src="${data.Image}" alt="Related Image" />`;
+                            } else {
+                                imageArea.innerHTML = '';
+                            }
+    
                             signaturePad.clear();
                         } else {
-                            if(!data.question){
+                            if (!data.question) {
                                 window.location.href = "{{ url_for('write_guide') }}";
-                            }else{
-                                alert(data.message || 'Error fetching the next question.');
-                            }                
-                            
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'දෝශයකි!',
+                                    text: data.message || 'ප්‍රශ්නය ලබා ගැනීමට දෝශයකි.',
+                                    confirmButtonText: 'හරි',
+                                });
+                            }
                         }
                     })
                     .catch(error => {
-                        console.error('Error fetching the next question:');
+                        console.error('Error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'දෝශයකි!',
+                            text: 'ප්‍රශ්නය ලබා ගැනීමට නොහැක. නැවත උත්සාහ කරන්න.',
+                            confirmButtonText: 'හරි',
+                        });
                     });
             });
         });
     </script>
+    
 </body>
 </html>

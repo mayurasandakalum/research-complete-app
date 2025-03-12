@@ -336,7 +336,7 @@ def write_guide():
             print(counts_dict2)
             counts_dict["New "+"lesson"+str(wr_lesson)]=counts_dict2["lesson0"+str(wr_lesson)]
             message="You Complete your Journey"
-        images = ["img2.png"]
+        images = ["completedHappy.jpg"]
         return render_template(
             "WriteGuide.html",
             results=counts_dict,
