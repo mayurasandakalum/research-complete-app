@@ -295,7 +295,7 @@ def init_routes(app):
         session.pop('email', None)
         session.pop('user_type', None)
         flash('You have been logged out')
-        return redirect(url_for('index'))
+        return redirect(url_for('login'))
 
     @app.route('/kinesthetic')
     def kinesthetic_redirect():
