@@ -1,5 +1,5 @@
 """
-Read/Write app - can run independently or as part of the main app.
+Audio app - can run independently or as part of the main app.
 """
 
 from flask import Flask, render_template, jsonify
@@ -15,15 +15,15 @@ app.config['SECRET_KEY'] = config.SECRET_KEY
 
 @app.route('/')
 def index():
-    return render_template('index.html', title='Read/Write App')
+    return render_template('index.html', title='Audio App')
 
 @app.route('/api/info')
 def api_info():
     return jsonify({
-        'app': 'Read/Write App',
+        'app': 'Audio App',
         'status': 'running'
     })
 
 if __name__ == '__main__':
     # If run directly, use the port from config
-    app.run(debug=True, port=config.READWRITE_APP_PORT)
+    app.run(debug=True, port=config.AUDIO_APP_PORT)
