@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Math Learning Hub - Sinhala Mathematics Quiz App</title>
+    <title>ශ්‍රේණි 4 සහ 5 සඳහා සිංහල ගණිත ප්‍රශ්නෝත්තර | Sinhala Maths Quiz App</title>
     <link rel="stylesheet" href="../static/css/home.css">
 </head>
 
@@ -26,33 +26,37 @@
                 <div class="logo">MATH LEARNING HUB</div>
                 <nav>
                     <a href="#" class="active">Home</a>
-                    <a href="#quiz">Quiz App</a>
+                    <a href="#features">Features</a>
                     <a href="#learning-styles">Learning Styles</a>
-                    <a href="#contact">Contact</a>
+                    <a href="#contact">Contact Us</a>
                 </nav>
-                <div class="search-box">
-                    <input type="text" placeholder="Search...">
-                    <button>🔍</button>
-                </div>
             </header>
 
             <div class="main">
                 <div class="text-content">
-                    <h1>SINHALA MATHEMATICS QUIZ</h1>
-                    <p>Interactive mathematics learning platform for Grade 4 and Grade 5 students in Sinhala medium.
-                        Enhance your child's mathematical skills through personalized learning experiences.</p>
-                    <a href="#quiz" class="cta-button">START LEARNING</a>
-
-                    <div class="social-media">
-                        <a href="#" class="social-icon">𝕏</a>
-                        <a href="#" class="social-icon">f</a>
-                        <a href="#" class="social-icon">📷</a>
+                    <h1>ශ්‍රේණි 4 සහ 5 සඳහා සිංහල ගණිත ප්‍රශ්නෝත්තර</h1>
+                    <h2>Sinhala Maths Quiz for Grades 4 & 5</h2>
+                    <p>ඔබේ දරුවාගේ ගණිත කුසලතා වර්ධනය කිරීමට සහය වන අන්තර්ක්‍රියාකාරී ඉගෙනුම් වේදිකාව.</p>
+                    <p>Interactive learning platform to enhance your child's mathematical skills in Sinhala medium.</p>
+                    <div class="cta-buttons">
+                        <a href="#quiz" class="cta-button primary-cta">අත්හදා බලන්න</a>
                     </div>
                 </div>
 
                 <div class="visual-content">
                     <div class="circle-bg"></div>
-                    <img src="/api/placeholder/400/400" alt="Student with mask" class="student-image">
+                    <img src="../static/images/math-kid-cartoon.png" alt="Child solving math problems"
+                        class="student-image">
+
+                    <!-- Mini Quiz Demo -->
+                    <div class="mini-quiz">
+                        <div class="quiz-question">5 + 3 = ?</div>
+                        <div class="quiz-options">
+                            <button class="quiz-option">7</button>
+                            <button class="quiz-option correct">8</button>
+                            <button class="quiz-option">9</button>
+                        </div>
+                    </div>
 
                     <!-- Decorative elements -->
                     <div class="decorative-elements">
@@ -69,48 +73,55 @@
                         <div class="deco-item deco-cat">😺</div>
                         <div class="deco-item deco-plus">+</div>
                         <div class="deco-item deco-paper-plane">✈️</div>
+                        <div class="deco-item deco-calculator">🖩</div>
+                        <div class="deco-item deco-ruler">📏</div>
+                        <div class="deco-item deco-equation">2+3=5</div>
+                        <div class="deco-item deco-fraction">½</div>
+                        <div class="deco-item deco-multiply">×</div>
+                        <div class="deco-item deco-divide">÷</div>
+                        <div class="deco-item deco-equals">=</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Quiz App Section -->
-            <section id="quiz" class="info-section">
-                <h2>Mathematics Quiz App for Grade 4 & 5</h2>
-                <div class="section-content">
-                    <div class="info-text">
-                        <p>Our Sinhala medium mathematics quiz application is specially designed for primary school
-                            students in grades 4 and 5. The app covers all essential mathematical concepts aligned with
-                            the Sri Lankan curriculum.</p>
-                        <h3>Key Features:</h3>
-                        <ul>
-                            <li>Interactive quizzes in Sinhala language</li>
-                            <li>Step-by-step problem solving</li>
-                            <li>Adaptive difficulty based on performance</li>
-                            <li>Immediate feedback and explanations</li>
-                            <li>Progress tracking for parents and teachers</li>
-                            <li>Fun rewards and achievements system</li>
-                            <li>Supports all learning styles</li>
-                        </ul>
-                        <p>The app covers topics including basic arithmetic, fractions, decimals, measurements,
-                            geometry, and data representation.</p>
+            <!-- Key Features Section -->
+            <section id="features" class="info-section">
+                <h2>විශේෂාංග | Key Features</h2>
+                <div class="features-container">
+                    <div class="feature-card">
+                        <div class="feature-icon">🎮</div>
+                        <h3>Interactive Quizzes</h3>
+                        <p>Fun and engaging math questions with immediate feedback</p>
                     </div>
-                    <div class="info-image">
-                        <div class="app-preview">
-                            <div class="app-screen">Quiz Screen</div>
-                        </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📚</div>
+                        <h3>Curriculum-Aligned</h3>
+                        <p>Matches the Sri Lankan education syllabus for grades 4 & 5</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🏆</div>
+                        <h3>Rewards & Points</h3>
+                        <p>Earn badges and points as you master math concepts</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <h3>Progress Tracking</h3>
+                        <p>Monitor improvement with detailed performance reports</p>
                     </div>
                 </div>
             </section>
 
             <!-- Learning Styles Section -->
             <section id="learning-styles" class="info-section">
-                <h2>Personalized Learning Styles</h2>
+                <h2>ඉගෙනුම් විලාසයන් | Learning Styles</h2>
+                <p class="section-intro">Our app adapts to different learning styles, helping every child succeed in
+                    mathematics</p>
                 <div class="learning-styles-container">
                     <div class="style-card">
                         <div class="style-icon">👁️</div>
                         <h3>Visual Learners</h3>
                         <p>Learn best through seeing. Our app provides colorful diagrams, pictures, charts, and
-                            animations to help visual learners grasp mathematical concepts quickly.</p>
+                            animations.</p>
                         <ul>
                             <li>Interactive graphs</li>
                             <li>Color-coded solutions</li>
@@ -121,8 +132,7 @@
                     <div class="style-card">
                         <div class="style-icon">👂</div>
                         <h3>Auditory Learners</h3>
-                        <p>Learn best through listening. The app includes clear audio explanations in Sinhala to help
-                            students understand concepts through verbal instruction.</p>
+                        <p>Learn best through listening. The app includes clear audio explanations in Sinhala.</p>
                         <ul>
                             <li>Spoken instructions</li>
                             <li>Audio explanations</li>
@@ -133,8 +143,7 @@
                     <div class="style-card">
                         <div class="style-icon">📝</div>
                         <h3>Read/Write Learners</h3>
-                        <p>Learn best through reading and writing. Our app provides text-based explanations and
-                            opportunities to practice writing solutions.</p>
+                        <p>Learn best through reading and writing. Our app provides text-based explanations.</p>
                         <ul>
                             <li>Written explanations</li>
                             <li>Note-taking features</li>
@@ -145,8 +154,7 @@
                     <div class="style-card">
                         <div class="style-icon">👐</div>
                         <h3>Kinesthetic Learners</h3>
-                        <p>Learn best through physical activities. The app includes interactive exercises that require
-                            movement and manipulation of objects.</p>
+                        <p>Learn best through physical activities. The app includes interactive exercises.</p>
                         <ul>
                             <li>Drag-and-drop activities</li>
                             <li>Interactive problem solving</li>
@@ -154,11 +162,34 @@
                         </ul>
                     </div>
                 </div>
-                <div class="learning-approach">
-                    <h3>Our Approach</h3>
-                    <p>Every child learns differently. Our app identifies each student's preferred learning style and
-                        adapts content delivery accordingly, ensuring maximum engagement and comprehension of
-                        mathematical concepts.</p>
+            </section>
+
+            <!-- Quiz App Demo Section -->
+            <section id="quiz" class="info-section">
+                <h2>ගණිත ප්‍රශ්නෝත්තර යෙදුම | Math Quiz App</h2>
+                <div class="section-content">
+                    <div class="info-text">
+                        <p>Our Sinhala medium mathematics quiz application is specially designed for primary school
+                            students in grades 4 and 5, covering all essential mathematical concepts.</p>
+                        <h3>App Highlights:</h3>
+                        <ul class="feature-list">
+                            <li><span class="feature-check">✅</span> Interactive quizzes in Sinhala language</li>
+                            <li><span class="feature-check">✅</span> Step-by-step problem solving</li>
+                            <li><span class="feature-check">✅</span> Adaptive difficulty based on performance</li>
+                            <li><span class="feature-check">✅</span> Immediate feedback and explanations</li>
+                            <li><span class="feature-check">✅</span> Progress tracking for parents and teachers</li>
+                        </ul>
+                        <p>The app covers topics including basic arithmetic, fractions, decimals, measurements,
+                            geometry, and data representation.</p>
+                    </div>
+                    <div class="info-image">
+                        <div class="app-preview">
+                            <video autoplay loop muted class="app-demo">
+                                <source src="../static/videos/app-demo.mp4" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -184,10 +215,50 @@
             </section>
 
             <footer>
-                <p>&copy; 2023 Math Learning Hub - Sinhala Mathematics Quiz App</p>
+                <div class="footer-content">
+                    <div class="footer-logo">MATH LEARNING HUB</div>
+                    <div class="footer-links">
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Terms of Use</a>
+                        <a href="#">Help Center</a>
+                    </div>
+                    <div class="social-media footer-social">
+                        <a href="#" class="social-icon">𝕏</a>
+                        <a href="#" class="social-icon">f</a>
+                        <a href="#" class="social-icon">📷</a>
+                    </div>
+                </div>
+                <p class="copyright">&copy; 2023 Math Learning Hub - ශ්‍රේණි 4 සහ 5 සඳහා සිංහල ගණිත ප්‍රශ්නෝත්තර</p>
             </footer>
         </div>
     </div>
+
+    <script>
+        // Simple mini-quiz interaction
+        document.addEventListener('DOMContentLoaded', function () {
+            const quizOptions = document.querySelectorAll('.quiz-option');
+
+            quizOptions.forEach(option => {
+                option.addEventListener('click', function () {
+                    // Reset all options
+                    quizOptions.forEach(opt => {
+                        opt.classList.remove('selected');
+                        opt.classList.remove('wrong');
+                    });
+
+                    // Mark selected option
+                    this.classList.add('selected');
+
+                    // Check if correct
+                    if (this.classList.contains('correct')) {
+                        this.classList.add('correct-selected');
+                    } else {
+                        this.classList.add('wrong');
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 
 </html>
