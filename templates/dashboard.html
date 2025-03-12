@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Teacher Dashboard - Math Learning Hub</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <!-- Add datepicker styles -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
+    <!-- Meta tag for responsive design -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+    <!-- Background grid -->
+    <div class="grid-bg"></div>
+
+    <!-- Decorative elements -->
+    <div class="sketch-line top-left-sketch"></div>
+    <div class="sketch-line bottom-right-sketch"></div>
+    <div class="deco-item deco-plus">+</div>
+    <div class="deco-item deco-multiply">×</div>
+    <div class="deco-item deco-equals">=</div>
+    <div class="deco-item deco-divide">÷</div>
+    <div class="deco-item deco-number-5">5</div>
+
+    <div class="container">
+        <div class="header">
+            <h1>Teacher Dashboard</h1>
+            <div>
+                <a href="{{ url_for('index') }}" class="auth-button">Home</a>
+                <a href="{{ url_for('logout') }}" class="auth-button" style="background-color: #ef4444;">Logout</a>
+            </div>
+        </div>
+
+        <nav class="dashboard-nav">
+            <ul>
+                <li><a href="#overview" class="nav-link active">Overview</a></li>
+                <li><a href="#apps" class="nav-link">Learning Apps</a></li>
+                <li><a href="#students" class="nav-link">My Students</a></li>
+                <li><a href="/system_overview" class="nav-link">System Overview</a></li>
+            </ul>
+        </nav>
+
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        {% for message in messages %}
+        <div class="flash-message">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <section id="overview" class="dashboard-section active">
+            <div class="profile-info">
+                <h2>Welcome, {{ teacher.name if teacher and teacher.name else 'Teacher' }}!</h2>
+                <p><strong>Email:</strong> {{ teacher.email }}</p>
+                <p><strong>School:</strong> {{ teacher.school }}</p>
+            </div>
+        </section>
+
+        <section id="apps" class="dashboard-section">
+            <h2>Manage Learning Applications</h2>
+
+            <div class="app-grid">
+                <div class="app-card">
+                    <h3>Kinesthetic Learning App</h3>
+                    <p>Tools and activities for kinesthetic learners who learn best through physical activities.</p>
+                    <a href="{{ kinesthetic_url }}" class="app-link">Open App</a>
+                </div>
+
+                <div class="app-card">
+                    <h3>Read/Write Learning App</h3>
+                    <p>Resources for students who prefer to learn through reading and writing exercises.</p>
+                    <a href="{{ readwrite_url }}" class="app-link">Open App</a>
+                </div>
+
+                <div class="app-card">
+                    <h3>Visual Learning App</h3>
+                    <p>Visual tools and resources for students who learn best through images and diagrams.</p>
+                    <a href="{{ visual_url }}" class="app-link">Open App</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="students" class="dashboard-section">
+            <h2>Manage Students</h2>
+
+            <!-- Replace form with button to open modal -->
+            <div class="student-actions">
+                <button id="openAddStudentModal" class="submit-btn">Add New Student</button>
+            </div>
+
+            <div class="student-list">
+                <h3>My Students</h3>
+                {% if students %}
+                <table class="student-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Gender</th>
+                            <th>Birthday</th>
+                            <th>Grade</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                        <tr>
+                            <td>{{ student.name }}</td>
+                            <td>{{ student.email }}</td>
+                            <td>{{ student.gender|capitalize if student.gender else 'N/A' }}</td>
+                            <td>{{ student.birthday if student.birthday else 'N/A' }}</td>
+                            <td>{{ student.grade|replace('grade', 'Grade ')|capitalize if student.grade else 'N/A' }}
+                            </td>
+                            <td>
+                                <button class="action-btn edit"
+                                    onclick="openEditModal('{{ student.id }}', '{{ student.name }}', '{{ student.email }}', '{{ student.gender }}', '{{ student.birthday }}', '{{ student.grade }}')">Edit</button>
+                                <a href="{{ url_for('delete_student', student_id=student.id) }}"
+                                    class="action-btn delete"
+                                    onclick="return confirm('Are you sure you want to delete this student?')">Delete</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p>You have not added any students yet.</p>
+                {% endif %}
+            </div>
+        </section>
+    </div>
+
+    <!-- Add Student Modal -->
+    <div id="addStudentModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="closeAddModal">&times;</span>
+            <h2>Add New Student</h2>
+            <form action="{{ url_for('add_student') }}" method="post">
+                <div class="form-group">
+                    <label for="student_name">Student Name:</label>
+                    <input type="text" id="student_name" name="student_name" required>
+                </div>
+                <div class="form-group">
+                    <label for="student_email">Email:</label>
+                    <input type="email" id="student_email" name="student_email" required>
+                </div>
+                <div class="form-group">
+                    <label for="student_password">Password:</label>
+                    <input type="password" id="student_password" name="student_password" required>
+                </div>
+                <div class="form-group">
+                    <label for="student_gender">Gender:</label>
+                    <select id="student_gender" name="student_gender" required>
+                        <option value="">Select gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="student_birthday">Birthday:</label>
+                    <input type="text" id="student_birthday" name="student_birthday" class="datepicker" required>
+                </div>
+                <div class="form-group">
+                    <label for="student_grade">Grade:</label>
+                    <select id="student_grade" name="student_grade" required>
+                        <option value="">Select grade</option>
+                        <option value="grade4">Grade 4</option>
+                        <option value="grade5">Grade 5</option>
+                    </select>
+                </div>
+                <button type="submit" class="submit-btn">Add Student</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Student Modal -->
+    <div id="editStudentModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2>Edit Student</h2>
+            <form id="editStudentForm">
+                <input type="hidden" id="edit_student_id" name="student_id">
+                <div class="form-group">
+                    <label for="edit_student_name">Student Name:</label>
+                    <input type="text" id="edit_student_name" name="student_name" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit_student_email">Email:</label>
+                    <input type="email" id="edit_student_email" name="student_email" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit_student_gender">Gender:</label>
+                    <select id="edit_student_gender" name="student_gender">
+                        <option value="">Select gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit_student_birthday">Birthday:</label>
+                    <input type="text" id="edit_student_birthday" name="student_birthday" class="datepicker">
+                </div>
+                <div class="form-group">
+                    <label for="edit_student_grade">Grade:</label>
+                    <select id="edit_student_grade" name="student_grade">
+                        <option value="">Select grade</option>
+                        <option value="grade4">Grade 4</option>
+                        <option value="grade5">Grade 5</option>
+                    </select>
+                </div>
+                <button type="submit" class="submit-btn">Update Student</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add jQuery and jQuery UI for datepicker -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+
+</html>
