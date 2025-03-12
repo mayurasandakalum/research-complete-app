@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>System Overview - Learning Apps Hub</title>
+    <title>System Overview - Math Learning Hub</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/system_overview.css') }}">
     <!-- Include jQuery if needed by datepicker -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -13,25 +13,38 @@
 </head>
 
 <body>
+    <!-- Background grid -->
+    <div class="grid-bg"></div>
+
+    <!-- Decorative elements -->
+    <div class="sketch-line top-left-sketch"></div>
+    <div class="sketch-line bottom-right-sketch"></div>
+    <div class="deco-item deco-plus">+</div>
+    <div class="deco-item deco-multiply">×</div>
+    <div class="deco-item deco-equals">=</div>
+    <div class="deco-item deco-divide">÷</div>
+    <div class="deco-item deco-number-5">5</div>
+    <div class="deco-item deco-star-1">★</div>
+
     <div class="container">
         <div class="header">
             <h1>System Overview</h1>
             <div>
                 {% if user_type == 'teacher' %}
-                <a href="/dashboard" class="auth-button" style="background-color: #3498db;">Dashboard</a>
+                <a href="/dashboard" class="auth-button">Dashboard</a>
                 {% elif user_type == 'student' %}
-                <a href="/student_dashboard" class="auth-button" style="background-color: #3498db;">Dashboard</a>
+                <a href="/student_dashboard" class="auth-button">Dashboard</a>
                 {% else %}
                 <!-- Show Home link if user is not logged in -->
-                <a href="/" class="auth-button" style="background-color: #3498db;">Home</a>
+                <a href="/" class="auth-button">Home</a>
                 {% endif %}
 
                 {% if user_type %}
                 <!-- Only show logout if user is logged in -->
-                <a href="/logout" class="auth-button">Logout</a>
+                <a href="/logout" class="auth-button" style="background-color: #ef4444;">Logout</a>
                 {% else %}
                 <!-- Show login link if user is not logged in -->
-                <a href="/login" class="auth-button" style="background-color: #27ae60;">Login</a>
+                <a href="/login" class="auth-button" style="background-color: #10b981;">Login</a>
                 {% endif %}
             </div>
         </div>
