@@ -11,28 +11,14 @@
     <style>
         body {
             font-family: 'Noto Sans Sinhala', sans-serif;
-            background-color: #f8f9fa;
+            
         }
-        .navbar {
-            background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%) !important;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
+        .container-main {
+            text-align: center;
+            padding: 50px;
+            margin-top: 30px;
         }
-        .navbar .logo img {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-        }
-        .logout-btn {
-            background-color: #dc3545;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            text-decoration: none;
-            font-weight: bold;
-        }
+        
         .dashboard-container {
             text-align: center;
             padding: 50px;
@@ -50,78 +36,28 @@
             font-size: 18px;
             font-weight: bold;
             color: white;
+            width:250px;
         }
-        .auditory { background-color: #17a2b8; }
-        .reading-writing { background-color: #28a745; }
-        .visual { background-color: #ffc107; }
+        
+        
 
-        /* Footer */
-        .footer {
-            width: 100%;
-            background-color: #333;
-            color: #fff;
-            padding: 20px 0;
-            display: flex;
-            justify-content: center;
-            margin-top: 40px;
-        }
-        .footer-content {
-            width: 90%;
-            max-width: 1000px;
-            text-align: center;
-        }
-        .footer-logo img {
-            height: 50px;
-            margin-bottom: 10px;
-        }
-        .social-media a {
-            color: #fff;
-            margin: 0 10px;
-            font-size: 24px;
-            transition: color 0.3s;
-        }
-        .social-media a:hover {
-            color: #00acee;
-        }
-        .contact-info {
-            font-size: 14px;
-            font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
-            margin-top: 10px;
-        }
+        
     </style>
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar">
-        <div class="logo">
-            <a href="/home"><img src="/static/Images/logo.png" alt="Company Logo"></a>
-        </div>
-        <a href="/logout" class="logout-btn">Logout</a>
-    </nav>
-
+    
+    <div class="container-main">
+        <h1>ඔබේ කුසලතා පරීක්ෂාකර දැනුම වර්ධනය කරගමු.</h1>
+    </div>
     <!-- Dashboard Content -->
     <div class="dashboard-container">
-        <h1>Let's Go To The Quize</h1>
+        
+        <h1>අපි දැන් ප්‍රශ්නාවලිය ආරම්භ කරමු.</h1>
         <div class="learning-methods">            
             <a href="reading_writing_learning" class="learning-btn reading-writing">Reading & Writing Learning</a>
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-logo">
-                <img src="/static/Images/logo.png" alt="Company Logo">
-            </div>
-            <div class="social-media">
-                <a href="#" class="fa fa-facebook"></a>
-                <a href="#" class="fa fa-twitter"></a>
-                <a href="#" class="fa fa-instagram"></a>
-            </div>
-            <div class="contact-info">
-                <p>&copy; 2025 Learn-Pal. All Rights Reserved.</p>
-            </div>
-        </div>
-    </footer>
+    
 </body>
 </html>
