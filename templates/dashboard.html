@@ -2,19 +2,33 @@
 <html>
 
 <head>
-    <title>Teacher Dashboard - Learning Apps Hub</title>
+    <title>Teacher Dashboard - Math Learning Hub</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
     <!-- Add datepicker styles -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
+    <!-- Meta tag for responsive design -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 
 <body>
+    <!-- Background grid -->
+    <div class="grid-bg"></div>
+
+    <!-- Decorative elements -->
+    <div class="sketch-line top-left-sketch"></div>
+    <div class="sketch-line bottom-right-sketch"></div>
+    <div class="deco-item deco-plus">+</div>
+    <div class="deco-item deco-multiply">×</div>
+    <div class="deco-item deco-equals">=</div>
+    <div class="deco-item deco-divide">÷</div>
+    <div class="deco-item deco-number-5">5</div>
+
     <div class="container">
         <div class="header">
             <h1>Teacher Dashboard</h1>
             <div>
-                <a href="{{ url_for('index') }}" class="auth-button" style="background-color: #3498db;">Home</a>
-                <a href="{{ url_for('logout') }}" class="auth-button">Logout</a>
+                <a href="{{ url_for('index') }}" class="auth-button">Home</a>
+                <a href="{{ url_for('logout') }}" class="auth-button" style="background-color: #ef4444;">Logout</a>
             </div>
         </div>
 
