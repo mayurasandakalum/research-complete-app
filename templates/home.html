@@ -39,7 +39,8 @@
                     <p>ඔබේ දරුවාගේ ගණිත කුසලතා වර්ධනය කිරීමට සහය වන අන්තර්ක්‍රියාකාරී ඉගෙනුම් වේදිකාව.</p>
                     <p>Interactive learning platform to enhance your child's mathematical skills in Sinhala medium.</p>
                     <div class="cta-buttons">
-                        <a href="#quiz" class="cta-button primary-cta">අත්හදා බලන්න</a>
+                        <a href="javascript:void(0);" onclick="handleTryItClick()" class="cta-button primary-cta">අත්හදා
+                            බලන්න</a>
                     </div>
                 </div>
 
@@ -234,6 +235,30 @@
     </div>
 
     <script>
+        // Function to handle the Try It button click based on user role
+        function handleTryItClick() {
+            // Check if user is logged in and their role
+            const userType = "{{ user_type }}";
+            const userId = "{{ user_id }}";
+
+            if (userId) {
+                // User is logged in
+                if (userType === "teacher") {
+                    // Redirect to teacher dashboard
+                    window.location.href = "{{ url_for('dashboard') }}";
+                } else if (userType === "student") {
+                    // Redirect to student dashboard
+                    window.location.href = "{{ url_for('student_dashboard') }}";
+                } else {
+                    // Unknown user type, redirect to login as fallback
+                    window.location.href = "{{ url_for('login') }}";
+                }
+            } else {
+                // User is not logged in, redirect to login page
+                window.location.href = "{{ url_for('login') }}";
+            }
+        }
+
         // Simple mini-quiz interaction
         document.addEventListener('DOMContentLoaded', function () {
             const quizOptions = document.querySelectorAll('.quiz-option');
@@ -258,6 +283,27 @@
                 });
             });
         });
+
+        // Fetch and display app status
+        function updateStatus() {
+            fetch('/api/status')
+                .then(response => response.json())
+                .then(data => {
+                    let statusHtml = '<ul>';
+                    for (const [app, status] of Object.entries(data)) {
+                        statusHtml += `<li>${app}: <span style="color: ${status === 'running' ? 'green' : 'red'}">${status}</span></li>`;
+                    }
+                    statusHtml += '</ul>';
+                    document.getElementById('status').innerHTML = statusHtml;
+                })
+                .catch(error => {
+                    document.getElementById('status').innerHTML = 'Error checking system status';
+                });
+        }
+
+        // Check status on page load and every 10 seconds
+        updateStatus();
+        setInterval(updateStatus, 10000);
     </script>
 </body>
 
