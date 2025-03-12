@@ -28,6 +28,7 @@ def init_routes(app):
                             kinesthetic_url=f"http://localhost:{config.KINESTHETIC_APP_PORT}",
                             readwrite_url=f"http://localhost:{config.READWRITE_APP_PORT}",
                             visual_url=f"http://localhost:{config.VISUAL_APP_PORT}",
+                            audio_url=f"http://localhost:{config.AUDIO_APP_PORT}",
                             user_id=user_id,
                             user_type=user_type)
 
@@ -142,7 +143,8 @@ def init_routes(app):
                             students=students,
                             kinesthetic_url=f"http://localhost:{config.KINESTHETIC_APP_PORT}",
                             readwrite_url=f"http://localhost:{config.READWRITE_APP_PORT}",
-                            visual_url=f"http://localhost:{config.VISUAL_APP_PORT}")
+                            visual_url=f"http://localhost:{config.VISUAL_APP_PORT}",
+                            audio_url=f"http://localhost:{config.AUDIO_APP_PORT}")
     
     @app.route('/student_dashboard')
     @login_required
@@ -171,7 +173,8 @@ def init_routes(app):
                             teacher=teacher_data,
                             kinesthetic_url=f"http://localhost:{config.KINESTHETIC_APP_PORT}",
                             readwrite_url=f"http://localhost:{config.READWRITE_APP_PORT}",
-                            visual_url=f"http://localhost:{config.VISUAL_APP_PORT}")
+                            visual_url=f"http://localhost:{config.VISUAL_APP_PORT}",
+                            audio_url=f"http://localhost:{config.AUDIO_APP_PORT}")
 
     @app.route('/add_student', methods=['POST'])
     @teacher_required
@@ -312,6 +315,11 @@ def init_routes(app):
         """Redirect to the visual app."""
         return redirect(f"http://localhost:{config.VISUAL_APP_PORT}")
 
+    @app.route('/audio')
+    def audio_redirect():
+        """Redirect to the audio app."""
+        return redirect(f"http://localhost:{config.AUDIO_APP_PORT}")
+
     @app.route('/api/status')
     def api_status():
         """API endpoint to check the status of all apps."""
@@ -319,7 +327,8 @@ def init_routes(app):
             'main': 'running',
             'kinesthetic': 'unknown',
             'readwrite': 'unknown',
-            'visual': 'unknown'
+            'visual': 'unknown',
+            'audio': 'unknown'
         }
         
         # Check kinesthetic app
@@ -345,6 +354,14 @@ def init_routes(app):
                 status['visual'] = 'running'
         except:
             status['visual'] = 'not running'
+            
+        # Check audio app
+        try:
+            response = requests.get(f"http://localhost:{config.AUDIO_APP_PORT}/api/info")
+            if response.status_code == 200:
+                status['audio'] = 'running'
+        except:
+            status['audio'] = 'not running'
         
         return jsonify(status)
     

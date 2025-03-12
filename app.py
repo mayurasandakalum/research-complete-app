@@ -77,11 +77,13 @@ if __name__ == '__main__':
     kinesthetic_process = launch_app('kinesthetic/app.py', config.KINESTHETIC_APP_PORT)
     readwrite_process = launch_app('readwrite/app.py', config.READWRITE_APP_PORT)
     visual_process = launch_app('visual/app.py', config.VISUAL_APP_PORT)
+    audio_process = launch_app('audio/app.py', config.AUDIO_APP_PORT)
     
     # Wait for the apps to be ready
     kinesthetic_url = f"http://localhost:{config.KINESTHETIC_APP_PORT}"
     readwrite_url = f"http://localhost:{config.READWRITE_APP_PORT}"
     visual_url = f"http://localhost:{config.VISUAL_APP_PORT}"
+    audio_url = f"http://localhost:{config.AUDIO_APP_PORT}"
     
     # Start a thread to open the browser when the apps are ready
     browser_thread = threading.Thread(target=open_browser)
