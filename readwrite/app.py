@@ -260,6 +260,7 @@ def home():
     global username
     return render_template("Home.html", name=username)
 
+#Fetches a random question from Firebase and displays it.
 @app.route("/reading_writing_learning")
 def reading_writing_learning():
     global WrQuestionID
@@ -277,7 +278,7 @@ def reading_writing_learning():
 
     return "No questions found.", 404
 
-
+#returns the next writing question
 @app.route("/next_question_rw", methods=["GET"])
 def next_question_rw():
     global WrQuestionID
@@ -285,12 +286,12 @@ def next_question_rw():
     global Wri_data
 
     qid = random_q_w(WrQuestionID, no_q)
-    question_doc = db.collection("write_questions").document(str(qid)).get()
+    question_doc = db.collection("write_questions").document(str(qid)).get()#retrieve the question from db
     if question_doc.exists:
         question_data = question_doc.to_dict()
         image = question_data.get("Image", None)
         if image:
-            image = image.replace("<", "").replace(">", "")
+            image = image.replace("<", "").replace(">", "")# If an image is associated with the question, it is cleaned of unwanted characters.
         Wri_data = question_data
         return jsonify(
             {
@@ -308,7 +309,8 @@ def next_question_rw():
             ),
             404,
         )
-
+        
+# how many characters match and checks if they meet the 75% threshold.
 def is_75_percent_match(str1: str, str2: str) -> bool:
     """
     Checks if at least 75% of the letters in one string match another string.
@@ -364,11 +366,13 @@ def submit_write():
     class_mapping_path = "readwrite/write_model/class_mapping.pkl"
     class_mapping_path2 = "readwrite/write_model/class_mapping2.pkl"
 
+    #The OCR model  reads the text from the image
     ans_txt = get_text(
         model_path, _file, class_mapping_path, class_mapping_path2, number, qid
     )
     user = session.get("user", "No user stored")
 
+    #The extracted answer is compared to the correct answer
     if ans_txt:
         ori_answer = Wri_data["Answer"]
         sim = is_similar(ori_answer, ans_txt)
@@ -382,7 +386,7 @@ def submit_write():
                 correct = True
                 Wr_results.append(Wri_data['Lesson'])
                      
-            db.collection('write_results').add({"name":user,"data":Wri_data})
+            db.collection('write_results').add({"name":user,"data":Wri_data}) #The correct answers are stored in db
            
         return jsonify({
             'success': True,
@@ -402,6 +406,8 @@ def write_guide():
     global wr_lesson
     counts = Counter(Wr_results)
     counts_dict = dict(counts)
+    
+    #counts the number of correct answers per lesson.
     if wr_lesson > 0:
         if len(Wr_results_2) == 0:
             counts_dict["New Results"]=0
