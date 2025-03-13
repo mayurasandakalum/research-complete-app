@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Auditory Learning</title>
+    <title>ශ්‍රව්‍ය ඉගෙනීම</title>
     <!-- Font Awesome for icons -->
     <link
       rel="stylesheet"
@@ -152,12 +152,14 @@
 
       .extra-controls {
         margin-top: 20px;
-        text-align: center;
+        /* text-align: center; */
+        /* width: 300px; */
+        
       }
       .extra-controls button {
         background-color: #007bff;
         color: white;
-        width: 150px;
+        width: 300px;
         margin-top: 15px;
         border: none;
         padding: 10px 20px;
@@ -178,16 +180,17 @@
       }
 
       .next {
-        width: 200px;
+        width: 300px;
         margin-top: 15px;
         font-family: serif;
+        text-align: center;
         font-size: 17px;
         font-weight: 600;
         background-color: #f39c12;
         color: #fff;
         border: none;
         border-radius: 5px;
-        padding: 10px 20px;
+        padding: 10px 50px; 
         cursor: pointer;
         transition: background 0.3s;
       }
@@ -196,7 +199,7 @@
       }
 
       .replay {
-        width: 200px;
+        width: 300px;
         margin-top: 15px;
         font-family: serif;
         font-size: 17px;
@@ -231,7 +234,7 @@
   <body>
     <!-- Navbar -->
     <nav class="navbar">
-      <div class="title">Auditory Learning</div>
+      <div class="title">ශ්‍රව්‍ය ඉගෙනීම</div>
       
     </nav>
     <!-- <div class="wrapper"> -->
@@ -267,26 +270,26 @@
 
         <!-- Recording Controls -->
         <div class="controls">
-          <button id="recordBtn"><i class="fas fa-microphone"></i> Record</button>
+          <button id="recordBtn"><i class="fas fa-microphone"></i>පිළිතුර සැපයීම</button>
           <!-- Stopped button below (hidden by default) -->
           <!-- <button id="stopBtn" class="stop" style="display: none;">
           <i class="fas fa-stop"></i> Stop
         </button> -->
           <button id="playBtn" style="display: none">
-            <i class="fas fa-play"></i> Play
+            <i class="fas fa-play"></i>ඇසීම
           </button>
         </div>
 
         <!-- Retake and Submit Buttons -->
         <div class="extra-controls">
-          <button id="retakeBtn" disabled>Retake Answer</button>
-          <button id="submitBtn" class="submit" disabled>Submit Answer</button>
+          <button id="retakeBtn" disabled>නැවත පිළිතුර දීම</button>
+          <button id="submitBtn" class="submit" disabled>පිළිතුර තහවුරු කිරීම</button>
         </div>
 
         <!-- Next Question Button -->
-        <button id="next" class="next">Next</button>
+        <button id="next" class="next">ඊළඟ ප්‍රශ්නය</button>
 
-        <button id="replay" class="replay">Replay</button>
+        <button id="replay" class="replay">නැවත ප්‍රශ්නය ඇසීම</button>
 
         <!-- Feedback -->
         <div class="feedback" id="feedback"></div>

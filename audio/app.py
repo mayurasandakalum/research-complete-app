@@ -51,8 +51,6 @@ os.makedirs(TEMPLATES_FOLDER, exist_ok=True)
 
 # app.config['SECRET_KEY'] = config.SECRET_KEY
 
-database = {"tharushi": "123"}  # username: password
-
 
 # Load the fine-tuned model and processor
 model = WhisperForConditionalGeneration.from_pretrained("audio/whisper-small-sinhala-finetuned")
@@ -403,21 +401,21 @@ def speech_guide():
     if rd_lesson > 0:
         if len(Aud_results_2) == 0:
             counts_dict["New Result"]=0
-            message="You are a bloody looser. get lost"
-            images=["img2.png"]
+            message="ඔබ තවමත් මෙම පාඩමට දුර්වල අයෙකි. එම නිසා මෙම පාඩම පිළිබඳව ඇති ඔබගේ පෙළපොත අද්‍යයනය කර හොඳ දැනුමක් ලබාගන්න. පසුව මෙම ක්‍රමවේදය මගින් ඔබගේ දැනුම තහවුරු කර ගන්න."
+            images=["imgtry.png"]
         else:    
             counts2 = Counter(Aud_results_2)
             counts_dict2 = dict(counts2)
             print(counts_dict2)
             counts_dict["New "+"lesson"+str(rd_lesson)]=counts_dict2["lesson0"+str(rd_lesson)]
-            message="You Complete your Journey"
-            images=["img2.png"]
+            message="ඔබ ඔබගේ අපහසු පාඩම පිළිබඳ හොඳ අධ්‍යයනයක් ලබාගෙන ඇති අතර ඔබ ජය ගෙන ඇත."
+            images=["imagese.png"]
         return render_template('AudioGuide.html', results=counts_dict, message=message,images=images,lesson_id="Finished")
     else:
         lesson_no=get_min_count_string(counts_dict)
         print("Shit lesson ------------------------------------>",rd_lesson)
         rd_lesson=lesson_no
-        message="Since you have minimum result for lesson "+str(lesson_no)
+        message="ඔබ අවම ලකුණු ලබාගෙන ඇති පාඩම් අංකය "+str(lesson_no)
         img_range=[3,2,2]
         images=[]
         for img in range(img_range[lesson_no-1]):
