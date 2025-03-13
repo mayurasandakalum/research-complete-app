@@ -40,7 +40,7 @@ os.makedirs(IMAGES_FOLDER, exist_ok=True)
 TEMPLATES_FOLDER = os.path.join(current_dir, "templates")
 os.makedirs(TEMPLATES_FOLDER, exist_ok=True)
 
-database = {"isu": "123"}  # username: password
+#database = {"isu": "123"}  # username: password
 
 
 model_st = SentenceTransformer("Ransaka/bert-small-sentence-transformer")
@@ -302,13 +302,13 @@ def write_guide():
     if wr_lesson > 0:
         if len(Wr_results_2) == 0:
             counts_dict["New Results"]=0
-            message="Get lost u looser"
+            message="ඔබ මෙම පාඩම සඳහා ගොඩක්ම දුර්වලයි!"
         else:    
             counts2 = Counter(Wr_results_2)
             counts_dict2 = dict(counts2)
             print(counts_dict2)
             counts_dict["New "+"lesson"+str(wr_lesson)]=counts_dict2["lesson0"+str(wr_lesson)]
-            message="You Complete your Journey"
+            message="ඔබගේ දැනුම පරීක්ෂා කර බැලීම අවසන්.ඔබේ ඉදිරි ගමනට සුභ පැතුම්!"
         images = ["completedHappy.jpg"]
         return render_template(
             "WriteGuide.html",
@@ -320,7 +320,7 @@ def write_guide():
     else:
         lesson_no = get_min_count_string(counts_dict)
         wr_lesson = lesson_no
-        message = "Since you have minimum result for lesson " + str(lesson_no)
+        message = "ඔබ අවම වශයෙන් නිවැරදි උත්තර ලබාදී ඇති පාඩම වනුයේ, පාඩම් අංක : " + str(lesson_no)
         img_range = [2, 3, 3]
         images = []
         for img in range(img_range[lesson_no - 1]):

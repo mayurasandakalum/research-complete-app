@@ -185,7 +185,7 @@
             align-items: center;
             gap: 8px; /* Spacing between radio button and text */
             font-size: 18px;
-            width: 100px;
+            width: 120px;
             cursor: pointer;
             padding: 8px 12px;
             border-radius: 8px;
@@ -244,7 +244,7 @@
                 />
             </a>
         </div>-->
-        <div class="title">Read/Write Learning</div>
+        <div class="title">කියවා ලිවීමේ ඉගෙනීම</div>
       
     </nav>
 
@@ -252,8 +252,8 @@
         <!-- Chatbox -->
         <div class="chat-container">
             <div class="lesson-level-container">
-                <p><strong>Lesson:</strong> <span id="lesson">{{ question['Lesson'] }}</span></p>
-                <p><strong>Level:</strong> <span id="level">{{ question['Level'] }}</span></p>
+                <p><strong>පාඩම:</strong> <span id="lesson">{{ question['Lesson'] }}</span></p>
+                <p><strong>මට්ටම:</strong> <span id="level">{{ question['Level'] }}</span></p>
             </div>
 
             <div class="question-area">
@@ -266,16 +266,16 @@
             </div>
 
             <div class="radio-group">
-                <label><input type="radio" name="inputType" value="number" checked> Number</label>
-                <label><input type="radio" name="inputType" value="text"> Text</label>
+                <label><input type="radio" name="inputType" value="number" checked>ඉලක්කමින්</label>
+                <label><input type="radio" name="inputType" value="text">අකුරින්</label>
             </div>
 
 
             <!-- Controls -->
             <div class="controls">
-                <button id="clearBtn" class="clear-btn">Clear</button>
-                <button id="submitBtn" class="submit-btn">Submit Answer</button>
-                <button id="next" class="next-btn">Next</button>
+                <button id="clearBtn" class="clear-btn">ඉවත් කරන්න</button>
+                <button id="submitBtn" class="submit-btn">පිළිතුර තහවුරු කරන්න</button>
+                <button id="next" class="next-btn">ඊළඟ ප්‍රශ්නය</button>
             </div>
 
             
