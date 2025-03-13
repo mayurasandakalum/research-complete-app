@@ -1,12 +1,14 @@
-from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify, current_app
+from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify, current_app, session
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.security import generate_password_hash, check_password_hash
-from firebase_admin import firestore
+from firebase_admin import firestore, auth
 from datetime import datetime
 import random
 import base64
 import os
 import shutil
+import requests
+import json
 
 from .models import (
     User,
@@ -18,8 +20,6 @@ from .models import (
     AnswerMethod,
 )
 from .forms import (
-    UserLoginForm,
-    RegistrationForm,
     QuizForm,
     QuestionForm,
     SubQuestionForm,
@@ -35,6 +35,88 @@ kinesthetic_blueprint = Blueprint(
     template_folder="../templates/kinesthetic",
     static_folder="../static",
 )
+
+# New route to handle authentication from main system
+@kinesthetic_blueprint.route("/authenticate")
+def authenticate():
+    token = request.args.get('token')
+    if not token:
+        flash('Authentication token missing', 'error')
+        return redirect('http://localhost:5000/login')
+    
+    try:
+        # For custom tokens, we need to extract the user ID directly
+        # Custom tokens are in the format: header.payload.signature
+        import base64
+        import json
+        
+        # Split the token to get the payload part (second part)
+        parts = token.split('.')
+        if len(parts) != 3:
+            flash('Invalid token format', 'error')
+            return redirect('http://localhost:5000/login')
+            
+        # Decode the payload
+        payload = parts[1]
+        # Add padding if needed
+        padding = '=' * (4 - len(payload) % 4) if len(payload) % 4 != 0 else ''
+        payload_padded = payload + padding
+        
+        try:
+            decoded = base64.urlsafe_b64decode(payload_padded)
+            payload_data = json.loads(decoded)
+            
+            # Extract the user ID from the custom token payload
+            # The structure is different from ID tokens
+            user_id = payload_data.get('uid')
+            
+            if not user_id:
+                flash('Could not extract user ID from token', 'error')
+                return redirect('http://localhost:5000/login')
+                
+        except Exception as e:
+            print(f"Error decoding token: {str(e)}")
+            flash('Invalid token format', 'error')
+            return redirect('http://localhost:5000/login')
+        
+        # Rest of the authenticate function remains the same
+        # Check if user exists in kinesthetic database
+        user = User.get_by_id(user_id)
+        if not user:
+            # Fetch user details from main system
+            response = requests.get(f'http://localhost:5000/api/user/{user_id}')
+            if response.status_code != 200:
+                flash('Failed to fetch user details', 'error')
+                return redirect('http://localhost:5000/login')
+            
+            user_data = response.json()
+            # Create user in kinesthetic database
+            username = user_data['email'].split('@')[0] if '@' in user_data['email'] else user_data['email']
+            user = User(
+                username=username,
+                email=user_data['email'],
+                first_name=user_data.get('name', '').split()[0] if user_data.get('name') else '',
+                last_name=user_data.get('name', '').split()[-1] if user_data.get('name') and len(user_data.get('name').split()) > 1 else '',
+                password_hash='',  # No password needed since login is removed
+                id=user_id  # Use the same ID as main system
+            )
+            user.save()
+        
+        # Log in the user with Flask-Login
+        login_user(user)
+        
+        # Create QuizProfile if it doesn't exist
+        kinesthetic_profile = QuizProfile.get_by_user_id(user_id)
+        if not kinesthetic_profile:
+            kinesthetic_profile = QuizProfile(user_id=user_id)
+            kinesthetic_profile.save()
+        
+        return redirect(url_for('kinesthetic.user_home'))
+    
+    except Exception as e:
+        print(f"Authentication failed: {str(e)}")
+        flash(f'Authentication failed: {str(e)}', 'error')
+        return redirect('http://localhost:5000/login')
 
 
 @kinesthetic_blueprint.route("/")
@@ -160,6 +242,17 @@ def play():
                 if kinesthetic_profile:
                     kinesthetic_profile.total_score += points
                     kinesthetic_profile.save()
+                    
+                    # Sync marks with main system
+                    try:
+                        requests.post('http://localhost:5000/api/save_marks', json={
+                            'user_id': current_user.id,
+                            'quiz_id': question_id,
+                            'score': points,
+                            'subject': kinesthetic_profile.subject_counts
+                        }, headers={'Content-Type': 'application/json'})
+                    except Exception as e:
+                        flash(f'Failed to sync marks with main system: {str(e)}', 'warning')
                     
             # Pass the attempt ID to the result page
             return redirect(url_for('kinesthetic.submission_result', 
@@ -298,82 +391,6 @@ def submission_result(attempted_question_id):
     return render_template(
         "kinesthetic/submission_result.html", attempted_question=attempted_question
     )
-
-
-@kinesthetic_blueprint.route("/login", methods=["GET", "POST"])
-def login():
-    if current_user.is_authenticated:
-        return redirect(url_for("kinesthetic.home"))
-
-    form = UserLoginForm()
-    if form.validate_on_submit():
-        user = User.get_by_username(form.username.data)
-        if user and check_password_hash(user.password_hash, form.password.data):
-            login_user(user)
-            return redirect(url_for("kinesthetic.user_home"))
-        else:
-            flash("Invalid username/password!", "danger")
-    return render_template("kinesthetic/login.html", form=form, title="Login")
-
-
-@kinesthetic_blueprint.route("/register", methods=["GET", "POST"])
-def register():
-    if current_user.is_authenticated:
-        return redirect(url_for("kinesthetic.home"))
-
-    form = RegistrationForm()
-    if form.validate_on_submit():
-        user = User.get_by_username(form.username.data)
-        if user:
-            flash("Username already exists")
-            return redirect(url_for("kinesthetic.register"))
-
-        password_hash = generate_password_hash(form.password.data)
-        new_user = User(
-            username=form.username.data,
-            email=form.email.data,
-            first_name=form.first_name.data,
-            last_name=form.last_name.data,
-            password_hash=password_hash,
-        )
-
-        new_user.save()
-
-        kinesthetic_profile = QuizProfile(user_id=new_user.id)
-        kinesthetic_profile.save()
-
-        flash("Registration successful!")
-        return redirect(url_for("kinesthetic.login"))
-
-    return render_template("kinesthetic/registration.html", form=form, title="Register")
-
-
-@kinesthetic_blueprint.route("/logout")
-@login_required
-def logout():
-    logout_user()
-    return redirect(url_for("kinesthetic.home"))
-
-
-def batch_get_subquestions(question_ids):
-    """Helper function to get sub-questions in batches"""
-    sub_questions_by_question = {}
-
-    # Process question_ids in batches of 30
-    for i in range(0, len(question_ids), 30):
-        batch_ids = question_ids[i : i + 30]
-        sub_questions_ref = (
-            db.collection("sub_questions").where("question_id", "in", batch_ids).get()
-        )
-
-        # Group sub-questions by question_id
-        for sub_doc in sub_questions_ref:
-            sub_q = SubQuestion.from_doc(sub_doc)
-            if sub_q.question_id not in sub_questions_by_question:
-                sub_questions_by_question[sub_q.question_id] = []
-            sub_questions_by_question[sub_q.question_id].append(sub_q)
-
-    return sub_questions_by_question
 
 
 @kinesthetic_blueprint.route("/manage/questions")
@@ -841,6 +858,18 @@ def process_all_answers():
         # Add points to the profile
         kinesthetic_profile.total_score += total_points
         
+        # Sync marks with main system if points were earned
+        if total_points > 0:
+            try:
+                requests.post('http://localhost:5000/api/save_marks', json={
+                    'user_id': current_user.id,
+                    'quiz_id': question_id,
+                    'score': total_points,
+                    'subject': kinesthetic_profile.subject_counts
+                }, headers={'Content-Type': 'application/json'})
+            except Exception as e:
+                print(f'Failed to sync marks with main system: {str(e)}')
+        
         # Update attempts counter (this counts as one attempt regardless of sub-questions)
         kinesthetic_profile.current_lesson_attempts += 1
         
@@ -854,3 +883,35 @@ def process_all_answers():
         kinesthetic_profile.save()
     
     return jsonify(response_data)
+
+
+def batch_get_subquestions(question_ids):
+    """Helper function to get sub-questions in batches"""
+    sub_questions_by_question = {}
+
+    # Process question_ids in batches of 30
+    for i in range(0, len(question_ids), 30):
+        batch_ids = question_ids[i : i + 30]
+        sub_questions_ref = (
+            db.collection("sub_questions").where("question_id", "in", batch_ids).get()
+        )
+
+        # Group sub-questions by question_id
+        for sub_doc in sub_questions_ref:
+            sub_q = SubQuestion.from_doc(sub_doc)
+            if sub_q.question_id not in sub_questions_by_question:
+                sub_questions_by_question[sub_q.question_id] = []
+            sub_questions_by_question[sub_q.question_id].append(sub_q)
+
+    return sub_questions_by_question
+
+# Add this route to redirect to main system logout
+
+@kinesthetic_blueprint.route("/logout")
+def logout():
+    """Redirect to main system logout."""
+    # Clear the flask-login session
+    logout_user()
+    
+    # Redirect to main system logout
+    return redirect("http://localhost:5000/logout")

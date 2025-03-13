@@ -37,6 +37,7 @@
                 <li><a href="#overview" class="nav-link active">Overview</a></li>
                 <li><a href="#apps" class="nav-link">Learning Apps</a></li>
                 <li><a href="#students" class="nav-link">My Students</a></li>
+                <li><a href="#reports" class="nav-link">Progress Reports</a></li>
                 <li><a href="/system_overview" class="nav-link">System Overview</a></li>
             </ul>
         </nav>
@@ -61,10 +62,14 @@
             <h2>Manage Learning Applications</h2>
 
             <div class="app-grid">
-                <div class="app-card">
+                <div class="app-card featured">
                     <h3>Kinesthetic Learning App</h3>
                     <p>Tools and activities for kinesthetic learners who learn best through physical activities.</p>
-                    <a href="{{ kinesthetic_url }}" class="app-link">Open App</a>
+                    <p class="app-status">Admin access available</p>
+                    <div class="btn-group">
+                        <a href="{{ kinesthetic_url }}" class="app-link">Open App</a>
+                        <a href="{{ kinesthetic_url }}/manage/questions" class="app-link secondary">Manage Questions</a>
+                    </div>
                 </div>
 
                 <div class="app-card">
@@ -126,6 +131,26 @@
                 {% else %}
                 <p>You have not added any students yet.</p>
                 {% endif %}
+            </div>
+        </section>
+
+        <section id="reports" class="dashboard-section">
+            <h2>Student Progress Reports</h2>
+
+            <div class="report-container">
+                <div class="report-filter">
+                    <select id="reportStudentFilter">
+                        <option value="">Select a student...</option>
+                        {% for student in students %}
+                        <option value="{{ student.id }}">{{ student.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <button onclick="fetchStudentReport()" class="submit-btn">View Report</button>
+                </div>
+
+                <div id="reportContent" class="report-content">
+                    <p>Select a student to view their progress report.</p>
+                </div>
             </div>
         </section>
     </div>
@@ -219,6 +244,72 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+    <script>
+        function fetchStudentReport() {
+            const studentId = document.getElementById('reportStudentFilter').value;
+            if (!studentId) {
+                alert('Please select a student');
+                return;
+            }
+
+            fetch(`/api/student/${studentId}/progress`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        document.getElementById('reportContent').innerHTML =
+                            `<p class="error-message">${data.error}</p>`;
+                        return;
+                    }
+
+                    let reportHTML = `
+                        <h3>${data.student_name}'s Progress</h3>
+                        
+                        <div class="report-summary">
+                            <div class="summary-item">
+                                <span class="summary-label">Total Score:</span>
+                                <span class="summary-value">${data.total_score || 0}</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Questions Completed:</span>
+                                <span class="summary-value">${data.questions_completed || 0}/15</span>
+                            </div>
+                        </div>
+                        
+                        <h4>Subject Performance</h4>
+                        <div class="subject-performance">
+                            <div class="subject-item">
+                                <span class="subject-name">Addition</span>
+                                <div class="progress-bar">
+                                    <div class="progress" style="width: ${data.subject_progress?.addition || 0}%"></div>
+                                </div>
+                                <span class="subject-value">${data.subject_progress?.addition || 0}%</span>
+                            </div>
+                            <div class="subject-item">
+                                <span class="subject-name">Subtraction</span>
+                                <div class="progress-bar">
+                                    <div class="progress" style="width: ${data.subject_progress?.subtraction || 0}%"></div>
+                                </div>
+                                <span class="subject-value">${data.subject_progress?.subtraction || 0}%</span>
+                            </div>
+                            <div class="subject-item">
+                                <span class="subject-name">Time</span>
+                                <div class="progress-bar">
+                                    <div class="progress" style="width: ${data.subject_progress?.time || 0}%"></div>
+                                </div>
+                                <span class="subject-value">${data.subject_progress?.time || 0}%</span>
+                            </div>
+                        </div>
+                    `;
+
+                    document.getElementById('reportContent').innerHTML = reportHTML;
+                })
+                .catch(error => {
+                    console.error('Error fetching student report:', error);
+                    document.getElementById('reportContent').innerHTML =
+                        '<p class="error-message">Failed to load student report.</p>';
+                });
+        }
+    </script>
 </body>
 
 </html>

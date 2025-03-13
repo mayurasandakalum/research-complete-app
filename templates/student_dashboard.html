@@ -53,6 +53,13 @@
                 {% if teacher %}
                 <p><strong>Your Teacher:</strong> {{ teacher.name if teacher.name else teacher.email }}</p>
                 {% endif %}
+
+                <div class="quick-stats">
+                    <h3>Your Progress</h3>
+                    <div id="progressStats" class="stats-container">
+                        <p>Loading your kinesthetic learning progress...</p>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -60,9 +67,10 @@
             <h2>Available Learning Applications</h2>
 
             <div class="app-grid">
-                <div class="app-card">
+                <div class="app-card featured">
                     <h3>Kinesthetic Learning App</h3>
                     <p>Tools and activities for kinesthetic learners who learn best through physical activities.</p>
+                    <p class="app-status">Ready to use</p>
                     <a href="{{ kinesthetic_url }}" class="app-link">Open App</a>
                 </div>
 
@@ -82,6 +90,41 @@
     </div>
 
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+    <script>
+        // Fetch the student's kinesthetic progress data
+        document.addEventListener('DOMContentLoaded', function () {
+            // Only attempt to fetch if we have a user ID
+            {% if student and student.id %}
+            fetch('/api/user/{{ student.id }}/progress')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        document.getElementById('progressStats').innerHTML =
+                            '<p>Could not load progress data.</p>';
+                        return;
+                    }
+
+                    let statsHTML = `
+                        <div class="stat-item">
+                            <span class="stat-label">Total Score:</span>
+                            <span class="stat-value">${data.total_score || 0}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Questions Completed:</span>
+                            <span class="stat-value">${data.questions_completed || 0}/15</span>
+                        </div>
+                    `;
+
+                    document.getElementById('progressStats').innerHTML = statsHTML;
+                })
+                .catch(error => {
+                    console.error('Error fetching progress:', error);
+                    document.getElementById('progressStats').innerHTML =
+                        '<p>Could not load progress data.</p>';
+                });
+            {% endif %}
+        });
+    </script>
 </body>
 
 </html>

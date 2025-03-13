@@ -7,7 +7,22 @@ import requests
 import config
 import psutil
 import datetime
-from models import login_required, teacher_required, User, Teacher, Student
+import firebase_admin
+from firebase_admin import credentials, auth, firestore
+from models import login_required, teacher_required, student_required, User, Teacher, Student
+
+# Initialize the kinesthetic Firebase app with its service account
+kinesthetic_cred_path = "c:\\Users\\Makara\\Documents\\projects\\research\\combined-1\\kinesthetic\\serviceAccountKey.json"
+try:
+    kinesthetic_cred = credentials.Certificate(kinesthetic_cred_path)
+    kinesthetic_app = firebase_admin.initialize_app(kinesthetic_cred, name='kinesthetic')
+except (ValueError, firebase_admin.exceptions.FirebaseError) as e:
+    print(f"Error initializing kinesthetic app: {str(e)}")
+    # If it's already initialized, get the existing app
+    try:
+        kinesthetic_app = firebase_admin.get_app(name='kinesthetic')
+    except:
+        print("Could not get existing kinesthetic app")
 
 def init_routes(app):
     """Initialize all routes for the Flask app."""
@@ -81,7 +96,18 @@ def init_routes(app):
                     session['email'] = user.email
                     session['user_type'] = 'student'
                     
-                    return redirect(url_for('student_dashboard'))
+                    # Generate custom token for kinesthetic system
+                    try:
+                        custom_token = auth.create_custom_token(user.uid, app=kinesthetic_app)
+                        custom_token_str = custom_token.decode('utf-8')  # Convert bytes to string
+                        
+                        # Redirect to kinesthetic system with the token
+                        kinesthetic_url = f"http://localhost:{config.KINESTHETIC_APP_PORT}/authenticate?token={custom_token_str}"
+                        return redirect(kinesthetic_url)
+                    except Exception as e:
+                        app.logger.error(f"Error generating custom token: {str(e)}")
+                        # Fall back to regular dashboard if token generation fails
+                        return redirect(url_for('student_dashboard'))
                 else:
                     flash('Invalid user type')
                     return render_template('login.html')
@@ -91,6 +117,64 @@ def init_routes(app):
                 return render_template('login.html')
         
         return render_template('login.html')
+    
+    # Add API endpoint for user details
+    @app.route('/api/user/<user_id>', methods=['GET'])
+    def get_user(user_id):
+        try:
+            # Check for authorization token (in a real app, validate this properly)
+            # auth_header = request.headers.get('Authorization')
+            # if not auth_header:
+            #     return jsonify({'error': 'Authorization required'}), 401
+            
+            student = Student.get(user_id)
+            if not student:
+                return jsonify({'error': 'Student not found'}), 404
+                
+            return jsonify({
+                'id': student['id'],
+                'name': student.get('name', ''),
+                'email': student.get('email', ''),
+                'gender': student.get('gender', ''),
+                'birthday': student.get('birthday', ''),
+                'grade': student.get('grade', '')
+            })
+        except Exception as e:
+            app.logger.error(f"Error getting user data: {str(e)}")
+            return jsonify({'error': str(e)}), 500
+    
+    # Add API endpoint to save marks
+    @app.route('/api/save_marks', methods=['POST'])
+    def save_marks():
+        try:
+            data = request.json
+            if not data:
+                return jsonify({'error': 'No data provided'}), 400
+                
+            user_id = data.get('user_id')
+            quiz_id = data.get('quiz_id')
+            score = data.get('score')
+            subject_data = data.get('subject', {})
+            
+            if not user_id or score is None:
+                return jsonify({'error': 'Missing user_id or score'}), 400
+            
+            # Get Firestore client
+            db = firestore.client()
+            
+            # Store marks in the main system's Firestore
+            db.collection('kinesthetic_marks').add({
+                'user_id': user_id,
+                'quiz_id': quiz_id,
+                'score': score,
+                'subject_data': subject_data,
+                'timestamp': firestore.SERVER_TIMESTAMP
+            })
+            
+            return jsonify({'status': 'success'})
+        except Exception as e:
+            app.logger.error(f"Error saving marks: {str(e)}")
+            return jsonify({'error': str(e)}), 500
 
     @app.route('/register', methods=['GET', 'POST'])
     def register():
