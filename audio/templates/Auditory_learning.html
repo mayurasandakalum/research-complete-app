@@ -225,6 +225,7 @@
       }
 
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   </head>
 
   <body>
@@ -454,7 +455,7 @@
       });
 
       // Submit Answer
-      submitBtn.addEventListener("click", () => {
+      /*submitBtn.addEventListener("click", () => {
         fetch("/submit_audio")
           .then((response) => response.json())
           .then((data) => {
@@ -483,7 +484,56 @@
           .catch((error) => {
             console.error("Error fetching the next question:", error);
           });
-      });
+      });*/
+
+      submitBtn.addEventListener("click", () => {
+        fetch("/submit_audio")
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.success) {
+                    if (data.correct) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'නිවැරදියි!',
+                            text: 'ඔබගේ ශබ්ද පිළිතුර නිවැරදියි.',
+                            confirmButtonText: 'හරි',
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'වැරදියි!',
+                            html: `ඔබගේ පිළිතුර වැරදියි.<br> නිවැරදි පිළිතුර: <b>${data.answer}</b>`,
+                            confirmButtonText: 'නැවත උත්සාහ කරන්න',
+                        });
+                    }
+
+                    playBtn.style.display = "none";
+
+                    // Reset record button
+                    recordBtn.style.backgroundColor = "";
+                    recordBtn.innerHTML = '<i class="fas fa-microphone"></i> Record';
+
+                    submitBtn.disabled = true;
+                } else {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'දෝශයකි!',
+                        text: data.message || 'ප්‍රශ්න අවසානයට පැමිණියෙමු.',
+                        confirmButtonText: 'හරි',
+                    });
+                }
+            })
+            .catch((error) => {
+                console.error("Error fetching the next question:", error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'දෝශයකි!',
+                    text: 'දෝශයක් සිදු විය. කරුණාකර නැවත උත්සාහ කරන්න.',
+                    confirmButtonText: 'හරි',
+                });
+            });
+    });
+
     </script>
   </body>
 </html>

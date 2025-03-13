@@ -21,7 +21,8 @@
           /* General Styles */
           body {
               font-family: Arial, sans-serif;
-              background-image: url('/static/Images/auditory.jpg');
+              /*background-image: url('/static/Images/auditory.jpg');*/
+              background: linear-gradient(135deg,rgb(138, 140, 250),rgb(202, 148, 253),rgb(253, 150, 202));
               background-size: cover;
               background-position: center;
               background-repeat: no-repeat;
@@ -211,17 +212,17 @@
     <body>
         <!-- Navbar -->
         <nav class="navbar">
-            <div class="logo">
-                <a href="/home">
+            <!-- <div class="logo"> -->
+                <!-- <a href="/home">
                     <img
                         src="aduio/static/Images/logo.png"
                         alt="Company Logo"
                         style="width:150px;height:150px;border-radius: 50%;"
                     />
-                </a>
-            </div>
+                </a> -->
+            <!-- </div> -->
             <div class="title">Audio input Guide</div>
-            <a href="logout.html" class="logout-btn">Logout</a>
+            
         </nav>
     
         <div class="wrapper">
@@ -264,14 +265,6 @@
             </a>
         </div>
     
-        <!-- Footer -->
-        <footer class="footer">
-            <div class="footer-content">
-                <p>📧 Email: info@learn-pal.com</p>
-                <p>📞 Fax: +94 11 2345678</p>
-                <p>📍 Address: 123 Learn-Pal St, Colombo, Sri Lanka</p>
-            </div>
-        </footer>
     
         <script>
             
@@ -279,7 +272,7 @@
     
               let baseName = imagePath.split('.')[0];
               let audio_f = `tts_${baseName}_.wav`;
-              const audioSrc = 'audio/static/aud_records/' + audio_f;
+              const audioSrc = 'static/aud_records/' + audio_f;
     
               const audio = new Audio(audioSrc);
               audio.play().catch(err => {

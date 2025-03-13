@@ -105,8 +105,8 @@ AudQuestionID = 1
 no_q = 5
 username = ""
 Aud_data = {}
-# Aud_results = ["lesson1","lesson1","lesson2","lesson2","lesson2","lesson2","lesson2","lesson3","lesson3","lesson3","lesson3","lesson3","lesson3","lesson3","lesson3","lesson3","lesson3"]
-# Aud_results_2 = ["lesson1","lesson1","lesson1"]
+# Aud_results = ["lesson1","lesson1","lesson1","lesson1","lesson1","lesson2","lesson2","lesson2","lesson2","lesson2","lesson2","lesson2","lesson2","lesson2","lesson2","lesson3","lesson3"]
+# Aud_results_2 = ["lesson3","lesson3","lesson3"]
 Aud_results = []
 Aud_results_2 = []
 rd_lesson = 0
@@ -211,62 +211,12 @@ def sin_text_to_speech(text,qid):
     tts.save(output_file)
 
 
-# Route for rendering the main page
-# @app.route("/")
-# def index():
-#     return render_template("Login.html")
-
-
-# @app.route("/logout")
-# def logout():
-#     session["user"] = ""
-#     return render_template("Login.html")
-
-
-# Route to handle login
-# @app.route("/form_login", methods=["POST", "GET"])
-# def login():
-#     # Get username and password from the form
-#     username = request.form.get("username")
-#     password = request.form.get("password")
-
-#     # Validate credentials
-#     if username not in database:
-#         return render_template("login.html", info="Invalid Username")
-#     elif database[username] != password:
-#         return render_template("login.html", info="Invalid Password")
-#     else:
-#         session["user"] = username
-#         return render_template("Home.html", name=username)
-
-
-# Route for rendering the registration page
-# @app.route("/registration")
-# def registration():
-#     return render_template("registration.html")
-
 @app.route('/api/info')
 def api_info():
     return jsonify({
         'app': 'Audio App',
         'status': 'running'
     })
-
-
-# Route to handle registration form submission
-# @app.route("/form_registration", methods=["POST"])
-# def form_registration():
-#     # Get username and password from the form
-#     username = request.form.get("username")
-#     password = request.form.get("password")
-
-#     # Check if the username already exists
-#     if username in database:
-#         return render_template("registration.html", info="Username already exists!")
-
-#     # Add the new user to the database
-#     database[username] = password
-#     return render_template("login.html", info="Registration successful! Please log in.")
 
 
 @app.route("/")

@@ -7,7 +7,7 @@
   /* Background Image */
   body {
     /* background-image: url('/static/Images/audio_learning.jpg'); */
-    background-color: rgba(205, 78, 227, 0.5);
+    background-color: rgba(146, 42, 164, 0.5);
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -29,10 +29,15 @@
     font-family: serif;
 }
 
+.sentence{
+    text-align: center;
+    margin-top: 70px;
+}
+
 .dashboard-container {
     text-align: center;
     padding: 100px;
-    margin-top: 250px;
+    margin-top: 150px;
     margin-left: 320px;
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -103,7 +108,7 @@ h1 {
     background: linear-gradient(45deg, #e777f6, #6b118f);
 }
 .auditory:hover {
-    background: linear-gradient(45deg, #037063, #44b435);
+    background: linear-gradient(45deg, #d83db9, #8a058f);
 }
 
 
