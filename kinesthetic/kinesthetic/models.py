@@ -79,16 +79,18 @@ class User(UserMixin):
 
 
 class QuizProfile:
-    def __init__(self, user_id, total_score=0.0, created=None, modified=None):
+    def __init__(self, user_id, total_score=0.0, created=None, modified=None, 
+                 completed_lessons=None, current_lesson_attempts=0, 
+                 mixed_quiz_completed=False, subject_counts=None):
         self.user_id = user_id
         self.total_score = total_score
         self.created = created if created else datetime.utcnow()
         self.modified = modified if modified else datetime.utcnow()
         self._user = None  # Cache for user object
-        self.completed_lessons = []
-        self.current_lesson_attempts = 0
-        self.mixed_quiz_completed = False  # To track if the mixed quiz is completed
-        self.subject_counts = {}  # To track how many questions from each subject have been shown
+        self.completed_lessons = completed_lessons or []
+        self.current_lesson_attempts = current_lesson_attempts
+        self.mixed_quiz_completed = mixed_quiz_completed
+        self.subject_counts = subject_counts or {}  # To track how many questions from each subject have been shown
 
     @staticmethod
     def get_by_user_id(user_id):
@@ -100,11 +102,11 @@ class QuizProfile:
                 total_score=data.get("total_score", 0.0),
                 created=data.get("created"),
                 modified=data.get("modified"),
+                completed_lessons=data.get("completed_lessons", []),
+                current_lesson_attempts=data.get("current_lesson_attempts", 0),
+                mixed_quiz_completed=data.get("mixed_quiz_completed", False),
+                subject_counts=data.get("subject_counts", {}),
             )
-            profile.completed_lessons = data.get("completed_lessons", [])
-            profile.current_lesson_attempts = data.get("current_lesson_attempts", 0)
-            profile.mixed_quiz_completed = data.get("mixed_quiz_completed", False)
-            profile.subject_counts = data.get("subject_counts", {})
             return profile
         return None
 
