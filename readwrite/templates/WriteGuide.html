@@ -13,7 +13,7 @@
       /* General Styles */
       body {
           font-family: Arial, sans-serif;
-          background-image: url('/static/Images/auditory.jpg');
+          background: linear-gradient(135deg,rgb(197, 179, 255),rgb(250, 137, 254),rgb(253, 150, 202));
           background-size: cover;
           background-position: center;
           background-repeat: no-repeat;
@@ -102,11 +102,11 @@
       .complete-btn {
           margin-top: 20px;
           padding: 10px 20px;
-          font-size: 16px;
+          font-size: 18px;
           cursor: pointer;
           border-radius: 30px;
           border: none;
-          background-color: #09ff00; /* bright green */
+          background-color:rgb(49, 190, 2); /* bright green */
           color: #fff;
           transition: background 0.3s;
       }
@@ -150,17 +150,17 @@
                 />
             </a>
         </div> -->
-        <div class="title">Write Guide</div>
+        <div class="title">කියවා ලිවීමේ මාර්ගෝපදේශය</div>
         
     </nav>
 
     <div class="wrapper">
         <!-- Results Container -->
         <div class="results-container">
-            <h3>Your Results</h3>
+            <h3>ඔබගේ ප්‍රතිඵල</h3>
             <ul>
                 {% for lesson_key, result_val in results.items() %}
-                    <li>{{ lesson_key }} Results : {{ result_val }}</li>
+                    <li>{{ lesson_key }} ප්‍රතිඵල : {{ result_val }}</li>
                 {% endfor %}
             </ul>
         </div>
@@ -172,7 +172,7 @@
 
         <!-- Centered Lesson Heading -->
         <!-- Example usage: "Lesson {{ lesson_id }}" or "Lesson 1" from your Flask context -->
-        <h1 class="lesson-heading">Lesson {{ lesson_id }}</h1>
+        <h1 class="lesson-heading">පාඩම {{ lesson_id }}</h1>
 
         <!-- Images Container -->
         <div class="images-container">
@@ -186,7 +186,7 @@
         </div>
 
         <!-- Complete Button -->
-        <a href="reading_writing_learning" ><button id="completeBtn" class="complete-btn">Understood</button></a>
+        <a href="reading_writing_learning" ><button id="completeBtn" class="complete-btn">නැවතත් ඔබගේ දැනුම පරීක්ෂා කිරීමට යොමු වන්න</button></a>
     </div>
 
     

@@ -139,33 +139,6 @@ def is_similar(target, source):
 
     return similarity
 
-# Route for rendering the main page
-# @app.route("/")
-# def index():
-#     return render_template("Login.html")
-
-# @app.route("/logout")
-# def logout():
-#     session["user"] = ""
-#     return render_template("Login.html")
-
-
-# Route to handle login
-# @app.route("/form_login", methods=["POST", "GET"])
-# def login():
-#     # Get username and password from the form
-#     username = request.form.get("username")
-#     password = request.form.get("password")
-
-#     # Validate credentials
-#     if username not in database:
-#         return render_template("login.html", info="Invalid Username")
-#     elif database[username] != password:
-#         return render_template("login.html", info="Invalid Password")
-#     else:
-#         session["user"] = username
-#         return render_template("Home.html", name=username)
-
 @app.route('/api/info')
 def api_info():
     return jsonify({
