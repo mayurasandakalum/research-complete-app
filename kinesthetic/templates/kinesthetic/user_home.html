@@ -22,6 +22,30 @@
                         <h4>සම්පූර්ණයි! 🎉</h4>
                         <p class="lead mb-0">ඔබේ ලකුණු: {{ kinesthetic_profile.total_score }}</p>
                     </div>
+
+                    <!-- Weakest Subject Analysis -->
+                    {% if kinesthetic_profile.subject_performance %}
+                    {% set weakest = kinesthetic_profile.get_weakest_subject() %}
+                    {% if weakest.subject %}
+                    <div class="card mb-4">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="mb-0">වැඩිදුර අධ්‍යයනය අවශ්‍ය විෂයය</h5>
+                        </div>
+                        <div class="card-body">
+                            <h4>
+                                {% if weakest.subject == 'addition' %}එකතු කිරීම
+                                {% elif weakest.subject == 'subtraction' %}අඩු කිරීම
+                                {% elif weakest.subject == 'time' %}කාලය
+                                {% else %}{{ weakest.subject }}
+                                {% endif %}
+                            </h4>
+                            <p>ඔබගේ කාර්ය සාධනය: {{ "%.1f"|format(weakest.percentage) }}%</p>
+                            <p>මෙම විෂය කෙරෙහි වැඩි අවධානයක් යොමු කිරීමෙන් ඔබට වැඩිදියුණු විය හැකිය.</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endif %}
+
                     <a href="{{ url_for('kinesthetic.leaderboard') }}" class="btn btn-primary">
                         ප්‍රතිඵල බලන්න
                     </a>
@@ -78,6 +102,17 @@
                                             {% endif %}" style="width: {{ count / 15 * 100 }}%" role="progressbar">
                                 </div>
                             </div>
+
+                            {% if kinesthetic_profile.subject_performance and subject in
+                            kinesthetic_profile.subject_performance %}
+                            {% set perf = kinesthetic_profile.subject_performance[subject] %}
+                            {% if perf.total > 0 %}
+                            <div class="small text-muted mt-1">
+                                නිවැරදි: {{ perf.correct }}/{{ perf.total }}
+                                ({{ "%.1f"|format((perf.correct / perf.total) * 100) }}%)
+                            </div>
+                            {% endif %}
+                            {% endif %}
                         </div>
                         {% endfor %}
                         {% else %}

@@ -81,7 +81,8 @@ class User(UserMixin):
 class QuizProfile:
     def __init__(self, user_id, total_score=0.0, created=None, modified=None, 
                  completed_lessons=None, current_lesson_attempts=0, 
-                 mixed_quiz_completed=False, subject_counts=None):
+                 mixed_quiz_completed=False, subject_counts=None,
+                 subject_performance=None):
         self.user_id = user_id
         self.total_score = total_score
         self.created = created if created else datetime.utcnow()
@@ -91,6 +92,8 @@ class QuizProfile:
         self.current_lesson_attempts = current_lesson_attempts
         self.mixed_quiz_completed = mixed_quiz_completed
         self.subject_counts = subject_counts or {}  # To track how many questions from each subject have been shown
+        # Track performance by subject: {subject: {"correct": x, "total": y}}
+        self.subject_performance = subject_performance or {}
 
     @staticmethod
     def get_by_user_id(user_id):
@@ -106,6 +109,7 @@ class QuizProfile:
                 current_lesson_attempts=data.get("current_lesson_attempts", 0),
                 mixed_quiz_completed=data.get("mixed_quiz_completed", False),
                 subject_counts=data.get("subject_counts", {}),
+                subject_performance=data.get("subject_performance", {}),
             )
             return profile
         return None
@@ -120,6 +124,7 @@ class QuizProfile:
             "current_lesson_attempts": self.current_lesson_attempts,
             "mixed_quiz_completed": self.mixed_quiz_completed,
             "subject_counts": self.subject_counts,
+            "subject_performance": self.subject_performance,
         }
         db.collection("kinesthetic_profiles").document(str(self.user_id)).set(data)
 
@@ -169,6 +174,28 @@ class QuizProfile:
     @property
     def user(self):
         return self.get_user()
+
+    def get_weakest_subject(self):
+        """Returns the subject with the lowest performance percentage"""
+        weakest = None
+        lowest_percentage = 100  # Start with maximum possible percentage
+        
+        for subject, data in self.subject_performance.items():
+            correct = data.get("correct", 0)
+            total = data.get("total", 0)
+            
+            if total == 0:  # Skip subjects with no attempts
+                continue
+                
+            percentage = (correct / total) * 100
+            if percentage < lowest_percentage:
+                lowest_percentage = percentage
+                weakest = subject
+        
+        return {
+            "subject": weakest,
+            "percentage": lowest_percentage if weakest else 0
+        }
 
 
 class AnswerMethod:

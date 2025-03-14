@@ -764,6 +764,14 @@ def process_all_answers():
     total_points = 0
     correct_count = 0
     
+    # Get the question to determine its subject
+    question_ref = db.collection("questions").document(question_id).get()
+    if not question_ref.exists:
+        return jsonify({"success": False, "error": "Question not found"}), 400
+    
+    question_data = question_ref.to_dict()
+    question_subject = question_data.get("subject", Subject.ADDITION)
+    
     # Process each sub-question
     for sub_question_id in sub_question_ids:
         # Look for captured image for this sub-question
@@ -858,6 +866,14 @@ def process_all_answers():
         # Add points to the profile
         kinesthetic_profile.total_score += total_points
         
+        # Update performance tracking by subject
+        if question_subject not in kinesthetic_profile.subject_performance:
+            kinesthetic_profile.subject_performance[question_subject] = {"correct": 0, "total": 0}
+        
+        # Update the subject performance - count each sub-question as an attempt
+        kinesthetic_profile.subject_performance[question_subject]["total"] += len(response_data["results"])
+        kinesthetic_profile.subject_performance[question_subject]["correct"] += correct_count
+        
         # Sync marks with main system if points were earned
         if total_points > 0:
             try:
@@ -878,7 +894,7 @@ def process_all_answers():
         if kinesthetic_profile.current_lesson_attempts >= total_questions:
             kinesthetic_profile.mixed_quiz_completed = True
             response_data["quiz_completed"] = True
-            response_data["redirect_url"] = url_for("kinesthetic.leaderboard")
+            response_data["redirect_url"] = url_for("kinesthetic.user_home")  # Changed to user_home to show results
             
         kinesthetic_profile.save()
     
