@@ -96,18 +96,16 @@ def init_routes(app):
                     session['email'] = user.email
                     session['user_type'] = 'student'
                     
-                    # Generate custom token for kinesthetic system
+                    # Generate and store token in session for later use
                     try:
                         custom_token = auth.create_custom_token(user.uid, app=kinesthetic_app)
                         custom_token_str = custom_token.decode('utf-8')  # Convert bytes to string
-                        
-                        # Redirect to kinesthetic system with the token
-                        kinesthetic_url = f"http://localhost:{config.KINESTHETIC_APP_PORT}/authenticate?token={custom_token_str}"
-                        return redirect(kinesthetic_url)
+                        session['kinesthetic_token'] = custom_token_str
                     except Exception as e:
                         app.logger.error(f"Error generating custom token: {str(e)}")
-                        # Fall back to regular dashboard if token generation fails
-                        return redirect(url_for('student_dashboard'))
+                    
+                    # Redirect to student dashboard instead of kinesthetic system
+                    return redirect(url_for('student_dashboard'))
                 else:
                     flash('Invalid user type')
                     return render_template('login.html')
@@ -117,6 +115,49 @@ def init_routes(app):
                 return render_template('login.html')
         
         return render_template('login.html')
+    
+    @app.route('/student_dashboard')
+    @login_required
+    def student_dashboard():
+        """Student dashboard."""
+        user_id = session.get('user_id')
+        user_type = session.get('user_type')
+        
+        # Ensure user is a student
+        if user_type != 'student':
+            flash('You need to be logged in as a student to access this page')
+            return redirect(url_for('login'))
+        
+        # Get student data from Firestore
+        student_data = Student.get(user_id)
+        if not student_data:
+            flash('Student data not found')
+            return redirect(url_for('logout'))
+        
+        # Get teacher data for this student
+        teacher_id = student_data.get('teacher_id')
+        teacher_data = Teacher.get(teacher_id) if teacher_id else None
+        
+        # Get kinesthetic token from session or generate a new one if needed
+        kinesthetic_token = session.get('kinesthetic_token')
+        if not kinesthetic_token:
+            try:
+                custom_token = auth.create_custom_token(user_id, app=kinesthetic_app)
+                kinesthetic_token = custom_token.decode('utf-8')
+                session['kinesthetic_token'] = kinesthetic_token
+            except Exception as e:
+                app.logger.error(f"Error generating kinesthetic token: {str(e)}")
+        
+        # Create full URL with token for kinesthetic app
+        kinesthetic_url = f"http://localhost:{config.KINESTHETIC_APP_PORT}/authenticate?token={kinesthetic_token}" if kinesthetic_token else f"http://localhost:{config.KINESTHETIC_APP_PORT}"
+        
+        return render_template('student_dashboard.html', 
+                            student=student_data,
+                            teacher=teacher_data,
+                            kinesthetic_url=kinesthetic_url,
+                            readwrite_url=f"http://localhost:{config.READWRITE_APP_PORT}",
+                            visual_url=f"http://localhost:{config.VISUAL_APP_PORT}",
+                            audio_url=f"http://localhost:{config.AUDIO_APP_PORT}")
     
     # Add API endpoint for user details
     @app.route('/api/user/<user_id>', methods=['GET'])
@@ -230,36 +271,6 @@ def init_routes(app):
                             visual_url=f"http://localhost:{config.VISUAL_APP_PORT}",
                             audio_url=f"http://localhost:{config.AUDIO_APP_PORT}")
     
-    @app.route('/student_dashboard')
-    @login_required
-    def student_dashboard():
-        """Student dashboard."""
-        user_id = session.get('user_id')
-        user_type = session.get('user_type')
-        
-        # Ensure user is a student
-        if user_type != 'student':
-            flash('You need to be logged in as a student to access this page')
-            return redirect(url_for('login'))
-        
-        # Get student data from Firestore
-        student_data = Student.get(user_id)
-        if not student_data:
-            flash('Student data not found')
-            return redirect(url_for('logout'))
-        
-        # Get teacher data for this student
-        teacher_id = student_data.get('teacher_id')
-        teacher_data = Teacher.get(teacher_id) if teacher_id else None
-        
-        return render_template('student_dashboard.html', 
-                            student=student_data,
-                            teacher=teacher_data,
-                            kinesthetic_url=f"http://localhost:{config.KINESTHETIC_APP_PORT}",
-                            readwrite_url=f"http://localhost:{config.READWRITE_APP_PORT}",
-                            visual_url=f"http://localhost:{config.VISUAL_APP_PORT}",
-                            audio_url=f"http://localhost:{config.AUDIO_APP_PORT}")
-
     @app.route('/add_student', methods=['POST'])
     @teacher_required
     def add_student():
@@ -306,11 +317,8 @@ def init_routes(app):
         
         # Check if the student belongs to this teacher
         if not student or student.get('teacher_id') != user_id:
-            if request.method == 'POST':
-                return jsonify({'error': 'Permission denied'}), 403
-            else:
-                flash('You do not have permission to edit this student')
-                return redirect(url_for('dashboard'))
+            flash('You do not have permission to edit this student')
+            return redirect(url_for('dashboard'))
         
         if request.method == 'POST':
             name = request.form.get('student_name')
@@ -345,7 +353,6 @@ def init_routes(app):
                 app.logger.error(f"Error updating student: {str(e)}")
                 if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                     return jsonify({'error': str(e)}), 500
-                    
                 flash(f'Failed to update student: {str(e)}')
                 return redirect(url_for('dashboard'))
         
@@ -448,7 +455,7 @@ def init_routes(app):
             status['audio'] = 'not running'
         
         return jsonify(status)
-    
+
     @app.route('/api/system_metrics')
     def system_metrics():
         """API endpoint to get real-time system metrics."""
@@ -493,7 +500,6 @@ def init_routes(app):
                 'active_processes': active_processes,
                 'user_activity': user_activity
             })
-            
         except Exception as e:
             app.logger.error(f"Error getting system metrics: {str(e)}")
             return jsonify({'error': str(e)}), 500

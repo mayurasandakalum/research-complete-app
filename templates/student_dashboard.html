@@ -56,7 +56,8 @@
 
                 <div class="quick-stats">
                     <h3>Your Progress</h3>
-                    <div id="progressStats" class="stats-container">
+                    <div id="progressStats" class="stats-container" {% if student and student.id
+                        %}data-user-id="{{ student.id }}" {% endif %}>
                         <p>Loading your kinesthetic learning progress...</p>
                     </div>
                 </div>
@@ -75,56 +76,31 @@
                 </div>
 
                 <div class="app-card">
-                    <h3>Read/Write Learning App</h3>
-                    <p>Resources for students who prefer to learn through reading and writing exercises.</p>
-                    <a href="{{ readwrite_url }}" class="app-link">Open App</a>
+                    <h3>Visual Learning App</h3>
+                    <p>Visual tools and resources for students who learn best through images and diagrams.</p>
+                    <p class="app-status">Available</p>
+                    <a href="{{ visual_url }}" class="app-link">Open App</a>
                 </div>
 
                 <div class="app-card">
-                    <h3>Visual Learning App</h3>
-                    <p>Visual tools and resources for students who learn best through images and diagrams.</p>
-                    <a href="{{ visual_url }}" class="app-link">Open App</a>
+                    <h3>Auditory Learning App</h3>
+                    <p>Audio-based learning resources for students who learn best through listening and speaking.</p>
+                    <p class="app-status">Available</p>
+                    <a href="{{ audio_url }}" class="app-link">Open App</a>
+                </div>
+
+                <div class="app-card">
+                    <h3>Read/Write Learning App</h3>
+                    <p>Resources for students who prefer to learn through reading and writing exercises.</p>
+                    <p class="app-status">Available</p>
+                    <a href="{{ readwrite_url }}" class="app-link">Open App</a>
                 </div>
             </div>
         </section>
     </div>
 
-    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
-    <script>
-        // Fetch the student's kinesthetic progress data
-        document.addEventListener('DOMContentLoaded', function () {
-            // Only attempt to fetch if we have a user ID
-            {% if student and student.id %}
-            fetch('/api/user/{{ student.id }}/progress')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        document.getElementById('progressStats').innerHTML =
-                            '<p>Could not load progress data.</p>';
-                        return;
-                    }
-
-                    let statsHTML = `
-                        <div class="stat-item">
-                            <span class="stat-label">Total Score:</span>
-                            <span class="stat-value">${data.total_score || 0}</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Questions Completed:</span>
-                            <span class="stat-value">${data.questions_completed || 0}/15</span>
-                        </div>
-                    `;
-
-                    document.getElementById('progressStats').innerHTML = statsHTML;
-                })
-                .catch(error => {
-                    console.error('Error fetching progress:', error);
-                    document.getElementById('progressStats').innerHTML =
-                        '<p>Could not load progress data.</p>';
-                });
-            {% endif %}
-        });
-    </script>
+    <!-- Replace dashboard.js with the new student_dashboard.js file -->
+    <script src="{{ url_for('static', filename='js/student_dashboard.js') }}"></script>
 </body>
 
 </html>

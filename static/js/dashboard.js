@@ -32,31 +32,66 @@ function updateStatus() {
 updateStatus();
 setInterval(updateStatus, 10000);
 
-// Navigation functionality
+// Navigation functionality - consolidated version
 document.addEventListener("DOMContentLoaded", function () {
   const navLinks = document.querySelectorAll(".nav-link");
   const sections = document.querySelectorAll(".dashboard-section");
 
+  // Function to activate a specific tab
+  function activateTab(tabId) {
+    // Hide all sections
+    sections.forEach((section) => {
+      section.classList.remove("active");
+    });
+
+    // Remove active class from all nav links
+    navLinks.forEach((link) => {
+      link.classList.remove("active");
+    });
+
+    // Show the selected section
+    const targetSection = document.getElementById(tabId);
+    if (targetSection) {
+      targetSection.classList.add("active");
+    }
+
+    // Add active class to the clicked nav link
+    const activeLink = document.querySelector(`.nav-link[href="#${tabId}"]`);
+    if (activeLink) {
+      activeLink.classList.add("active");
+    }
+  }
+
+  // Add click event listeners to all nav links
   navLinks.forEach((link) => {
     link.addEventListener("click", function (e) {
-      // Don't prevent default for external links (those with href starting with http or containing url_for)
-      if (!this.getAttribute("href").startsWith("#")) {
-        return; // Let the browser handle the navigation
+      // Only handle internal links (those starting with #)
+      if (this.getAttribute("href").startsWith("#")) {
+        e.preventDefault();
+        const tabId = this.getAttribute("href").substring(1);
+        activateTab(tabId);
+
+        // Update URL fragment without reloading the page
+        history.pushState(null, null, `#${tabId}`);
       }
-
-      e.preventDefault();
-
-      // Remove active class from all links and sections
-      navLinks.forEach((l) => l.classList.remove("active"));
-      sections.forEach((s) => s.classList.remove("active"));
-
-      // Add active class to clicked link
-      this.classList.add("active");
-
-      // Show the corresponding section
-      const targetId = this.getAttribute("href").substring(1);
-      document.getElementById(targetId).classList.add("active");
     });
+  });
+
+  // Handle initial load with URL hash
+  if (window.location.hash) {
+    const tabId = window.location.hash.substring(1);
+    activateTab(tabId);
+  }
+
+  // Handle back/forward browser navigation
+  window.addEventListener("popstate", function () {
+    if (window.location.hash) {
+      const tabId = window.location.hash.substring(1);
+      activateTab(tabId);
+    } else {
+      // Default to first tab if no hash
+      activateTab("overview");
+    }
   });
 
   // Add Student Modal functionality
