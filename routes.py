@@ -183,6 +183,39 @@ def init_routes(app):
         except Exception as e:
             app.logger.error(f"Error getting user data: {str(e)}")
             return jsonify({'error': str(e)}), 500
+
+    # Add new API endpoint for user progress
+    @app.route('/api/user/<user_id>/progress', methods=['GET'])
+    def get_user_progress(user_id):
+        try:
+            # Get Firestore client
+            db = firestore.client()
+            
+            # Query the kinesthetic_marks collection for this user's marks
+            marks_ref = db.collection('kinesthetic_marks').where('user_id', '==', user_id).get()
+            
+            # Calculate total score and count unique quiz attempts
+            total_score = 0
+            completed_quiz_ids = set()
+            
+            for mark in marks_ref:
+                mark_data = mark.to_dict()
+                score = mark_data.get('score', 0)
+                quiz_id = mark_data.get('quiz_id')
+                
+                total_score += score
+                if quiz_id:  # Only count if quiz_id exists
+                    completed_quiz_ids.add(quiz_id)
+            
+            # Return the progress data as JSON
+            return jsonify({
+                'total_score': total_score,
+                'questions_completed': len(completed_quiz_ids)
+            })
+            
+        except Exception as e:
+            app.logger.error(f"Error getting user progress: {str(e)}")
+            return jsonify({'error': str(e)}), 500
     
     # Add API endpoint to save marks
     @app.route('/api/save_marks', methods=['POST'])
