@@ -50,10 +50,17 @@
                             </p>
 
                             <!-- Add link to video tutorial for weakest subject -->
+                            {% if kinesthetic_profile and kinesthetic_profile.watched_videos and weakest.subject in
+                            kinesthetic_profile.watched_videos %}
+                            <button class="btn btn-success mt-2" disabled>
+                                <i class="fa fa-check-circle"></i> නරඹා ඇත
+                            </button>
+                            {% else %}
                             <a href="{{ url_for('kinesthetic.subject_help', subject=weakest.subject) }}"
                                 class="btn btn-warning mt-2">
                                 <i class="fa fa-play-circle"></i> විඩියෝ පාඩම බලන්න
                             </a>
+                            {% endif %}
                         </div>
                     </div>
                     {% endif %}
@@ -176,7 +183,7 @@
             </div>
 
             <!-- Display video watching status separately if any videos watched -->
-            {% if kinesthetic_profile and kinesthetic_profile.watched_videos and
+            <!-- {% if kinesthetic_profile and kinesthetic_profile.watched_videos and
             kinesthetic_profile.watched_videos|length > 0 %}
             <div class="card mt-4">
                 <div class="card-header bg-light">
@@ -223,7 +230,7 @@
                     </div>
                 </div>
             </div>
-            {% endif %}
+            {% endif %} -->
         </div>
     </div>
 </div>
