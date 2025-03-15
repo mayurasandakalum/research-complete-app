@@ -14,6 +14,16 @@
 
         <div class="header">
             <h1 class="title">ප්‍රශ්නාවලියේ ප්‍රතිඵල</h1>
+            <h3 class="subtitle">
+                <span class="badge badge-primary">දෙවන ප්‍රශ්නාවලිය</span>
+                {% if subject == 'addition' %}
+                <span class="badge badge-info">එකතු කිරීම</span>
+                {% elif subject == 'subtraction' %}
+                <span class="badge badge-warning">අඩු කිරීම</span>
+                {% elif subject == 'time' %}
+                <span class="badge badge-success">කාලය</span>
+                {% endif %}
+            </h3>
         </div>
 
         <div class="question-content">
@@ -32,6 +42,85 @@
                 </span>
                 {% endif %}
             </h2>
+
+            <!-- Quiz Performance Comparison -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">ප්‍රශ්නාවලි ප්‍රගතිය</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">පළමු ප්‍රශ්නාවලිය<br><small>මිශ්‍ර ප්‍රශ්න</small></h5>
+                                </div>
+                                <div class="card-body text-center">
+                                    <!-- Calculate performance from mixed quiz (quiz_type="mixed_quiz") -->
+                                    {% set mixed_correct = initial_stats.correct %}
+                                    {% set mixed_total = initial_stats.total %}
+                                    {% set mixed_percentage = initial_stats.percentage %}
+
+                                    <div class="progress mx-auto" style="height: 100px; width: 100px;"
+                                        data-toggle="tooltip" data-placement="top"
+                                        title="{{ mixed_correct }}/{{ mixed_total }} correct answers">
+                                        <div class="progress-circle">
+                                            <div class="progress-circle-inner"
+                                                style="--percentage: {{ mixed_percentage }}%">
+                                                <span class="percentage">{{ "%.1f"|format(mixed_percentage) }}%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header bg-success">
+                                    <h5 class="mb-0 text-white">දෙවන ප්‍රශ්නාවලිය<br><small>දුර්වලම විෂයය</small></h5>
+                                </div>
+                                <div class="card-body text-center">
+                                    <!-- Calculate performance from weakest subject quiz (quiz_type="weakest_subject") -->
+                                    {% set weakest_correct = final_stats.correct %}
+                                    {% set weakest_total = final_stats.total %}
+                                    {% set weakest_percentage = final_stats.percentage %}
+
+                                    <div class="progress mx-auto" style="height: 100px; width: 100px;"
+                                        data-toggle="tooltip" data-placement="top"
+                                        title="{{ weakest_correct }}/{{ weakest_total }} correct answers">
+                                        <div class="progress-circle">
+                                            <div class="progress-circle-inner"
+                                                style="--percentage: {{ weakest_percentage }}%">
+                                                <span class="percentage">{{ "%.1f"|format(weakest_percentage) }}%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Improvement indicator -->
+                                    {% if weakest_percentage > mixed_percentage %}
+                                    <div class="improvement mt-2 text-success">
+                                        <i class="fa fa-arrow-up"></i>
+                                        <span class="ml-1">{{ "%.1f"|format(weakest_percentage - mixed_percentage) }}%
+                                            වැඩිදියුණු වීම</span>
+                                    </div>
+                                    {% elif weakest_percentage == mixed_percentage %}
+                                    <div class="improvement mt-2 text-warning">
+                                        <i class="fa fa-minus"></i>
+                                        <span class="ml-1">වෙනසක් නැත</span>
+                                    </div>
+                                    {% else %}
+                                    <div class="improvement mt-2 text-danger">
+                                        <i class="fa fa-arrow-down"></i>
+                                        <span class="ml-1">{{ "%.1f"|format(mixed_percentage - weakest_percentage)|abs
+                                            }}% අඩුවීම</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <div class="row">
                 <div class="col-md-4">
@@ -108,6 +197,43 @@
     </div>
 </div>
 
+<style>
+    /* Custom styles for the progress circles */
+    .progress-circle {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        border-radius: 50%;
+        background: #f0f0f0;
+        overflow: hidden;
+    }
+
+    .progress-circle-inner {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: conic-gradient(#4CAF50 0% var(--percentage), transparent var(--percentage) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        clip-path: circle(50%);
+    }
+
+    .percentage {
+        font-size: 20px;
+        font-weight: bold;
+        background: white;
+        width: 70%;
+        height: 70%;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+</style>
+
 <script>
     // Add confetti animation for positive score difference
     document.addEventListener('DOMContentLoaded', function () {
@@ -146,6 +272,9 @@
             }, parseFloat(fallDuration) * 1000);
         }
         {% endif %}
+
+        // Initialize tooltips
+        $('[data-toggle="tooltip"]').tooltip();
     });
 </script>
 {% endblock %}

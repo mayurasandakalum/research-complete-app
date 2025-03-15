@@ -128,8 +128,57 @@ def home():
 @login_required
 def user_home():
     kinesthetic_profile = QuizProfile.get_by_user_id(current_user.id)
+    
+    # Get attempts by quiz type for performance comparison
+    attempts_by_type = {}
+    weakest_subject = None
+    
+    if kinesthetic_profile:
+        # Get the weakest subject
+        weakest_data = kinesthetic_profile.get_weakest_subject()
+        weakest_subject = weakest_data.get("subject")
+        
+        if weakest_subject:
+            # Get attempts for this subject and split by quiz_type
+            attempts_query = (
+                db.collection("attempted_questions")
+                .where("user_id", "==", current_user.id)
+                .get()
+            )
+            
+            # Process the attempts to get statistics by quiz_type
+            for attempt in attempts_query:
+                attempt_data = attempt.to_dict()
+                quiz_type = attempt_data.get("quiz_type", "mixed_quiz")  # Default if not specified
+                
+                # Get the question to determine subject
+                question_id = attempt_data.get("question_id")
+                if not question_id:
+                    continue
+                    
+                question_ref = db.collection("questions").document(question_id).get()
+                if not question_ref.exists:
+                    continue
+                    
+                question_data = question_ref.to_dict()
+                subject = question_data.get("subject")
+                
+                if subject != weakest_subject:
+                    continue
+                
+                # Initialize counters if needed
+                if quiz_type not in attempts_by_type:
+                    attempts_by_type[quiz_type] = {"total": 0, "correct": 0}
+                
+                # Count the attempt
+                attempts_by_type[quiz_type]["total"] += 1
+                if attempt_data.get("is_correct", False):
+                    attempts_by_type[quiz_type]["correct"] += 1
+    
     return render_template(
-        "kinesthetic/user_home.html", kinesthetic_profile=kinesthetic_profile
+        "kinesthetic/user_home.html",
+        kinesthetic_profile=kinesthetic_profile,
+        attempts_by_type=attempts_by_type
     )
 
 
@@ -233,6 +282,7 @@ def play():
                 is_correct=is_correct,
                 images=captured_images,
                 result_data=result_data,  # Add results to the attempt record
+                quiz_type="mixed_quiz"  # Set quiz_type to "mixed_quiz"
             )
             attempted.save()
 
@@ -1083,8 +1133,63 @@ def process_weakest_subject_quiz():
         # Get current profile score
         kinesthetic_profile = QuizProfile.get_by_user_id(current_user.id)
         final_score = kinesthetic_profile.total_score
-        
         score_difference = final_score - initial_score
+        
+        # Get detailed statistics for both quiz types
+        # For the mixed quiz (initial)
+        initial_stats = {
+            "correct": 0,
+            "total": 0,
+            "percentage": 0
+        }
+        
+        # For the weakest subject quiz (final)
+        final_stats = {
+            "correct": 0,
+            "total": 0,
+            "percentage": 0
+        }
+        
+        # Get all attempted questions for this subject
+        attempted_questions = (
+            db.collection("attempted_questions")
+            .where("user_id", "==", current_user.id)
+            .get()
+        )
+        
+        for attempt in attempted_questions:
+            attempt_data = attempt.to_dict()
+            quiz_type = attempt_data.get("quiz_type", "mixed_quiz")
+            
+            # Get the question to check subject
+            question_id = attempt_data.get("question_id")
+            if not question_id:
+                continue
+                
+            question_ref = db.collection("questions").document(question_id).get()
+            if not question_ref.exists:
+                continue
+                
+            question_data = question_ref.to_dict()
+            if question_data.get("subject") != subject:
+                continue
+            
+            # Count based on quiz type
+            if quiz_type == "mixed_quiz":
+                initial_stats["total"] += 1
+                if attempt_data.get("is_correct", False):
+                    initial_stats["correct"] += 1
+            elif quiz_type == "weakest_subject":
+                final_stats["total"] += 1
+                if attempt_data.get("is_correct", False):
+                    final_stats["correct"] += 1
+        
+        # Calculate percentages
+        if initial_stats["total"] > 0:
+            initial_stats["percentage"] = (initial_stats["correct"] / initial_stats["total"]) * 100
+        
+        if final_stats["total"] > 0:
+            final_stats["percentage"] = (final_stats["correct"] / final_stats["total"]) * 100
         
         # Render the result page
         return render_template(
@@ -1092,7 +1197,9 @@ def process_weakest_subject_quiz():
             initial_score=initial_score,
             final_score=final_score,
             score_difference=score_difference,
-            subject=subject
+            subject=subject,
+            initial_stats=initial_stats,
+            final_stats=final_stats
         )
     
     # For POST requests, process the current question's answers
@@ -1193,7 +1300,8 @@ def process_weakest_subject_quiz():
             sub_question_id=sub_question_id,
             is_correct=is_correct,
             images=captured_images,
-            result_data=result_data
+            result_data=result_data,
+            quiz_type="weakest_subject"  # Set quiz_type to "weakest_subject"
         )
         attempted.save()
         

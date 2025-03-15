@@ -392,7 +392,7 @@ class SubQuestion:
 class AttemptedQuestion:
     def __init__(
         self, user_id, question_id, sub_question_id=None, is_correct=False, images=None,
-        result_data=None
+        result_data=None, quiz_type="mixed_quiz"  # Add quiz_type field with default value
     ):
         self.id = str(uuid.uuid4())
         self.user_id = user_id
@@ -400,7 +400,8 @@ class AttemptedQuestion:
         self.sub_question_id = sub_question_id
         self.is_correct = is_correct
         self.images = images or {}
-        self.result_data = result_data or {}  # Store detection results
+        self.result_data = result_data or {}
+        self.quiz_type = quiz_type  # Initialize quiz_type
         self.attempted_at = datetime.utcnow()
 
     def save(self):
@@ -411,6 +412,7 @@ class AttemptedQuestion:
             "is_correct": self.is_correct,
             "images": self.images,
             "result_data": self.result_data,  # Add this field
+            "quiz_type": self.quiz_type,  # Save quiz_type
             "attempted_at": self.attempted_at,
         }
         db.collection("attempted_questions").document(self.id).set(data)
