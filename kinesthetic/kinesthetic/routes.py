@@ -931,3 +931,33 @@ def logout():
     
     # Redirect to main system logout
     return redirect("http://localhost:5000/logout")
+
+@kinesthetic_blueprint.route("/subject-help/<subject>")
+@login_required
+def subject_help(subject):
+    """Show tutorial video for the specified subject."""
+    # Validate subject
+    if subject not in [Subject.ADDITION, Subject.SUBTRACTION, Subject.TIME]:
+        flash("Invalid subject specified", "error")
+        return redirect(url_for("kinesthetic.user_home"))
+        
+    # Get subject name for display
+    subject_names = {
+        "addition": "එකතු කිරීම",
+        "subtraction": "අඩු කිරීම",
+        "time": "කාලය",
+    }
+    
+    # YouTube video IDs for each subject
+    video_ids = {
+        "addition": "dZW84LMJFws",      # Example video ID for addition
+        "subtraction": "QZlOZtdJA50",   # Example video ID for subtraction
+        "time": "5M5IoW_qcIY",          # Example video ID for time
+    }
+    
+    return render_template(
+        "kinesthetic/subject_help.html",
+        subject=subject,
+        subject_name=subject_names.get(subject, subject),
+        video_id=video_ids.get(subject)
+    )

@@ -40,7 +40,12 @@
                                 {% endif %}
                             </h4>
                             <p>ඔබගේ කාර්ය සාධනය: {{ "%.1f"|format(weakest.percentage) }}%</p>
-                            <p>මෙම විෂය කෙරෙහි වැඩි අවධානයක් යොමු කිරීමෙන් ඔබට වැඩිදියුණු විය හැකිය.</p>
+
+                            <!-- Add link to video tutorial for weakest subject -->
+                            <a href="{{ url_for('kinesthetic.subject_help', subject=weakest.subject) }}"
+                                class="btn btn-warning mt-2">
+                                <i class="fa fa-play-circle"></i> විඩියෝ පාඩම බලන්න
+                            </a>
                         </div>
                     </div>
                     {% endif %}
