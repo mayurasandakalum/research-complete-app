@@ -36,6 +36,7 @@
         {% endwith %}
 
         <form method="POST" action="{{ url_for('login') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="form-group">
                 <label for="email">විද්‍යුත් තැපෑල:</label>
                 <input type="email" id="email" name="email" required>

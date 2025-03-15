@@ -50,6 +50,9 @@ def init_routes(app):
     @app.route('/login', methods=['GET', 'POST'])
     def login():
         """Handle user login."""
+        # Debug line to check if we're processing a form submission
+        print(f"Login request: {request.method}, form data: {request.form if request.method == 'POST' else 'N/A'}")
+        
         if request.method == 'POST':
             email = request.form.get('email')
             password = request.form.get('password')

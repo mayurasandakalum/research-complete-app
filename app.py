@@ -17,17 +17,16 @@ from routes import init_routes
 app = Flask(__name__)
 app.config['SECRET_KEY'] = config.SECRET_KEY
 
-# Add this debug line to your app initialization code
-print("Initializing routes...")
-# Initialize routes before defining any local routes
-init_routes(app)
-print("Routes initialized!")
-
-# Initialize CSRF protection
+# Initialize CSRF protection BEFORE routes
 csrf = CSRFProtect()
 csrf.init_app(app)
 
-# Exempt the video-watching route from CSRF protection
+# Now initialize routes
+print("Initializing routes...")
+init_routes(app)
+print("Routes initialized!")
+
+# Exempt specific routes if needed
 csrf.exempt("kinesthetic.mark_video_as_watched")
 
 # Store the process objects for cleanup
