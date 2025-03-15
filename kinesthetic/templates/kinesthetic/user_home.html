@@ -20,7 +20,7 @@
 
                     {% if kinesthetic_profile and kinesthetic_profile.mixed_quiz_completed %}
                     <div class="completion-banner bg-success text-white p-3 rounded mb-4">
-                        <h4>සම්පූර්ණයි! 🎉</h4>
+                        <h4>පළමු ප්‍රශ්නාවලිය සම්පූර්ණයි! 🎉</h4>
                         <!-- <p class="lead mb-0">ඔබේ ලකුණු: {{ kinesthetic_profile.total_score }}</p> -->
                     </div>
 
@@ -30,17 +30,24 @@
                     {% if weakest.subject %}
                     <div class="card mb-4">
                         <div class="card-header bg-warning text-dark">
-                            <h5 class="mb-0">වැඩිදුර අධ්‍යයනය අවශ්‍ය විෂයය</h5>
+                            <h5 class="mb-0">ප්‍රශ්නාවලියට අනුව ඔබ වැඩිදුර අධ්‍යයනය කිරීමට අවශ්‍ය විෂයය</h5>
                         </div>
                         <div class="card-body">
-                            <h4>
-                                {% if weakest.subject == 'addition' %}එකතු කිරීම
-                                {% elif weakest.subject == 'subtraction' %}අඩු කිරීම
-                                {% elif weakest.subject == 'time' %}කාලය
+                            <h4 style="font-weight: bolder;">
+                                {% if weakest.subject == 'addition' %}එකතු කිරීම පාඩම
+                                {% elif weakest.subject == 'subtraction' %}අඩු කිරීම පාඩම
+                                {% elif weakest.subject == 'time' %}කාලය පාඩම
                                 {% else %}{{ weakest.subject }}
                                 {% endif %}
                             </h4>
                             <p>පළමු ප්‍රශ්නාවලියේ ලකුණු: {{ "%.1f"|format(weakest.percentage) }}%</p>
+                            <p>දැන්, ඔබට අප ඔබේ <span>{% if weakest.subject == 'addition' %}එකතු කිරීම
+                                    {% elif weakest.subject == 'subtraction' %}අඩු කිරීම
+                                    {% elif weakest.subject == 'time' %}කාලය
+                                    {% else %}{{ weakest.subject }}
+                                    {% endif %}</span> පාඩම සම්බන්ධ දැනුම වැඩි දියුණු කරගැනීමට පහතින් වීඩියෝවක් නිර්දේශ
+                                කර ඇත. එය බලන්න.
+                            </p>
 
                             <!-- Add link to video tutorial for weakest subject -->
                             <a href="{{ url_for('kinesthetic.subject_help', subject=weakest.subject) }}"
@@ -52,9 +59,9 @@
                     {% endif %}
                     {% endif %}
 
-                    <a href="{{ url_for('kinesthetic.leaderboard') }}" class="btn btn-primary">
+                    <!-- <a href="{{ url_for('kinesthetic.leaderboard') }}" class="btn btn-primary">
                         ප්‍රතිඵල බලන්න
-                    </a>
+                    </a> -->
                     {% else %}
                     <div class="progress mb-3" style="height: 30px;">
                         {% set progress = (kinesthetic_profile.current_lesson_attempts or 0) / 15 * 100 if

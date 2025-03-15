@@ -86,7 +86,7 @@
   <nav class="navbar navbar-expand-md navbar-dark">
     <div class="container">
       <h1 class="mb-0">
-        <a href="{{ url_for('kinesthetic.home') }}" class="navbar-brand">
+        <a href="{{ url_for('kinesthetic.user_home') }}" class="navbar-brand">
           <i class="bi bi-stars me-2"></i>
           <strong>Math Learning Hub</strong>
         </a>
@@ -111,12 +111,13 @@
           {% else %}
           <li class="nav-item">
             <span class="text-white me-3">
-              <i class="bi bi-person-circle me-2"></i>{{ current_user.username|capitalize }}, ඔබව සාදරයෙන් පිලිගන්නවා!
+              <span class="me-2" style="font-size: 1.2rem;">👋</span>{{ current_user.username|capitalize }}, ඔබව
+              සාදරයෙන් පිලිගන්නවා!
             </span>
           </li>
           <li class="nav-item">
             <a href="{{ url_for('kinesthetic.leaderboard') }}" class="btn btn-info me-2">
-              <i class="bi bi-trophy-fill me-2"></i>Leaderboard
+              <i class="bi bi-trophy-fill me-2"></i>ශ්‍රේණිගත කිරීම්
             </a>
           </li>
           <!-- <li class="nav-item">
@@ -136,20 +137,6 @@
   </nav>
 
   {% block content %} {% endblock content %}
-
-  <!-- <footer class="child-friendly-footer mt-5">
-    <div class="container">
-      <div class="row align-items-center text-center">
-        <div class="col-12">
-          <p class="mb-0">
-            <i class="bi bi-stars text-warning"></i>
-            Learning is fun with Let's Quiz!
-            <i class="bi bi-stars text-warning"></i>
-          </p>
-        </div>
-      </div>
-    </div>
-  </footer> -->
 
   <!-- jQuery first, then Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
