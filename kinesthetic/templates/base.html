@@ -88,7 +88,7 @@
       <h1 class="mb-0">
         <a href="{{ url_for('kinesthetic.home') }}" class="navbar-brand">
           <i class="bi bi-stars me-2"></i>
-          <strong>Let's Quiz</strong>
+          <strong>Math Learning Hub</strong>
         </a>
       </h1>
       <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar"
@@ -111,7 +111,7 @@
           {% else %}
           <li class="nav-item">
             <span class="text-white me-3">
-              <i class="bi bi-person-circle me-2"></i>Welcome, {{ current_user.username }}
+              <i class="bi bi-person-circle me-2"></i>{{ current_user.username|capitalize }}, ඔබව සාදරයෙන් පිලිගන්නවා!
             </span>
           </li>
           <li class="nav-item">
@@ -119,11 +119,11 @@
               <i class="bi bi-trophy-fill me-2"></i>Leaderboard
             </a>
           </li>
-          <li class="nav-item">
+          <!-- <li class="nav-item">
             <a href="{{ url_for('kinesthetic.play') }}" class="btn btn-success me-2">
               <i class="bi bi-controller me-2"></i>Let's Play
             </a>
-          </li>
+          </li> -->
           <li class="nav-item">
             <a href="http://localhost:5000/logout" class="btn btn-danger">
               Logout

@@ -3,24 +3,25 @@
 
 {% block content %}
 <div class="container py-5">
-    <h1 class="text-center mb-5">ප්‍රශ්න පරීක්ෂණය</h1>
+    <h1 class="text-center mb-5">Kinesthetic ප්‍රශ්නාවලිය</h1>
 
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h2 class="card-title mb-0">මිශ්‍ර පාඩම් මඟින් ඉගෙනගන්න</h2>
+                    <h2 class="card-title mb-0">පළමු ප්‍රශ්නාවලිය</h2>
                     <a href="http://localhost:5000/student_dashboard" class="btn btn-outline-primary btn-sm">
                         <i class="fa fa-arrow-left"></i> ප්‍රධාන පුවරුවට ආපසු
                     </a>
                 </div>
                 <div class="card-body text-center">
-                    <p class="card-text">විවිධ විෂය ක්ෂේත්‍ර වල මිශ්‍ර ප්‍රශ්න 15 (එකතු කිරීම, අඩු කිරීම සහ කාලය)</p>
+                    <p class="card-text">මෙහි <u>එකතු කිරීම</u>, <u>අඩු කිරීම</u>, සහ <u>කාලය</u> යන විෂයන් වලින්
+                        මිශ්‍ර ප්‍රශ්න 15 ක් අඩංගු වේ.</p>
 
                     {% if kinesthetic_profile and kinesthetic_profile.mixed_quiz_completed %}
                     <div class="completion-banner bg-success text-white p-3 rounded mb-4">
                         <h4>සම්පූර්ණයි! 🎉</h4>
-                        <p class="lead mb-0">ඔබේ ලකුණු: {{ kinesthetic_profile.total_score }}</p>
+                        <!-- <p class="lead mb-0">ඔබේ ලකුණු: {{ kinesthetic_profile.total_score }}</p> -->
                     </div>
 
                     <!-- Weakest Subject Analysis -->
@@ -39,7 +40,7 @@
                                 {% else %}{{ weakest.subject }}
                                 {% endif %}
                             </h4>
-                            <p>ඔබගේ කාර්ය සාධනය: {{ "%.1f"|format(weakest.percentage) }}%</p>
+                            <p>පළමු ප්‍රශ්නාවලියේ ලකුණු: {{ "%.1f"|format(weakest.percentage) }}%</p>
 
                             <!-- Add link to video tutorial for weakest subject -->
                             <a href="{{ url_for('kinesthetic.subject_help', subject=weakest.subject) }}"
@@ -65,7 +66,7 @@
                             %}0/15{% endif %}
                         </div>
                     </div>
-                    <p class="card-text">සම්පූර්ණ කළ ප්‍රශ්න:
+                    <p class="card-text">ඔබ දැනට සම්පූර්ණ කළ ප්‍රශ්න:
                         {% if kinesthetic_profile %}
                         <strong>{{ kinesthetic_profile.current_lesson_attempts }}/15</strong>
                         {% else %}
@@ -73,7 +74,7 @@
                         {% endif %}
                     </p>
                     <a href="{{ url_for('kinesthetic.play') }}" class="btn btn-primary btn-lg">
-                        <i class="fa fa-play-circle"></i> පරීක්ෂණය ආරම්භ කරන්න
+                        <i class="fa fa-play-circle"></i> ප්‍රශ්නාවලිය ආරම්භ කරන්න
                     </a>
                     {% endif %}
                 </div>
@@ -94,7 +95,7 @@
                         {% else %}{{ weakest.subject }}
                         {% endif %}
                     </h4>
-                    <p>ඔබගේ ලකුණු: {{ "%.1f"|format(weakest.percentage) }}%</p>
+                    <p>දෙවන ප්‍රශ්නාවලියේ ලකුණු: {{ "%.1f"|format(weakest.percentage) }}%</p>
                     <a href="{{ url_for('kinesthetic.weakest_subject_quiz') }}" class="btn btn-warning">
                         <i class="fa fa-graduation-cap"></i> දුර්වලම විෂය ප්‍රශ්නාවලිය
                     </a>
