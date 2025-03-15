@@ -148,30 +148,6 @@ function onPlayerStateChange(event) {
   }
 }
 
-// Helper function to mark video as watched (for use by external scripts)
-window.markVideoAsWatched = function () {
-  // Get subject from URL path
-  const pathParts = window.location.pathname.split("/");
-  const subject = pathParts[pathParts.length - 1];
-
-  return fetch("/api/video-watched/" + subject, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ method: "manual" }),
-  }).then((response) => {
-    if (!response.ok) {
-      console.error("Error response:", response.status);
-      return response.text().then((text) => {
-        console.error("Error details:", text);
-        throw new Error("Network response was not ok");
-      });
-    }
-    return response.json();
-  });
-};
-
 // Handle any errors
 function onPlayerError(event) {
   console.error("YouTube player error:", event.data);
@@ -183,6 +159,65 @@ function onPlayerError(event) {
          <i class="fa fa-youtube-play"></i> YouTube හි වීඩියෝව බලන්න
        </a>
      </div>`;
+}
+
+// Function to handle the "Finished Watching" button click
+function markVideoAsWatched() {
+  // Get subject from URL path
+  const pathParts = window.location.pathname.split("/");
+  const subject = pathParts[pathParts.length - 1];
+
+  // Get the button element
+  const watchedBtn = document.getElementById("mark-watched-btn");
+
+  // Disable button and show loading state
+  watchedBtn.disabled = true;
+  watchedBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Processing...';
+
+  // Send AJAX request to mark video as watched
+  fetch("/api/video-watched/" + subject, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ method: "manual" }), // Adding context for how it was marked
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Network response was not ok: " + response.status);
+      }
+      return response.json();
+    })
+    .then((data) => {
+      console.log("Video marked as watched:", data);
+
+      // Update the button to show success
+      watchedBtn.innerHTML = '<i class="fa fa-check"></i> නරඹා ඇත';
+      watchedBtn.classList.add("btn-watched");
+      watchedBtn.disabled = true;
+
+      // Add the watched badge to the header if it doesn't exist
+      const videoHeader = document.querySelector(".video-header");
+      let watchedBadge = document.querySelector(".watched-badge");
+
+      if (!watchedBadge) {
+        watchedBadge = document.createElement("div");
+        watchedBadge.className = "watched-badge";
+        watchedBadge.innerHTML = '<i class="fa fa-check-circle"></i> නරඹා ඇත';
+        videoHeader.appendChild(watchedBadge);
+      }
+    })
+    .catch((error) => {
+      console.error("Error marking video as watched:", error);
+
+      // Restore button state
+      watchedBtn.disabled = false;
+      watchedBtn.innerHTML =
+        '<i class="fa fa-check-circle"></i> වීඩියෝව බලා අවසන්';
+
+      // Show error
+      alert("Error marking video as watched. Please try again.");
+    });
 }
 
 // Start loading the API when the page loads
