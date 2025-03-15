@@ -29,9 +29,16 @@
                     {% set weakest = kinesthetic_profile.get_weakest_subject() %}
                     {% if weakest.subject %}
                     <div class="card mb-4">
+                        {% if kinesthetic_profile and kinesthetic_profile.watched_videos and weakest.subject in
+                        kinesthetic_profile.watched_videos %}
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">ප්‍රශ්නාවලියට අනුව ඔබ වැඩිදුර අධ්‍යයනය කිරීමට අවශ්‍ය විෂයය</h5>
+                        </div>
+                        {% else %}
                         <div class="card-header bg-warning text-dark">
                             <h5 class="mb-0">ප්‍රශ්නාවලියට අනුව ඔබ වැඩිදුර අධ්‍යයනය කිරීමට අවශ්‍ය විෂයය</h5>
                         </div>
+                        {% endif %}
                         <div class="card-body">
                             <h4 style="font-weight: bolder;">
                                 {% if weakest.subject == 'addition' %}එකතු කිරීම පාඩම
