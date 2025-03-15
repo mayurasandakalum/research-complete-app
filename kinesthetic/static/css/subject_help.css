@@ -216,6 +216,56 @@ html {
   }
 }
 
+/* Watched badge styling */
+.watched-badge {
+  background-color: rgba(
+    40,
+    167,
+    69,
+    0.9
+  ); /* Bootstrap success color with transparency */
+  color: white;
+  padding: 8px 15px;
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: bold;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.watched-badge i {
+  font-size: 18px;
+}
+
+/* Video actions */
+.video-actions {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+#mark-watched-btn {
+  font-size: 16px;
+  padding: 10px 20px;
+  border-radius: 50px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+#mark-watched-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+}
+
+.btn-watched {
+  background-color: #198754 !important; /* Bootstrap success green */
+  opacity: 0.8;
+  cursor: not-allowed;
+}
+
 /* For smaller screens */
 @media (max-width: 992px) {
   .youtube-player {

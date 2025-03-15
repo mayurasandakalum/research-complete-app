@@ -82,7 +82,7 @@ class QuizProfile:
     def __init__(self, user_id, total_score=0.0, created=None, modified=None, 
                  completed_lessons=None, current_lesson_attempts=0, 
                  mixed_quiz_completed=False, subject_counts=None,
-                 subject_performance=None):
+                 subject_performance=None, watched_videos=None):
         self.user_id = user_id
         self.total_score = total_score
         self.created = created if created else datetime.utcnow()
@@ -94,6 +94,8 @@ class QuizProfile:
         self.subject_counts = subject_counts or {}  # To track how many questions from each subject have been shown
         # Track performance by subject: {subject: {"correct": x, "total": y}}
         self.subject_performance = subject_performance or {}
+        # Track which subject videos have been watched
+        self.watched_videos = watched_videos or []
 
     @staticmethod
     def get_by_user_id(user_id):
@@ -110,6 +112,7 @@ class QuizProfile:
                 mixed_quiz_completed=data.get("mixed_quiz_completed", False),
                 subject_counts=data.get("subject_counts", {}),
                 subject_performance=data.get("subject_performance", {}),
+                watched_videos=data.get("watched_videos", []),
             )
             return profile
         return None
@@ -125,6 +128,7 @@ class QuizProfile:
             "mixed_quiz_completed": self.mixed_quiz_completed,
             "subject_counts": self.subject_counts,
             "subject_performance": self.subject_performance,
+            "watched_videos": self.watched_videos,
         }
         db.collection("kinesthetic_profiles").document(str(self.user_id)).set(data)
 

@@ -95,6 +95,21 @@
                                     {% elif subject == 'time' %}කාලය
                                     {% else %}{{ subject }}
                                     {% endif %}
+
+                                    <!-- Show video watched badge -->
+                                    {% if kinesthetic_profile.watched_videos and subject in
+                                    kinesthetic_profile.watched_videos %}
+                                    <span class="badge badge-pill badge-success ml-2"
+                                        title="ඔබ මේ විෂයයේ පාඩම් වීඩියෝව නරඹා ඇත">
+                                        <i class="fa fa-check"></i> වීඩියෝව නරඹා ඇත
+                                    </span>
+                                    {% else %}
+                                    <a href="{{ url_for('kinesthetic.subject_help', subject=subject) }}"
+                                        class="badge badge-pill badge-secondary ml-2"
+                                        title="මේ විෂයයේ පාඩම් වීඩියෝව නරඹන්න">
+                                        <i class="fa fa-play-circle"></i> වීඩියෝව නරඹන්න
+                                    </a>
+                                    {% endif %}
                                 </span>
                                 <span>{{ count }} ප්‍රශ්න</span>
                             </div>
@@ -126,6 +141,56 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Display video watching status separately if any videos watched -->
+            {% if kinesthetic_profile and kinesthetic_profile.watched_videos and
+            kinesthetic_profile.watched_videos|length > 0 %}
+            <div class="card mt-4">
+                <div class="card-header bg-light">
+                    <h3>නරඹන ලද වීඩියෝ පාඩම්</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for subject in ['addition', 'subtraction', 'time'] %}
+                        <div class="col-md-4 mb-3">
+                            <div
+                                class="card h-100 {% if subject in kinesthetic_profile.watched_videos %}border-success{% else %}border-light{% endif %}">
+                                <div class="card-body text-center">
+                                    <h5>
+                                        {% if subject == 'addition' %}එකතු කිරීම
+                                        {% elif subject == 'subtraction' %}අඩු කිරීම
+                                        {% elif subject == 'time' %}කාලය
+                                        {% endif %}
+                                    </h5>
+                                    {% if subject in kinesthetic_profile.watched_videos %}
+                                    <div class="text-success">
+                                        <i class="fa fa-check-circle fa-2x"></i>
+                                        <p class="mb-0">නරඹා ඇත</p>
+                                    </div>
+                                    {% else %}
+                                    <div class="text-muted">
+                                        <i class="fa fa-times-circle fa-2x"></i>
+                                        <p class="mb-0">නරඹා නැත</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="card-footer bg-transparent text-center">
+                                    <a href="{{ url_for('kinesthetic.subject_help', subject=subject) }}"
+                                        class="btn btn-sm {% if subject in kinesthetic_profile.watched_videos %}btn-outline-success{% else %}btn-primary{% endif %}">
+                                        {% if subject in kinesthetic_profile.watched_videos %}
+                                        <i class="fa fa-redo"></i> නැවත නරඹන්න
+                                        {% else %}
+                                        <i class="fa fa-play-circle"></i> වීඩියෝව නරඹන්න
+                                        {% endif %}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>

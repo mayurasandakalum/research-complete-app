@@ -99,6 +99,40 @@ function onPlayerReady(event) {
 function onPlayerStateChange(event) {
   if (event.data === YT.PlayerState.ENDED) {
     console.log("Video ended");
+
+    // Get subject from URL path
+    const pathParts = window.location.pathname.split("/");
+    const subject = pathParts[pathParts.length - 1];
+
+    // Send AJAX request to mark video as watched - fix the URL path
+    fetch("/api/video-watched/" + subject, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ method: "automatic" }), // Add information about how it was completed
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok: " + response.status);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log("Video marked as watched:", data);
+
+        // Update the "Finished Watching" button
+        const watchedBtn = document.getElementById("mark-watched-btn");
+        if (watchedBtn) {
+          watchedBtn.innerHTML = '<i class="fa fa-check"></i> සම්පූර්ණයි!';
+          watchedBtn.classList.add("btn-watched");
+          watchedBtn.disabled = true;
+        }
+      })
+      .catch((error) => {
+        console.error("Error marking video as watched:", error);
+      });
+
     // Show a message when video ends
     const playerContainer =
       document.querySelector(".youtube-player").parentNode;
@@ -113,6 +147,30 @@ function onPlayerStateChange(event) {
       .scrollIntoView({ behavior: "smooth" });
   }
 }
+
+// Helper function to mark video as watched (for use by external scripts)
+window.markVideoAsWatched = function () {
+  // Get subject from URL path
+  const pathParts = window.location.pathname.split("/");
+  const subject = pathParts[pathParts.length - 1];
+
+  return fetch("/api/video-watched/" + subject, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ method: "manual" }),
+  }).then((response) => {
+    if (!response.ok) {
+      console.error("Error response:", response.status);
+      return response.text().then((text) => {
+        console.error("Error details:", text);
+        throw new Error("Network response was not ok");
+      });
+    }
+    return response.json();
+  });
+};
 
 // Handle any errors
 function onPlayerError(event) {

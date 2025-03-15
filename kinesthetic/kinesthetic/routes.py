@@ -932,6 +932,59 @@ def logout():
     # Redirect to main system logout
     return redirect("http://localhost:5000/logout")
 
+@kinesthetic_blueprint.route("/api/video-watched/<subject>", methods=["POST"])
+@login_required
+def video_watched(subject):
+    """Track when a user watches a video for a specific subject"""
+    # Debug info
+    print(f"Video watched request for subject: {subject}")
+    print(f"Request content type: {request.content_type}")
+    print(f"Request data: {request.get_data(as_text=True)}")
+    
+    # Validate subject - make case-insensitive comparison
+    valid_subjects = [Subject.ADDITION.lower(), Subject.SUBTRACTION.lower(), Subject.TIME.lower()]
+    if subject.lower() not in valid_subjects:
+        print(f"Invalid subject: {subject}. Valid subjects are: {valid_subjects}")
+        return jsonify({"success": False, "error": f"Invalid subject: {subject}"}), 400
+    
+    # Get the completion method (manual or automatic)
+    try:
+        data = request.get_json()
+        # Handle if request.get_json() returns None
+        if data is None:
+            data = {}
+        
+        completion_method = data.get('method', 'manual')
+    except Exception as e:
+        print(f"Error parsing JSON: {str(e)}")
+        completion_method = 'manual'  # Default if parsing fails
+    
+    # Get user profile
+    kinesthetic_profile = QuizProfile.get_by_user_id(current_user.id)
+    if not kinesthetic_profile:
+        return jsonify({"success": False, "error": "User profile not found"}), 404
+    
+    # Initialize watched_videos if it doesn't exist
+    if not hasattr(kinesthetic_profile, 'watched_videos') or kinesthetic_profile.watched_videos is None:
+        kinesthetic_profile.watched_videos = []
+    
+    # Add the subject to watched videos if not already there
+    if subject not in kinesthetic_profile.watched_videos:
+        kinesthetic_profile.watched_videos.append(subject)
+        
+        # You could also track HOW they completed the video if needed
+        if not hasattr(kinesthetic_profile, 'video_completion_methods'):
+            kinesthetic_profile.video_completion_methods = {}
+        
+        kinesthetic_profile.video_completion_methods[subject] = completion_method
+        kinesthetic_profile.save()
+    
+    return jsonify({
+        "success": True, 
+        "watched_videos": kinesthetic_profile.watched_videos,
+        "completion_method": completion_method
+    })
+
 @kinesthetic_blueprint.route("/subject-help/<subject>")
 @login_required
 def subject_help(subject):
@@ -955,9 +1008,17 @@ def subject_help(subject):
         "time": "5M5IoW_qcIY",          # Example video ID for time
     }
     
+    # Get user profile to check if video has already been watched
+    kinesthetic_profile = QuizProfile.get_by_user_id(current_user.id)
+    video_already_watched = False
+    
+    if kinesthetic_profile and hasattr(kinesthetic_profile, 'watched_videos'):
+        video_already_watched = subject in kinesthetic_profile.watched_videos
+    
     return render_template(
         "kinesthetic/subject_help.html",
         subject=subject,
         subject_name=subject_names.get(subject, subject),
-        video_id=video_ids.get(subject)
+        video_id=video_ids.get(subject),
+        video_already_watched=video_already_watched
     )

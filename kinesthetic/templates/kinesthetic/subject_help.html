@@ -23,6 +23,13 @@
                 <i class="fa fa-arrow-left"></i> ආපසු
             </a>
             <h1>{{ subject_name }} පාඩම</h1>
+
+            <!-- Show watched badge if video was previously watched -->
+            {% if video_already_watched %}
+            <div class="watched-badge">
+                <i class="fa fa-check-circle"></i> නරඹා ඇත
+            </div>
+            {% endif %}
         </div>
 
         <div class="youtube-container">
@@ -36,6 +43,13 @@
                     <p class="mt-3 text-light">වීඩියෝව පූරණය වෙමින්...</p>
                 </div>
             </div>
+        </div>
+
+        <!-- Add "Finished Watching" button -->
+        <div class="video-actions">
+            <button id="mark-watched-btn" class="btn btn-success" onclick="markVideoAsWatched()">
+                <i class="fa fa-check-circle"></i> වීඩියෝව බලා අවසන්
+            </button>
         </div>
 
         <div class="video-footer">
@@ -52,6 +66,80 @@
 
     <!-- Custom script for YouTube player -->
     <script src="{{ url_for('static', filename='js/subject_help.js') }}"></script>
+
+    <script>
+        // Get the subject from the URL
+        const pathParts = window.location.pathname.split('/');
+        const subject = pathParts[pathParts.length - 1];
+
+        // Add function to mark video as watched manually
+        function markVideoAsWatched() {
+            // Updated fetch URL: remove '/kinesthetic' since blueprint is registered without prefix
+            fetch('/api/video-watched/' + subject, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                    // Remove CSRF token for now to simplify
+                },
+                body: JSON.stringify({ method: 'manual' })
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok: ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Video marked as watched:', data);
+                    const watchedBtn = document.getElementById('mark-watched-btn');
+                    watchedBtn.innerHTML = '<i class="fa fa-check"></i> සම්පූර්ණයි!';
+                    watchedBtn.classList.add('btn-watched');
+                    watchedBtn.disabled = true;
+
+                    const playerContainer = document.querySelector(".youtube-player").parentNode;
+                    const completionMessage = document.createElement("div");
+                    completionMessage.className = "video-completion-message";
+                    completionMessage.textContent = "වීඩියෝව නැරඹීම සම්පූර්ණ කර ඇත!";
+                    playerContainer.appendChild(completionMessage);
+
+                    if (!document.querySelector('.watched-badge')) {
+                        const header = document.querySelector('.video-header');
+                        const watchedBadge = document.createElement('div');
+                        watchedBadge.className = 'watched-badge';
+                        watchedBadge.innerHTML = '<i class="fa fa-check-circle"></i> නරඹා ඇත';
+                        header.appendChild(watchedBadge);
+                    }
+                    document.querySelector(".video-footer").scrollIntoView({ behavior: "smooth" });
+                })
+                .catch(error => {
+                    console.error('Error marking video as watched:', error);
+                    alert('වීඩියෝව සම්පූර්ණ ලෙස සලකුණු කිරීමේදී දෝෂයක් ඇති විය. කරුණාකර නැවත උත්සාහ කරන්න.');
+                });
+        }
+
+        // Function to get CSRF token from meta or cookie
+        function getCSRFToken() {
+            const metaTag = document.querySelector('meta[name="csrf-token"]');
+            if (metaTag) return metaTag.getAttribute('content');
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                const [name, value] = cookie.trim().split('=');
+                if (name === 'csrf_token') return value;
+            }
+            return '';
+        }
+
+        // Disable the button if video is already watched
+        document.addEventListener('DOMContentLoaded', function () {
+            const isWatched = JSON.parse('{{ "true" if video_already_watched else "false" }}');
+            if (isWatched) {
+                const watchedBtn = document.getElementById('mark-watched-btn');
+                watchedBtn.innerHTML = '<i class="fa fa-check"></i> දැනටමත් නරඹා ඇත';
+                watchedBtn.classList.add('btn-watched');
+                watchedBtn.disabled = true;
+            }
+        });
+    </script>
 </body>
 
 </html>
