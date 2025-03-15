@@ -4,7 +4,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Nunito", "Arial", sans-serif;
+  font-family: Arial, sans-serif, "Noto Sans Sinhala";
   font-size: 105%;
   /* Increase base font size throughout the app */
 }
