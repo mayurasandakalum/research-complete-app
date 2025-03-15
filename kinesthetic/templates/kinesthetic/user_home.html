@@ -110,16 +110,17 @@
                     <h2>දෙවන ප්‍රශ්නාවලිය</h2>
                 </div>
                 <div class="card-body text-center">
-                    <h4>
+                    <h6> දැන් නැවත මේ
                         {% if weakest.subject == 'addition' %}එකතු කිරීම
                         {% elif weakest.subject == 'subtraction' %}අඩු කිරීම
                         {% elif weakest.subject == 'time' %}කාලය
                         {% else %}{{ weakest.subject }}
                         {% endif %}
-                    </h4>
+                        ප්‍රශ්නාවලියට මුහුණ දී ඔබේ ප්‍රගතිය පිරික්සා බලමු.
+                    </h6>
                     <p>දෙවන ප්‍රශ්නාවලියේ ලකුණු: {{ "%.1f"|format(weakest.percentage) }}%</p>
                     <a href="{{ url_for('kinesthetic.weakest_subject_quiz') }}" class="btn btn-warning">
-                        <i class="fa fa-graduation-cap"></i> දුර්වලම විෂය ප්‍රශ්නාවලිය
+                        <i class="fa fa-graduation-cap"></i> ප්‍රශ්නාවලිය ආරම්භ කරන්න
                     </a>
                 </div>
             </div>
