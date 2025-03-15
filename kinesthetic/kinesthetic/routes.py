@@ -1022,3 +1022,260 @@ def subject_help(subject):
         video_id=video_ids.get(subject),
         video_already_watched=video_already_watched
     )
+
+@kinesthetic_blueprint.route("/weakest-subject-quiz")
+@login_required
+def weakest_subject_quiz():
+    """Start a 5-question quiz for the user's weakest subject."""
+    kinesthetic_profile = QuizProfile.get_by_user_id(current_user.id)
+    if not kinesthetic_profile:
+        flash("Quiz profile not found.", "error")
+        return redirect(url_for("kinesthetic.user_home"))
+
+    weakest_subject_data = kinesthetic_profile.get_weakest_subject()
+    weakest_subject = weakest_subject_data.get("subject")
+
+    if not weakest_subject:
+        flash("Could not determine weakest subject.", "warning")
+        return redirect(url_for("kinesthetic.user_home"))
+
+    # Get questions for the weakest subject
+    questions_ref = (
+        db.collection("questions")
+        .where("subject", "==", weakest_subject)
+        .where("is_published", "==", True)
+        .limit(5)
+        .get()
+    )
+    
+    available_questions = [Question.from_doc(q) for q in questions_ref]
+    
+    # Check if there are any questions available
+    if not available_questions:
+        flash(f"No questions available for {weakest_subject}.", "warning")
+        return redirect(url_for("kinesthetic.user_home"))
+    
+    # Store initial score in session for comparison later
+    session['initial_score'] = kinesthetic_profile.total_score
+    session['weakest_subject'] = weakest_subject
+    
+    # Store question IDs in session to maintain the set of 5 questions
+    session['weakest_subject_question_ids'] = [q.id for q in available_questions]
+    session['weakest_subject_current_question'] = 0
+    session['weakest_subject_remaining'] = 5
+    
+    # Get the first question
+    question = available_questions[0]
+    
+    # Get sub-questions for the question
+    sub_questions = SubQuestion.get_by_question(question.id)
+    question._sub_questions = sub_questions
+
+    return render_template(
+        "kinesthetic/weakest_subject_quiz.html",
+        question=question,
+        subject=weakest_subject,
+        remaining_questions=5
+    )
+
+@kinesthetic_blueprint.route("/next-weakest-subject-question")
+@login_required
+def next_weakest_subject_question():
+    """Get the next question for the weakest subject quiz."""
+    # Check if there are question IDs in the session
+    question_ids = session.get('weakest_subject_question_ids', [])
+    current_question_index = session.get('weakest_subject_current_question', 0)
+    remaining = session.get('weakest_subject_remaining', 0)
+    
+    if not question_ids or current_question_index >= len(question_ids) - 1 or remaining <= 1:
+        # Quiz is completed, show results
+        return redirect(url_for('kinesthetic.process_weakest_subject_quiz'))
+    
+    # Move to the next question
+    current_question_index += 1
+    session['weakest_subject_current_question'] = current_question_index
+    session['weakest_subject_remaining'] = remaining - 1
+    
+    # Get the next question
+    question_id = question_ids[current_question_index]
+    question_ref = db.collection("questions").document(question_id).get()
+    
+    if not question_ref.exists:
+        flash("Question not found.", "error")
+        return redirect(url_for("kinesthetic.user_home"))
+    
+    question = Question.from_doc(question_ref)
+    
+    # Get sub-questions
+    sub_questions = SubQuestion.get_by_question(question.id)
+    question._sub_questions = sub_questions
+    
+    return render_template(
+        "kinesthetic/weakest_subject_quiz.html",
+        question=question,
+        subject=session.get('weakest_subject'),
+        remaining_questions=remaining
+    )
+
+@kinesthetic_blueprint.route("/process-weakest-subject-quiz", methods=["POST", "GET"])
+@login_required
+def process_weakest_subject_quiz():
+    """Process the quiz for the weakest subject and compare scores."""
+    # If it's a GET request, show the final results
+    if request.method == "GET":
+        # Get initial score from session
+        initial_score = session.pop('initial_score', 0)
+        subject = session.pop('weakest_subject', Subject.ADDITION)
+        
+        # Clear other session variables
+        session.pop('weakest_subject_question_ids', None)
+        session.pop('weakest_subject_current_question', None)
+        session.pop('weakest_subject_remaining', None)
+        
+        # Get current profile score
+        kinesthetic_profile = QuizProfile.get_by_user_id(current_user.id)
+        final_score = kinesthetic_profile.total_score
+        
+        score_difference = final_score - initial_score
+        
+        # Render the result page
+        return render_template(
+            "kinesthetic/weakest_subject_quiz_result.html",
+            initial_score=initial_score,
+            final_score=final_score,
+            score_difference=score_difference,
+            subject=subject
+        )
+    
+    # For POST requests, process the current question's answers
+    question_id = request.form.get("question_pk")
+    answer_method = request.form.get("answer_method")
+    sub_question_ids = request.form.getlist("sub_question_ids")
+    
+    # Get subject from session
+    subject = session.get('weakest_subject', Subject.ADDITION)
+    
+    # Check if this is an AJAX request
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+    
+    # Initialize response
+    response_data = {
+        "success": True,
+        "results": [],
+        "subject": subject,
+        "redirect_url": url_for("kinesthetic.next_weakest_subject_question")
+    }
+    
+    total_points = 0
+    correct_count = 0
+    
+    # Process each sub-question (similar to process_all_answers)
+    for sub_question_id in sub_question_ids:
+        # Look for captured image for this sub-question
+        image_key = f"captured_image_{sub_question_id}"
+        base64_image = request.form.get(image_key)
+        
+        if not base64_image:
+            continue  # Skip if no image for this sub-question
+            
+        # Get sub-question details
+        sub_question_ref = db.collection("sub_questions").document(sub_question_id).get()
+        if not sub_question_ref.exists:
+            continue
+            
+        sub_question_data = sub_question_ref.to_dict()
+        correct_answer = sub_question_data.get("correct_answer")
+        sub_question_text = sub_question_data.get("text", "")
+        points = sub_question_data.get("points", 1)
+        
+        # Initialize result for this sub-question
+        result = {
+            "sub_question_id": sub_question_id,
+            "sub_question_text": sub_question_text,
+            "is_correct": False,
+            "detected_value": None,
+            "expected_value": correct_answer,
+            "annotated_image_url": None
+        }
+        
+        # Process answer based on answer method
+        if answer_method == AnswerMethod.ABACUS:
+            # Check answer using the abacus service
+            is_correct, detected_value, annotated_image_path = check_abacus_answer(
+                base64_image, correct_answer
+            )
+        elif answer_method == AnswerMethod.ANALOG_CLOCK or answer_method == AnswerMethod.DIGITAL_CLOCK:
+            # Check answer using the clock service
+            is_correct, detected_value, annotated_image_path = check_clock_answer(
+                base64_image, correct_answer
+            )
+        else:
+            # Unsupported answer method
+            continue
+            
+        # Update result data
+        result["is_correct"] = is_correct
+        result["detected_value"] = detected_value
+        
+        # If there's an annotated image path, copy it to the static folder
+        if annotated_image_path and os.path.exists(annotated_image_path):
+            static_uploads = os.path.join(current_app.static_folder, "uploads")
+            os.makedirs(static_uploads, exist_ok=True)
+            
+            filename = os.path.basename(annotated_image_path)
+            static_path = os.path.join(static_uploads, filename)
+            shutil.copy(annotated_image_path, static_path)
+            
+            # Add the public URL to the result
+            result["annotated_image_url"] = f"/static/uploads/{filename}"
+        
+        # Save attempt to database
+        captured_images = {image_key: base64_image}
+        if result["annotated_image_url"]:
+            captured_images["annotated_image"] = result["annotated_image_url"]
+            
+        result_data = {
+            "detected_value": detected_value,
+            "expected_value": correct_answer,
+        }
+        
+        attempted = AttemptedQuestion(
+            user_id=current_user.id,
+            question_id=question_id,
+            sub_question_id=sub_question_id,
+            is_correct=is_correct,
+            images=captured_images,
+            result_data=result_data
+        )
+        attempted.save()
+        
+        # Update counters
+        if is_correct:
+            correct_count += 1
+            total_points += points
+            
+        # Add to results list
+        response_data["results"].append(result)
+    
+    # Update quiz profile
+    kinesthetic_profile = QuizProfile.get_by_user_id(current_user.id)
+    if kinesthetic_profile:
+        # Add points to the profile
+        kinesthetic_profile.total_score += total_points
+        
+        # Update performance tracking by subject
+        if subject not in kinesthetic_profile.subject_performance:
+            kinesthetic_profile.subject_performance[subject] = {"correct": 0, "total": 0}
+        
+        # Update the subject performance
+        kinesthetic_profile.subject_performance[subject]["total"] += len(response_data["results"])
+        kinesthetic_profile.subject_performance[subject]["correct"] += correct_count
+        
+        kinesthetic_profile.save()
+    
+    # Return JSON response for AJAX requests, otherwise redirect
+    if is_ajax:
+        return jsonify(response_data)
+    else:
+        # Get the next question or finish the quiz
+        return redirect(url_for('kinesthetic.next_weakest_subject_question'))

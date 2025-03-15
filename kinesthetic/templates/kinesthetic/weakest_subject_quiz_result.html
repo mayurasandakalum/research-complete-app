@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block title %}Let's Quiz | ප්‍රතිඵල{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/play.css') }}" />
+
+<div class="quiz-container">
+    <div class="card">
+        <!-- Decorative sparkles -->
+        <div class="sparkle" style="top: 10%; left: 20%;"></div>
+        <div class="sparkle" style="top: 70%; left: 80%;"></div>
+        <div class="sparkle" style="top: 30%; left: 90%;"></div>
+        <div class="sparkle" style="top: 80%; left: 10%;"></div>
+
+        <div class="header">
+            <h1 class="title">ප්‍රශ්නාවලියේ ප්‍රතිඵල</h1>
+        </div>
+
+        <div class="question-content">
+            <h2 class="text-center mb-4">
+                {% if score_difference > 0 %}
+                <span class="text-success">
+                    <i class="fa fa-arrow-up"></i> ඔබගේ දක්ෂතාව වැඩි දියුණු වී ඇත!
+                </span>
+                {% elif score_difference == 0 %}
+                <span class="text-warning">
+                    <i class="fa fa-minus"></i> ඔබගේ දක්ෂතාවය එලෙසම පවතී
+                </span>
+                {% else %}
+                <span class="text-danger">
+                    <i class="fa fa-arrow-down"></i> වැඩිදුර පුහුණුව අවශ්‍ය වේ
+                </span>
+                {% endif %}
+            </h2>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card bg-light h-100">
+                        <div class="card-header text-center">
+                            <h3>පෙර ලකුණු</h3>
+                        </div>
+                        <div class="card-body text-center">
+                            <h1 class="display-4">{{ initial_score }}</h1>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card bg-primary text-white h-100">
+                        <div class="card-header text-center">
+                            <h3>වෙනස</h3>
+                        </div>
+                        <div class="card-body text-center">
+                            <h1
+                                class="display-4 {% if score_difference > 0 %}text-success{% elif score_difference < 0 %}text-danger{% endif %}">
+                                {% if score_difference > 0 %}+{% endif %}{{ score_difference }}
+                            </h1>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card bg-success text-white h-100">
+                        <div class="card-header text-center">
+                            <h3>නව ලකුණු</h3>
+                        </div>
+                        <div class="card-body text-center">
+                            <h1 class="display-4">{{ final_score }}</h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-5">
+                {% if score_difference > 0 %}
+                <div class="alert alert-success">
+                    <i class="fa fa-trophy fa-2x"></i>
+                    <h4>සුභ පැතුම්! ඔබ වැඩි දියුණු වී ඇත!</h4>
+                    <p>ඔබගේ ලකුණු {{ initial_score }} සිට {{ final_score }} දක්වා වැඩි වී ඇත. එය {{ score_difference }}
+                        ක වර්ධනයකි!</p>
+                </div>
+                {% elif score_difference == 0 %}
+                <div class="alert alert-warning">
+                    <i class="fa fa-exclamation-circle fa-2x"></i>
+                    <h4>ලකුණු වෙනසක් නැත</h4>
+                    <p>ඔබට {{ score_difference }} ක ලකුණු වෙනසක් ඇත. තවත් පුහුණුවීමට උත්සාහ කරන්න!</p>
+                </div>
+                {% else %}
+                <div class="alert alert-danger">
+                    <i class="fa fa-exclamation-triangle fa-2x"></i>
+                    <h4>තව පුහුණු විය යුතුයි</h4>
+                    <p>ඔබගේ ලකුණු {{ initial_score }} සිට {{ final_score }} දක්වා අඩු වී ඇත. තවත් පුහුණුවීමට උත්සාහ
+                        කරන්න!</p>
+                </div>
+                {% endif %}
+
+                <div class="mt-4">
+                    <a href="{{ url_for('kinesthetic.subject_help', subject=subject) }}"
+                        class="btn btn-warning btn-lg mr-2">
+                        <i class="fa fa-play-circle"></i> පාඩම් වීඩියෝව නැරඹීම
+                    </a>
+                    <a href="{{ url_for('kinesthetic.user_home') }}" class="btn btn-primary btn-lg">
+                        <i class="fa fa-home"></i> මුල් පිටුවට යන්න
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Add confetti animation for positive score difference
+    document.addEventListener('DOMContentLoaded', function () {
+        {% if score_difference > 0 %}
+        // Simple confetti effect
+        const colors = ['#4F46E5', '#A855F7', '#EC4899', '#F59E0B', '#10B981'];
+        const confettiCount = 100;
+
+        for (let i = 0; i < confettiCount; i++) {
+            const confetti = document.createElement('div');
+            confetti.classList.add('confetti');
+
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            const size = Math.random() * 10 + 5;
+            const shakeOffset = (Math.random() * 50) - 25;
+            const fallDuration = (Math.random() * 3) + 2 + 's';
+            const shakeDuration = (Math.random() * 0.5) + 0.5 + 's';
+
+            confetti.style.setProperty('--color', color);
+            confetti.style.setProperty('--shake-offset', `${shakeOffset}px`);
+            confetti.style.setProperty('--fall-duration', fallDuration);
+            confetti.style.setProperty('--shake-duration', shakeDuration);
+
+            confetti.style.width = `${size}px`;
+            confetti.style.height = `${size}px`;
+            confetti.style.backgroundColor = color;
+            confetti.style.left = `${Math.random() * 100}%`;
+
+            document.body.appendChild(confetti);
+
+            // Remove confetti after animation completes
+            setTimeout(() => {
+                if (confetti.parentNode === document.body) {
+                    document.body.removeChild(confetti);
+                }
+            }, parseFloat(fallDuration) * 1000);
+        }
+        {% endif %}
+    });
+</script>
+{% endblock %}
