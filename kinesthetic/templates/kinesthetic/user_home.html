@@ -89,7 +89,8 @@
             <!-- Weakest Subject Quiz Option -->
             {% if kinesthetic_profile and kinesthetic_profile.subject_performance %}
             {% set weakest = kinesthetic_profile.get_weakest_subject() %}
-            {% if weakest.subject %}
+            {% if weakest.subject and kinesthetic_profile and kinesthetic_profile.watched_videos and
+            kinesthetic_profile.watched_videos|length > 0 %}
             <div class="card mt-4">
                 <div class="card-header bg-light">
                     <h3>දුර්වලම විෂය වැඩි දියුණු කරගන්න</h3>
