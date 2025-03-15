@@ -12,11 +12,9 @@ import base64
 from write_model.get_letters import get_text
 from collections import Counter
 import sys
-import io
-import wave
 import config
 
-# Initialize the app with template and static folder configurations
+# the system stores the data temporarily (until the session ends).
 app = Flask(__name__)
 app.config["SESSION_TYPE"] = "filesystem"  # Stores session data locally
 Session(app)
@@ -40,15 +38,13 @@ os.makedirs(IMAGES_FOLDER, exist_ok=True)
 TEMPLATES_FOLDER = os.path.join(current_dir, "templates")
 os.makedirs(TEMPLATES_FOLDER, exist_ok=True)
 
-#database = {"isu": "123"}  # username: password
-
-
+#This is initial transformer model of google that used to check the similarity between two answers.
 model_st = SentenceTransformer("Ransaka/bert-small-sentence-transformer")
 
 # Flag to indicate if we're running with Firebase or in offline mode
 OFFLINE_MODE = False
 
-# Initialize Firebase with better error handling
+# Extablish connection with firebase
 try:
     import firebase_admin
     from firebase_admin import credentials, firestore
@@ -89,7 +85,7 @@ def extract_first_number(s):
     match = re.search(r"\d+", s)
     return int(match.group()) if match else None
 
-
+#Finds the lesson where the student has attempted the least number of questions.
 def get_min_count_string(strings):
     counter = Counter(strings)
     min_count = min(counter.values())
@@ -97,7 +93,7 @@ def get_min_count_string(strings):
     no = extract_first_number(min_strings[0])
     return no
 
-
+#Calculate Student's answers for each Lesson
 def calculate_res(query):
     result = []
     for doc in query:
@@ -107,7 +103,7 @@ def calculate_res(query):
     counts_dict = dict(counts)
     return counts_dict
 
-
+#generate random questions from each lesson
 def random_q_w(num, noq):
     global wr_lesson
     global wr_lesson_c
@@ -123,8 +119,7 @@ def random_q_w(num, noq):
     qid = random.randint(start, start + 50)
     return qid
 
-
-
+#calculates the similarity between correct answer and the inputed answer
 def is_similar(target, source):
     sentences = [target, source]
 
@@ -151,7 +146,7 @@ def home():
     global username
     return render_template("Home.html", name=username)
 
-#Fetches a random question from Firebase and displays it.
+#Retrieve a random question from Firebase and displays it.
 @app.route("/reading_writing_learning")
 def reading_writing_learning():
     global WrQuestionID
@@ -182,8 +177,10 @@ def next_question_rw():
         question_data = question_doc.to_dict()
         image = question_data.get("Image", None)
         if image:
-            image = image.replace("<", "").replace(">", "")# If an image is associated with the question, it is cleaned of unwanted characters.
+            image = image.replace("<", "").replace(">", "")# If the question contains an image, it removes unnecessary symbols.
+
         Wri_data = question_data
+        #Send the next question and image to the frontend
         return jsonify(
             {
                 "success": True,
@@ -231,12 +228,12 @@ def is_75_percent_match(str1: str, str2: str) -> bool:
 def submit_write():
     global Wri_data
     global WrQuestionID
-    global Wr_results
-    global wr_lesson
-    global Wr_results_2
+    global Wr_results #Stores the correct answers for normal questions.
+    global wr_lesson #Keeps track of difficult lessons
+    global Wr_results_2 #Stores the correct answers for difficult lessons.
 
-    correct = False
-    qid = Wri_data["ID"]
+    correct = False #check whether the student's answer is correct or not.
+    qid = Wri_data["ID"] #The current question ID is retrieved
     _file = "./readwrite/static/write_img/" + str(qid) + ".png"
 
     data = request.get_json()
@@ -297,19 +294,38 @@ def write_guide():
     global wr_lesson
     counts = Counter(Wr_results)
     counts_dict = dict(counts)
+    # Default message for 0 correct answers
+    weak_message = "ඔබ මෙම පාඩම සඳහා ගොඩක්ම දුර්වලයි!"
     
-    #counts the number of correct answers per lesson.
     if wr_lesson > 0:
-        if len(Wr_results_2) == 0:
-            counts_dict["New Results"]=0
-            message="ඔබ මෙම පාඩම සඳහා ගොඩක්ම දුර්වලයි!"
-        else:    
-            counts2 = Counter(Wr_results_2)
+        if len(Wr_results_2) == 0:  # If no new results
+            counts_dict["New Results"] = 0
+            message = weak_message
+            images = ["Lose.jpg"]
+        else:
+            counts2 = Counter(Wr_results_2)  # New results
             counts_dict2 = dict(counts2)
             print(counts_dict2)
-            counts_dict["New "+"lesson"+str(wr_lesson)]=counts_dict2["lesson0"+str(wr_lesson)]
-            message="ඔබගේ දැනුම පරීක්ෂා කර බැලීම අවසන්.ඔබේ ඉදිරි ගමනට සුභ පැතුම්!"
-        images = ["completedHappy.jpg"]
+            prev_score = counts_dict.get("lesson0" + str(wr_lesson), 0)  # Previous result count
+            new_score = counts_dict2.get("lesson0" + str(wr_lesson), 0)  # New result count
+            
+            # Add new result to the result dictionary
+            counts_dict["New lesson" + str(wr_lesson)] = new_score
+            
+            # Compare previous and new results
+            if new_score == 0:
+                message = weak_message 
+                images = ["Lose.jpg"]
+            elif new_score > prev_score:
+                message = "ඔබගේ දැනුම වැඩිදියුණු වී ඇත!"
+                images = ["completedHappy.jpg"]
+            elif new_score == prev_score:
+                message = "ඔබ ප්‍රගතියක් ලබාගෙන නැහැ!"
+                images = ["notprogess.jpg"]
+            else:
+                message = "ඔබගේ දැනුම අඩු වී ඇත!"
+                images = ["Lose.jpg"]
+        #images = ["completedHappy.jpg"]
         return render_template(
             "WriteGuide.html",
             results=counts_dict,
