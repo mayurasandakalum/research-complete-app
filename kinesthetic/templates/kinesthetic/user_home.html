@@ -24,13 +24,7 @@
                         <!-- <p class="lead mb-0">ඔබේ ලකුණු: {{ kinesthetic_profile.total_score }}</p> -->
                     </div>
 
-                    <!-- Weakest Subject Analysis -->
-                    {% if kinesthetic_profile.subject_performance %}
-                    {% set weakest = kinesthetic_profile.get_weakest_subject() %}
-
-                    <!-- Use the stored weakest_subject if available, otherwise use calculated one -->
-                    {% set weakest_subject = kinesthetic_profile.weakest_subject or weakest.subject %}
-
+                    <!-- Weakest Subject Analysis - Use passed weakest_subject directly -->
                     {% if weakest_subject %}
                     <div class="card mb-4">
                         {% if kinesthetic_profile and kinesthetic_profile.watched_videos and weakest_subject in
@@ -45,36 +39,43 @@
                         {% endif %}
                         <div class="card-body">
                             <h4 style="font-weight: bolder;">
-                                {% if weakest.subject == 'addition' %}එකතු කිරීම පාඩම
-                                {% elif weakest.subject == 'subtraction' %}අඩු කිරීම පාඩම
-                                {% elif weakest.subject == 'time' %}කාලය පාඩම
-                                {% else %}{{ weakest.subject }}
+                                {% if weakest_subject == 'addition' %}එකතු කිරීම පාඩම
+                                {% elif weakest_subject == 'subtraction' %}අඩු කිරීම පාඩම
+                                {% elif weakest_subject == 'time' %}කාලය පාඩම
+                                {% else %}{{ weakest_subject }}
                                 {% endif %}
                             </h4>
-                            <p>පළමු ප්‍රශ්නාවලියේ ලකුණු: {{ "%.1f"|format(weakest.percentage) }}%</p>
-                            <p>දැන්, ඔබට අප ඔබේ <span>{% if weakest.subject == 'addition' %}එකතු කිරීම
-                                    {% elif weakest.subject == 'subtraction' %}අඩු කිරීම
-                                    {% elif weakest.subject == 'time' %}කාලය
-                                    {% else %}{{ weakest.subject }}
+
+                            {% if kinesthetic_profile.subject_performance and weakest_subject in
+                            kinesthetic_profile.subject_performance %}
+                            {% set perf = kinesthetic_profile.subject_performance[weakest_subject] %}
+                            {% if perf.total > 0 %}
+                            <p>පළමු ප්‍රශ්නාවලියේ ලකුණු: {{ "%.1f"|format((perf.correct / perf.total) * 100) }}%</p>
+                            {% endif %}
+                            {% endif %}
+
+                            <p>දැන්, ඔබට අප ඔබේ <span>{% if weakest_subject == 'addition' %}එකතු කිරීම
+                                    {% elif weakest_subject == 'subtraction' %}අඩු කිරීම
+                                    {% elif weakest_subject == 'time' %}කාලය
+                                    {% else %}{{ weakest_subject }}
                                     {% endif %}</span> පාඩම සම්බන්ධ දැනුම වැඩි දියුණු කරගැනීමට පහතින් වීඩියෝවක් නිර්දේශ
                                 කර ඇත. එය බලන්න.
                             </p>
 
                             <!-- Add link to video tutorial for weakest subject -->
-                            {% if kinesthetic_profile and kinesthetic_profile.watched_videos and weakest.subject in
+                            {% if kinesthetic_profile and kinesthetic_profile.watched_videos and weakest_subject in
                             kinesthetic_profile.watched_videos %}
                             <button class="btn btn-success mt-2" disabled>
                                 <i class="fa fa-check-circle"></i> නරඹා ඇත
                             </button>
                             {% else %}
-                            <a href="{{ url_for('kinesthetic.subject_help', subject=weakest.subject) }}"
+                            <a href="{{ url_for('kinesthetic.subject_help', subject=weakest_subject) }}"
                                 class="btn btn-warning mt-2">
                                 <i class="fa fa-play-circle"></i> විඩියෝ පාඩම බලන්න
                             </a>
                             {% endif %}
                         </div>
                     </div>
-                    {% endif %}
                     {% endif %}
 
                     <!-- <a href="{{ url_for('kinesthetic.leaderboard') }}" class="btn btn-primary">
@@ -106,34 +107,26 @@
             </div>
 
             <!-- Weakest Subject Quiz Option -->
-            {% if kinesthetic_profile and kinesthetic_profile.subject_performance %}
-            {% set weakest = kinesthetic_profile.get_weakest_subject() %}
-
-            <!-- Only show second quiz if they've watched videos -->
-            {% if weakest.subject and kinesthetic_profile and kinesthetic_profile.watched_videos and
-            kinesthetic_profile.watched_videos|length > 0 %}
-
+            {% if kinesthetic_profile and weakest_subject and kinesthetic_profile.watched_videos and weakest_subject in
+            kinesthetic_profile.watched_videos %}
             <!-- Calculate performance metrics for weakest subject -->
             {% set attempts_query = namespace(mixed_correct=0, mixed_total=0, weakest_correct=0, weakest_total=0) %}
 
             <!-- Count attempts by quiz_type and calculate improvement -->
-            {% if kinesthetic_profile.subject_performance and weakest.subject in
-            kinesthetic_profile.subject_performance
+            {% if kinesthetic_profile.subject_performance and weakest_subject in kinesthetic_profile.subject_performance
             %}
-            {% set performance = kinesthetic_profile.subject_performance[weakest.subject] %}
-
             <div class="card mt-4">
                 <div class="card-header bg-light">
                     <h2>දෙවන ප්‍රශ්නාවලිය</h2>
                 </div>
                 <div class="card-body text-center">
                     <h6> දැන් නැවත මේ
-                        {% if weakest.subject == 'addition' %}එකතු කිරීම
-                        {% elif weakest.subject == 'subtraction' %}අඩු කිරීම
-                        {% elif weakest.subject == 'time' %}කාලය
-                        {% else %}{{ weakest.subject }}
+                        {% if weakest_subject == 'addition' %}එකතු කිරීම
+                        {% elif weakest_subject == 'subtraction' %}අඩු කිරීම
+                        {% elif weakest_subject == 'time' %}කාලය
+                        {% else %}{{ weakest_subject }}
                         {% endif %}
-                        ප්‍රශ්නාවලියට මුහුණ දී ඔබේ ප්‍රගතිය පිරික්සා බලමු.
+                        විෂයේ ප්‍රශ්න 5 කින් සමන්විත දෙවන ප්‍රශ්නාවලියට මුහුණ දී ඔබේ ප්‍රගතිය පිරික්සා බලමු.
                     </h6>
 
                     <!-- Show different sections based on whether they've taken the second quiz -->
@@ -142,10 +135,10 @@
 
                     <!-- Check for attempts with quiz_type='weakest_subject' -->
                     {% if kinesthetic_profile.id %}
-                    {% if kinesthetic_profile.quiz_comparisons and weakest.subject in
+                    {% if kinesthetic_profile.quiz_comparisons and weakest_subject in
                     kinesthetic_profile.quiz_comparisons %}
                     {% set has_weakest_attempt = true %}
-                    {% set comparison_data = kinesthetic_profile.quiz_comparisons[weakest.subject] %}
+                    {% set comparison_data = kinesthetic_profile.quiz_comparisons[weakest_subject] %}
 
                     <!-- Display progress comparison when both quizzes attempted -->
                     <div class="comparison-stats mt-3">
@@ -177,7 +170,7 @@
                             </div>
                         </div>
                     </div>
-                    {% elif kinesthetic_profile.subject_performance and weakest.subject in
+                    {% elif kinesthetic_profile.subject_performance and weakest_subject in
                     kinesthetic_profile.subject_performance %}
                     {% set has_weakest_attempt = true %}
 
@@ -223,73 +216,145 @@
             </div>
             {% endif %}
             {% endif %}
-            {% endif %}
 
+            <!-- Quiz Comparison Section -->
+            {% if kinesthetic_profile and kinesthetic_profile.quiz_comparisons and weakest_subject and weakest_subject
+            in kinesthetic_profile.quiz_comparisons %}
+            {% set comparison_data = kinesthetic_profile.quiz_comparisons[weakest_subject] %}
             <div class="card mt-4">
-                <div class="card-header">
-                    <h3>විෂය ප්‍රගතිය</h3>
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0"><i class="fa fa-chart-line"></i> ඔබේ ප්‍රගතිය</h3>
                 </div>
                 <div class="card-body">
-                    <div class="subject-progress">
-                        {% if kinesthetic_profile and kinesthetic_profile.subject_counts %}
-                        {% for subject, count in kinesthetic_profile.subject_counts.items() %}
-                        <div class="subject-item mb-3">
-                            <div class="d-flex justify-content-between">
-                                <span>
-                                    {% if subject == 'addition' %}එකතු කිරීම
-                                    {% elif subject == 'subtraction' %}අඩු කිරීම
-                                    {% elif subject == 'time' %}කාලය
-                                    {% else %}{{ subject }}
-                                    {% endif %}
+                    <h5 class="text-center mb-4">
+                        {% if weakest_subject == 'addition' %}එකතු කිරීම
+                        {% elif weakest_subject == 'subtraction' %}අඩු කිරීම
+                        {% elif weakest_subject == 'time' %}කාලය
+                        {% else %}{{ weakest_subject }}
+                        {% endif %}
+                        විෂයේ ප්‍රගතිය
+                    </h5>
 
-                                    <!-- Show video watched badge -->
-                                    {% if kinesthetic_profile.watched_videos and subject in
-                                    kinesthetic_profile.watched_videos %}
-                                    <span class="badge badge-pill badge-success ml-2"
-                                        title="ඔබ මේ විෂයයේ පාඩම් වීඩියෝව නරඹා ඇත">
-                                        <i class="fa fa-check"></i> වීඩියෝව නරඹා ඇත
-                                    </span>
-                                    {% else %}
-                                    <a href="{{ url_for('kinesthetic.subject_help', subject=subject) }}"
-                                        class="badge badge-pill badge-secondary ml-2"
-                                        title="මේ විෂයයේ පාඩම් වීඩියෝව නරඹන්න">
-                                        <i class="fa fa-play-circle"></i> වීඩියෝව නරඹන්න
-                                    </a>
-                                    {% endif %}
-                                </span>
-                                <span>{{ count }} ප්‍රශ්න</span>
+                    <div class="row">
+                        <div class="col-md-5 text-center">
+                            <div class="p-3 border rounded">
+                                <h4>පළමු ප්‍රශ්නාවලිය</h4>
+                                <div class="display-4">{{ "%.1f"|format(comparison_data.before.percentage) }}%</div>
+                                <p class="text-muted">නිවැරදි ප්‍රශ්න {{ comparison_data.before.correct }}/{{
+                                    comparison_data.before.total }}</p>
                             </div>
-                            <div class="progress" style="height: 10px;">
-                                <div class="progress-bar 
+                        </div>
+
+                        <div class="col-md-2 d-flex align-items-center justify-content-center">
+                            {% set diff = comparison_data.after.percentage - comparison_data.before.percentage %}
+                            {% if diff > 0 %}
+                            <div class="text-success">
+                                <i class="fa fa-arrow-right fa-2x"></i>
+                            </div>
+                            {% elif diff < 0 %} <div class="text-danger">
+                                <i class="fa fa-arrow-right fa-2x"></i>
+                        </div>
+                        {% else %}
+                        <div class="text-muted">
+                            <i class="fa fa-arrows-h fa-2x"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-5 text-center"></div>
+                    <div
+                        class="p-3 border rounded {% if diff > 0 %}bg-success text-white{% elif diff < 0 %}bg-danger text-white{% else %}{% endif %}">
+                        <h4>දෙවන ප්‍රශ්නාවලිය</h4>
+                        <div class="display-4">{{ "%.1f"|format(comparison_data.after.percentage) }}%</div>
+                        <p
+                            class="{% if diff > 0 %}text-white{% elif diff < 0 %}text-white{% else %}text-muted{% endif %}">
+                            නිවැරදි ප්‍රශ්න {{ comparison_data.after.correct }}/{{ comparison_data.after.total }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                {% if diff > 0 %}
+                <div class="alert alert-success">
+                    <i class="fa fa-trophy"></i> ඔබ <strong>{{ "%.1f"|format(diff) }}%</strong> කින් වැඩිදියුණු වී ඇත!
+                </div>
+                {% elif diff < 0 %} <div class="alert alert-warning">
+                    <i class="fa fa-exclamation-triangle"></i> ඔබගේ කාර්ය සාධනය <strong>{{ "%.1f"|format(diff|abs)
+                        }}%</strong> කින් අඩු වී ඇත. තව පුහුණු වන්න!
+            </div>
+            {% else %}
+            <div class="alert alert-info"></div>
+            <i class="fa fa-info-circle"></i> ඔබ එකම මට්ටමේ පවතී. දිගටම පුහුණු වන්න!
+        </div>
+        {% endif %}
+    </div>
+</div>
+</div>
+{% endif %}
+
+<div class="card mt-4">
+    <div class="card-header">
+        <h3>විෂය ප්‍රගතිය</h3>
+    </div>
+    <div class="card-body">
+        <div class="subject-progress">
+            {% if kinesthetic_profile and kinesthetic_profile.subject_counts %}
+            {% for subject, count in kinesthetic_profile.subject_counts.items() %}
+            <div class="subject-item mb-3">
+                <div class="d-flex justify-content-between">
+                    <span>
+                        {% if subject == 'addition' %}එකතු කිරීම
+                        {% elif subject == 'subtraction' %}අඩු කිරීම
+                        {% elif subject == 'time' %}කාලය
+                        {% else %}{{ subject }}
+                        {% endif %}
+
+                        <!-- Show video watched badge -->
+                        {% if kinesthetic_profile.watched_videos and subject in
+                        kinesthetic_profile.watched_videos %}
+                        <span class="badge badge-pill badge-success ml-2" title="ඔබ මේ විෂයයේ පාඩම් වීඩියෝව නරඹා ඇත">
+                            <i class="fa fa-check"></i> වීඩියෝව නරඹා ඇත
+                        </span>
+                        {% else %}
+                        <a href="{{ url_for('kinesthetic.subject_help', subject=subject) }}"
+                            class="badge badge-pill badge-secondary ml-2" title="මේ විෂයයේ පාඩම් වීඩියෝව නරඹන්න">
+                            <i class="fa fa-play-circle"></i> වීඩියෝව නරඹන්න
+                        </a>
+                        {% endif %}
+                    </span>
+                    <span>{{ count }} ප්‍රශ්න</span>
+                </div>
+                <div class="progress" style="height: 10px;">
+                    <div class="progress-bar 
                                             {% if subject == 'addition' %}bg-success
                                             {% elif subject == 'subtraction' %}bg-warning
                                             {% elif subject == 'time' %}bg-info
                                             {% else %}bg-primary
                                             {% endif %}" style="width: {{ count / 15 * 100 }}%" role="progressbar">
-                                </div>
-                            </div>
-
-                            {% if kinesthetic_profile.subject_performance and subject in
-                            kinesthetic_profile.subject_performance %}
-                            {% set perf = kinesthetic_profile.subject_performance[subject] %}
-                            {% if perf.total > 0 %}
-                            <div class="small text-muted mt-1">
-                                නිවැරදි: {{ perf.correct }}/{{ perf.total }}
-                                ({{ "%.1f"|format((perf.correct / perf.total) * 100) }}%)
-                            </div>
-                            {% endif %}
-                            {% endif %}
-                        </div>
-                        {% endfor %}
-                        {% else %}
-                        <p>ඔබ තවම කිසිදු විෂය පථයක ප්‍රශ්න සම්පූර්ණ කර නැත.</p>
-                        {% endif %}
                     </div>
                 </div>
-            </div>
 
-            <!-- Display video watching status separately if any videos watched -->
-            <!-- {% if kinesthetic_profile and kinesthetic_profile.watched_videos and
+                {% if kinesthetic_profile.subject_performance and subject in
+                kinesthetic_profile.subject_performance %}
+                {% set perf = kinesthetic_profile.subject_performance[subject] %}
+                {% if perf.total > 0 %}
+                <div class="small text-muted mt-1">
+                    නිවැරදි: {{ perf.correct }}/{{ perf.total }}
+                    ({{ "%.1f"|format((perf.correct / perf.total) * 100) }}%)
+                </div>
+                {% endif %}
+                {% endif %}
+            </div>
+            {% endfor %}
+            {% else %}
+            <p>ඔබ තවම කිසිදු විෂය පථයක ප්‍රශ්න සම්පූර්ණ කර නැත.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Display video watching status separately if any videos watched -->
+<!-- {% if kinesthetic_profile and kinesthetic_profile.watched_videos and
             kinesthetic_profile.watched_videos|length > 0 %}
             <div class="card mt-4">
                 <div class="card-header bg-light">
@@ -337,7 +402,7 @@
                 </div>
             </div>
             {% endif %} -->
-        </div>
-    </div>
+</div>
+</div>
 </div>
 {% endblock %}

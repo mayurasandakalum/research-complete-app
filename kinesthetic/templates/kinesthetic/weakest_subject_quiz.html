@@ -45,12 +45,14 @@
         <div class="alert">
             <i class="fa fa-info-circle"></i>
             <span class="alert-text">
-                {% if subject == 'addition' %}එකතු කිරීම
-                {% elif subject == 'subtraction' %}අඩු කිරීම
-                {% elif subject == 'time' %}කාලය
-                {% else %}{{ subject }}
-                {% endif %}
-                විෂයේ දුර්වලතා වැඩි දියුණු කිරීමේ ප්‍රශ්නාවලිය - තව ප්‍රශ්න {{ remaining_questions or 5 }} යි
+                <strong>ඔබේ දුර්වලම විෂයය:
+                    {% if subject == 'addition' %}<span class="badge badge-warning">එකතු කිරීම</span>
+                    {% elif subject == 'subtraction' %}<span class="badge badge-warning">අඩු කිරීම</span>
+                    {% elif subject == 'time' %}<span class="badge badge-warning">කාලය</span>
+                    {% else %}<span class="badge badge-warning">{{ subject }}</span>
+                    {% endif %}
+                </strong><br>
+                මෙම විෂයේ ප්‍රශ්න 5කින් සමන්විත විශේෂ ප්‍රශ්නාවලිය - තව ප්‍රශ්න {{ remaining_questions or 5 }} යි
             </span>
         </div>
 
@@ -69,6 +71,7 @@
                 <input type="hidden" name="subject" value="{{ subject }}">
                 <!-- Add this hidden input to identify AJAX requests on the server -->
                 <input type="hidden" name="is_ajax" value="true">
+                <input type="hidden" name="quiz_type" value="weakest_subject">
 
                 <!-- Sub questions in accordion -->
                 <div class="sub-questions-container">

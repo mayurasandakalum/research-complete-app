@@ -134,9 +134,13 @@ def user_home():
     weakest_subject = None
     
     if kinesthetic_profile:
-        # Get the weakest subject
-        weakest_data = kinesthetic_profile.get_weakest_subject()
-        weakest_subject = weakest_data.get("subject")
+        # Prioritize the stored weakest_subject instead of recalculating
+        weakest_subject = kinesthetic_profile.weakest_subject
+        
+        # Only calculate if no stored value exists (for backward compatibility)
+        if not weakest_subject and kinesthetic_profile.subject_performance:
+            weakest_data = kinesthetic_profile.get_weakest_subject()
+            weakest_subject = weakest_data.get("subject")
         
         if weakest_subject:
             # Get attempts for this subject and split by quiz_type
@@ -178,7 +182,8 @@ def user_home():
     return render_template(
         "kinesthetic/user_home.html",
         kinesthetic_profile=kinesthetic_profile,
-        attempts_by_type=attempts_by_type
+        attempts_by_type=attempts_by_type,
+        weakest_subject=weakest_subject  # Pass the weakest subject directly to the template
     )
 
 
