@@ -103,7 +103,7 @@ def calculate_res(query):
     counts_dict = dict(counts)
     return counts_dict
 
-#generate random questions from each lesson
+#generate 5 random questions from each lesson
 def random_q_w(num, noq):
     global wr_lesson
     global wr_lesson_c
@@ -152,14 +152,15 @@ def reading_writing_learning():
     global WrQuestionID
     global Wri_data
 
-    qid = random_q_w(WrQuestionID, no_q)
-    question_doc = db.collection("write_questions").document(str(qid)).get()
+    qid = random_q_w(WrQuestionID, no_q) #called to select a random question ID (qid) from the database.
+    ##from the "write_questions" collection.Fetches the data from the database
+    question_doc = db.collection("write_questions").document(str(qid)).get() 
     if question_doc.exists:
         question_data = question_doc.to_dict()
         image = question_data.get("Image", None)
         if image:
             image = image.replace("<", "").replace(">", "")
-        Wri_data = question_data
+        Wri_data = question_data #Stores the current question data
         return render_template("R&W_learning.html", question=question_data, image=image)
 
     return "No questions found.", 404
@@ -199,6 +200,7 @@ def next_question_rw():
         )
         
 # how many characters match and checks if they meet the 75% threshold.
+# used to compare the recognized Sinhala text with the correct answer
 def is_75_percent_match(str1: str, str2: str) -> bool:
     """
     Checks if at least 75% of the letters in one string match another string.

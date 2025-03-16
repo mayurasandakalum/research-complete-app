@@ -296,6 +296,7 @@
         const canvas = document.getElementById('answerCanvas');
         let signaturePad;
     
+        //his resizes the canvas when the screen size changes to make the whiteboard responsive.
         function resizeCanvas() {
             const ratio = 1;
             canvas.width = canvas.offsetWidth * ratio;
@@ -307,6 +308,7 @@
             }
         }
     
+        //allowing students to write answers in Sinhala or numbers.
         document.addEventListener('DOMContentLoaded', () => {
             resizeCanvas();
     
@@ -318,7 +320,8 @@
             });
     
             window.addEventListener('resize', resizeCanvas);
-    
+
+            //checks whether the input is Sinhala writing or numbers.
             function getSelectedInputType() {
                 return document.querySelector('input[name="inputType"]:checked').value === "number";
             }
@@ -328,7 +331,7 @@
                 signaturePad.clear();
             });
     
-            // Submit button with improved pop-up
+            // Submit button click student's handwritten answer is sent to the Flask backend route /submit_write
             document.getElementById('submitBtn').addEventListener('click', () => {
                 if (signaturePad.isEmpty()) {
                     Swal.fire({
@@ -339,9 +342,10 @@
                     });
                     return;
                 }
-    
+                //Converts the handwritten answer to an image format (PNG).
                 const dataURL = signaturePad.toDataURL("image/png");
-    
+
+                //Send the Handwritten Answer to the Flask Backend
                 fetch("/submit_write", {
                     method: "POST",
                     headers: {
@@ -389,11 +393,12 @@
     
             // Next button with improved pop-up
             document.getElementById('next').addEventListener('click', () => {
-                fetch('/next_question_rw')
-                    .then(response => response.json())
+                fetch('/next_question_rw')//This sends a GET request to the Flask route 
+                    .then(response => response.json()) //Converts the server response into JSON format
                     .then((data) => {
                         if (data.success) {
                             const questionData = data.question;
+                            //Update the UI with New Question Data
                             document.querySelector('.question-area span').textContent = questionData.Question;
                             document.getElementById('lesson').textContent = questionData.Lesson;
                             document.getElementById('level').textContent = questionData.Level;
