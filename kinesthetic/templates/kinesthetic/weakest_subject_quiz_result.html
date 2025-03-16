@@ -13,7 +13,7 @@
         <div class="sparkle" style="top: 80%; left: 10%;"></div>
 
         <div class="header">
-            <h1 class="title">ප්‍රශ්නාවලියේ ප්‍රතිඵල</h1>
+            <h1 class="title" style="color:black">ප්‍රශ්නාවලියේ ප්‍රතිඵල</h1>
             <h3 class="subtitle">
                 <span class="badge badge-primary">දෙවන ප්‍රශ්නාවලිය</span>
                 {% if subject == 'addition' %}
@@ -137,7 +137,7 @@
                 <div class="col-md-4">
                     <div class="card bg-primary text-white h-100">
                         <div class="card-header text-center">
-                            <h3>වෙනස</h3>
+                            <h3 style="color: white;">වෙනස</h3>
                         </div>
                         <div class="card-body text-center">
                             <h1
@@ -151,10 +151,10 @@
                 <div class="col-md-4">
                     <div class="card bg-success text-white h-100">
                         <div class="card-header text-center">
-                            <h3>නව ලකුණු</h3>
+                            <h3 style="color: white;">නව ලකුණු</h3>
                         </div>
                         <div class="card-body text-center">
-                            <h1 class="display-4">{{ final_score }}</h1>
+                            <h1 class="display-4" style="color: white;">{{ final_score }}</h1>
                         </div>
                     </div>
                 </div>
@@ -184,10 +184,10 @@
                 {% endif %}
 
                 <div class="mt-4">
-                    <a href="{{ url_for('kinesthetic.subject_help', subject=subject) }}"
+                    <!-- <a href="{{ url_for('kinesthetic.subject_help', subject=subject) }}"
                         class="btn btn-warning btn-lg mr-2">
                         <i class="fa fa-play-circle"></i> පාඩම් වීඩියෝව නැරඹීම
-                    </a>
+                    </a> -->
                     <a href="{{ url_for('kinesthetic.user_home') }}" class="btn btn-primary btn-lg">
                         <i class="fa fa-home"></i> මුල් පිටුවට යන්න
                     </a>

@@ -1276,3 +1276,153 @@
 .btn-secondary:hover {
   background-color: #5a6268;
 }
+
+/* Styles for the weakest subject quiz results page */
+.subtitle .badge {
+  margin: 0 5px;
+  font-size: 16px;
+}
+
+.badge-info {
+  background: linear-gradient(135deg, #0ea5e9, #0284c7);
+  color: white;
+  box-shadow: 0 4px 8px rgba(14, 165, 233, 0.2);
+}
+
+.badge-warning {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+  box-shadow: 0 4px 8px rgba(245, 158, 11, 0.2);
+}
+
+.card-header.bg-primary,
+.card-header.bg-success,
+.card-header.bg-light {
+  color: inherit;
+}
+
+.card-header.bg-primary {
+  color: white;
+}
+
+.text-success {
+  color: #22c55e !important;
+}
+
+.text-warning {
+  color: #f59e0b !important;
+}
+
+.text-danger {
+  color: #ef4444 !important;
+}
+
+.display-4 {
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+.improvement {
+  font-weight: bold;
+}
+
+/* Fix column layouts in quiz result page */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-right: -15px;
+  margin-left: -15px;
+}
+
+.col-md-4,
+.col-md-6 {
+  position: relative;
+  width: 100%;
+  padding-right: 15px;
+  padding-left: 15px;
+}
+
+@media (min-width: 768px) {
+  .col-md-4 {
+    flex: 0 0 33.333333%;
+    max-width: 33.333333%;
+  }
+
+  .col-md-6 {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+}
+
+/* Ensure bottom margin for cards */
+.mb-4 {
+  margin-bottom: 1.5rem;
+}
+
+.mt-5 {
+  margin-top: 3rem;
+}
+
+.mt-4 {
+  margin-top: 1.5rem;
+}
+
+.mt-2 {
+  margin-top: 0.5rem;
+}
+
+/* Fix alert colors in quiz result page */
+.alert-success,
+.alert-warning,
+.alert-danger {
+  border-left-width: 4px;
+  padding: 25px;
+  border-radius: 12px;
+}
+
+.alert-success {
+  background-color: rgba(34, 197, 94, 0.1);
+  border-left-color: #22c55e;
+  color: #166534;
+}
+
+.alert-warning {
+  background-color: rgba(245, 158, 11, 0.1);
+  border-left-color: #f59e0b;
+  color: #92400e;
+}
+
+.alert-danger {
+  background-color: rgba(239, 68, 68, 0.1);
+  border-left-color: #ef4444;
+  color: #991b1b;
+}
+
+.h-100 {
+  height: 100% !important;
+}
+
+.text-center {
+  text-align: center !important;
+}
+
+.mr-2 {
+  margin-right: 0.5rem;
+}
+
+/* Button overrides for result page */
+.btn-warning {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+  box-shadow: 0 8px 15px rgba(245, 158, 11, 0.3);
+}
+
+.btn-warning:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(245, 158, 11, 0.4);
+}
+
+.btn-lg {
+  padding: 18px 34px;
+  font-size: 18px;
+}
