@@ -294,6 +294,7 @@ def write_guide():
     global wr_lesson
     counts = Counter(Wr_results)
     counts_dict = dict(counts)
+    
     # Default message for 0 correct answers
     weak_message = "ඔබ මෙම පාඩම සඳහා ගොඩක්ම දුර්වලයි!"
     
