@@ -60,7 +60,7 @@ class SubQuestionForm(FlaskForm):
     max_value = FloatField("Maximum Value", validators=[Optional()])
     time_format = StringField("Time Format")
     difficulty_level = IntegerField(
-        "Difficulty Level", validators=[NumberRange(min=1, max=5)], default=1
+        "Difficulty Level", validators=[NumberRange(min=1, max=3)], default=1
     )
     points = IntegerField("Points", validators=[NumberRange(min=1)], default=1)
     hint = TextAreaField("Hint")

@@ -95,7 +95,7 @@
                   {% if question.answer_method == 'abacus' %}
                   <i class="fa fa-calculator" style="color: #6366F1;"></i> ගණක රාමුව (ඇබකසය) පෙන්වන්න
                   {% elif question.answer_method == 'analog_clock' %}
-                  <i class="fa fa-clock-o" style="color: #6366F1;"></i> අනලොග් ඔරලෝසුව පෙන්වන්න
+                  <i class="fa fa-clock-o" style="color: #6366F1;"></i> ඔරලෝසුවෙහි කටු මගින් ඇද දක්වන්න.
                   {% else %}
                   <i class="fa fa-desktop" style="color: #6366F1;"></i> ඩිජිටල් ඔරලෝසුව පෙන්වන්න
                   {% endif %}
@@ -116,7 +116,7 @@
                 {% endif %}
 
                 <!-- Webcam capture -->
-                <div class="webcam-container">
+                <!-- <div class="webcam-container">
                   <video id="webcam{{ loop.index }}" autoplay playsinline class="webcam-video"></video>
                   <button type="button" class="btn btn-primary mt-3" id="openCamera{{ loop.index }}"
                     onclick="openCamera('webcam{{ loop.index }}', this)">
@@ -125,9 +125,9 @@
                   <select id="cameraSelect{{ loop.index }}" class="form-control mt-2" style="display: none;"
                     onchange="switchCamera(this, 'webcam{{ loop.index }}')">
                     <option value="">කැමරාව තෝරන්න...</option>
-                  </select>
+                  </select> -->
                   <!-- Mirror button for clock questions (initially hidden) -->
-                  <button type="button" class="btn btn-secondary mt-2" id="mirror{{ loop.index }}"
+                  <!-- <button type="button" class="btn btn-secondary mt-2" id="mirror{{ loop.index }}"
                     onclick="toggleMirror({{ loop.index }})" style="display: none;" data-mirrored="false">
                     <i class="fa fa-exchange"></i> පිංතූරය පෙරළන්න
                   </button>
@@ -136,6 +136,53 @@
                     style="display: none;" id="capture{{ loop.index }}">
                     <i class="fa fa-camera"></i> පිංතූරය ගන්න
                   </button>
+                </div> -->
+
+                <!-- Conditional interface based on subject type -->
+                <div class="answer-interface">
+                  {% if subject == 'time' %}
+                    <!-- Clock drawing interface -->
+                    <div class="clock-drawing-container">
+                      <canvas id="clockCanvas{{ loop.index }}" class="clock-canvas" width="300" height="300"></canvas>
+                      <div class="drawing-controls mt-3">
+                        <button type="button" class="btn btn-secondary" onclick="clearClockHands({{ loop.index }})">
+                          <i class="fa fa-eraser"></i> මකන්න
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="captureClockDrawing({{ loop.index }}, '{{ sub_q.id }}')">
+                          <i class="fa fa-save"></i> පිළිතුර සුරකින්න
+                        </button>
+                      </div>
+                    </div>
+                  {% elif subject == 'addition' %}
+                    <!-- Decimal representation drawing interface -->
+                    <div class="decimal-drawing-container">
+                      <canvas id="decimalCanvas{{ loop.index }}" class="decimal-canvas" width="500" height="200"></canvas>
+                      <div class="drawing-controls mt-3">
+                        <div class="color-tools">
+                          <button type="button" class="btn btn-color active" id="shadeTool{{ loop.index }}" 
+                            onclick="selectDecimalTool({{ loop.index }}, 'shade')" style="background-color: #3B82F6; border-color: #1D4ED8">
+                            <i class="fa fa-paint-brush"></i> වර්ණ කිරීම
+                          </button>
+                          <button type="button" class="btn btn-tool" id="eraserTool{{ loop.index }}" 
+                            onclick="selectDecimalTool({{ loop.index }}, 'eraser')">
+                            <i class="fa fa-eraser"></i> මකන්න
+                          </button>
+                          <button type="button" class="btn btn-secondary" onclick="clearDecimalDrawing({{ loop.index }})">
+                            <i class="fa fa-trash"></i> සියල්ල මකන්න
+                          </button>
+                        </div>
+                        <button type="button" class="btn btn-primary mt-2" 
+                          onclick="captureDecimalDrawing({{ loop.index }}, '{{ sub_q.id }}')">
+                          <i class="fa fa-save"></i> පිළිතුර සුරකින්න
+                        </button>
+                      </div>
+                    </div>
+                  {% else %}
+                    <!-- Webcam capture interface -->
+                    <div class="webcam-container">
+                      <!-- Existing webcam code -->
+                    </div>
+                  {% endif %}
                 </div>
 
                 <!-- Hint section -->

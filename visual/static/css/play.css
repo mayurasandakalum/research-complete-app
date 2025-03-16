@@ -1355,3 +1355,109 @@
 .btn-secondary:hover {
   background-color: #5a6268;
 }
+
+.clock-drawing-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.clock-canvas {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 10px;
+}
+
+.drawing-controls {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.decimal-drawing-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.decimal-canvas {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 10px;
+  cursor: crosshair;
+}
+
+.color-tools {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.btn-color {
+  padding: 6px 12px;
+  color: white;
+  border-radius: 4px;
+}
+
+.btn-color.active {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+}
+
+/* Notification styles */
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 12px 16px;
+  z-index: 1000;
+  transform: translateX(110%);
+  transition: transform 0.3s ease-in-out;
+  max-width: 320px;
+}
+
+.notification.active {
+  transform: translateX(0);
+}
+
+.notification.success {
+  border-left: 4px solid #10b981;
+}
+
+.notification.warning {
+  border-left: 4px solid #f59e0b;
+}
+
+.notification.error {
+  border-left: 4px solid #ef4444;
+}
+
+.notification-content {
+  display: flex;
+  align-items: center;
+}
+
+.notification-content i {
+  margin-right: 12px;
+  font-size: 20px;
+}
+
+.notification.success i {
+  color: #10b981;
+}
+
+.notification.warning i {
+  color: #f59e0b;
+}
+
+.notification.error i {
+  color: #ef4444;
+}

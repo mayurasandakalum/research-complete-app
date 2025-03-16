@@ -57,7 +57,7 @@ def load_user(user_id):
 @app.route('/api/info')
 def api_info():
     return jsonify({
-        'app': 'Kinesthetic App',
+        'app': 'Visual App',
         'status': 'running'
     })
 
