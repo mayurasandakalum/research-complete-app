@@ -79,14 +79,18 @@ class User(UserMixin):
 
 
 class QuizProfile:
-    def __init__(self, user_id, total_score=0.0, created=None, modified=None):
+    def __init__(self, user_id, total_score=0.0, created=None, modified=None, 
+                 completed_lessons=None, current_lesson_attempts=0, 
+                 mixed_quiz_completed=False, subject_counts=None):
         self.user_id = user_id
         self.total_score = total_score
         self.created = created if created else datetime.utcnow()
         self.modified = modified if modified else datetime.utcnow()
         self._user = None  # Cache for user object
-        self.completed_lessons = []
-        self.current_lesson_attempts = 0
+        self.completed_lessons = completed_lessons if completed_lessons is not None else []
+        self.current_lesson_attempts = current_lesson_attempts
+        self.mixed_quiz_completed = mixed_quiz_completed  # To track if the mixed quiz is completed
+        self.subject_counts = subject_counts if subject_counts is not None else {}  # To track how many questions from each subject have been shown
 
     @staticmethod
     def get_by_user_id(user_id):
@@ -98,9 +102,11 @@ class QuizProfile:
                 total_score=data.get("total_score", 0.0),
                 created=data.get("created"),
                 modified=data.get("modified"),
+                completed_lessons=data.get("completed_lessons", []),
+                current_lesson_attempts=data.get("current_lesson_attempts", 0),
+                mixed_quiz_completed=data.get("mixed_quiz_completed", False),
+                subject_counts=data.get("subject_counts", {}),
             )
-            profile.completed_lessons = data.get("completed_lessons", [])
-            profile.current_lesson_attempts = data.get("current_lesson_attempts", 0)
             return profile
         return None
 
@@ -112,6 +118,8 @@ class QuizProfile:
             "modified": self.modified,
             "completed_lessons": self.completed_lessons,
             "current_lesson_attempts": self.current_lesson_attempts,
+            "mixed_quiz_completed": self.mixed_quiz_completed,
+            "subject_counts": self.subject_counts,
         }
         db.collection("kinesthetic_profiles").document(str(self.user_id)).set(data)
 
@@ -181,7 +189,7 @@ class Subject:
     TIME = "time"
 
     CHOICES = [
-        (ADDITION, "එකතු කිරීම පාඩම"),
+        (ADDITION, "දශම පාඩම"),
         (SUBTRACTION, "අඩු කිරීම පාඩම"),
         (TIME, "කාලය පාඩම"),
     ]
@@ -352,7 +360,8 @@ class SubQuestion:
 
 class AttemptedQuestion:
     def __init__(
-        self, user_id, question_id, sub_question_id=None, is_correct=False, images=None
+        self, user_id, question_id, sub_question_id=None, is_correct=False, images=None,
+        result_data=None
     ):
         self.id = str(uuid.uuid4())
         self.user_id = user_id
@@ -360,6 +369,7 @@ class AttemptedQuestion:
         self.sub_question_id = sub_question_id
         self.is_correct = is_correct
         self.images = images or {}
+        self.result_data = result_data or {}  # Store detection results
         self.attempted_at = datetime.utcnow()
 
     def save(self):
@@ -369,6 +379,7 @@ class AttemptedQuestion:
             "sub_question_id": self.sub_question_id,
             "is_correct": self.is_correct,
             "images": self.images,
+            "result_data": self.result_data,  # Add this field
             "attempted_at": self.attempted_at,
         }
         db.collection("attempted_questions").document(self.id).set(data)

@@ -735,3 +735,579 @@ window.addEventListener('DOMContentLoaded', function () {
 // ...existing code...
 updateCapturedAnswersCount();
 });
+
+// Global variables to track drawing state
+let isDrawing = false;
+let lastX = 0;
+let lastY = 0;
+let clockCanvasContext = {};
+let clockImage = new Image();
+clockImage.src = "/static/images/clock_face.jpg"; // Update with your clock image path
+clockImage.crossOrigin = "anonymous";
+clockImage.src = "https://visuallearning000123.weebly.com/uploads/1/5/2/4/152446337/c0_orig.jpg"; // Update with your clock image path
+
+// Initialize clock canvas when the page loads
+document.querySelectorAll('[id^="clockCanvas"]').forEach(canvas => {
+  const index = canvas.id.replace('clockCanvas', '');
+  initializeClockCanvas(index);
+});
+
+function initializeClockCanvas(index) {
+  const canvas = document.getElementById(`clockCanvas${index}`);
+  if (!canvas) return;
+  
+  const ctx = canvas.getContext('2d');
+  clockCanvasContext[index] = ctx;
+  clockImage.onload = function() {
+  // Draw the clock face when the image loads
+  clockImage.onload = function() {
+    drawClockFace(index);
+  };
+  
+  // If image already loaded, draw it now
+  if (clockImage.complete) {
+    drawClockFace(index);
+  }
+  
+  // Set up event listeners for drawing
+  canvas.addEventListener('mousedown', function(e) {
+    startDrawing(e, index);
+  });
+  
+  canvas.addEventListener('mousemove', function(e) {
+    draw(e, index);
+  });
+  
+  canvas.addEventListener('mouseup', function() {
+    stopDrawing();
+  });
+  
+  canvas.addEventListener('mouseout', function() {
+    stopDrawing();
+  });
+  canvas.addEventListener('touchstart', function(e) {
+    // Touch events for mobile
+    const touch = e.touches[0];
+    const mouseEvent = new MouseEvent('mousedown', {
+      clientX: touch.clientX,
+      clientY: touch.clientY
+    });
+    canvas.dispatchEvent(mouseEvent);
+    e.preventDefault();
+  });
+  
+  canvas.addEventListener('touchmove', function(e) {
+    const touch = e.touches[0];
+    const mouseEvent = new MouseEvent('mousemove', {
+      clientX: touch.clientX,
+      clientY: touch.clientY
+    });
+    canvas.dispatchEvent(mouseEvent);
+    e.preventDefault();
+  });
+    const mouseEvent = new MouseEvent('mouseup');
+  canvas.addEventListener('touchend', function() {
+    const mouseEvent = new MouseEvent('mouseup');
+    canvas.dispatchEvent(mouseEvent);
+  });
+}
+
+function drawClockFace(index) {
+  const ctx = clockCanvasContext[index];
+  const canvas = document.getElementById(`clockCanvas${index}`);
+  ctx.drawImage(clockImage, 0, 0, canvas.width, canvas.height);
+} try {
+    // Draw the background image (clock face)
+    ctx.drawImage(clockImage, 0, 0, canvas.width, canvas.height);
+  } catch (e) {
+    console.error("Failed to draw clock image, drawing fallback clock face", e);
+    // Draw a simple clock face as fallback
+    drawFallbackClockFace(ctx, canvas.width, canvas.height);
+  }
+}
+
+// Add a fallback function to draw a basic clock face if the image fails to load
+function drawFallbackClockFace(ctx, width, height) {
+  // Clear the canvas
+  ctx.clearRect(0, 0, width, height);
+  
+  // Draw clock circle
+  ctx.beginPath();
+  ctx.arc(width/2, height/2, Math.min(width, height)/2 - 10, 0, 2 * Math.PI);
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  
+  // Draw clock center
+  ctx.beginPath();
+  ctx.arc(width/2, height/2, 5, 0, 2 * Math.PI);
+  ctx.fillStyle = '#000';
+  ctx.fill();
+  
+  // Draw hour marks
+  for (let i = 0; i < 12; i++) {
+    const angle = (i * Math.PI / 6);
+    const x1 = width/2 + Math.sin(angle) * (Math.min(width, height)/2 - 30);
+    const y1 = height/2 - Math.cos(angle) * (Math.min(width, height)/2 - 30);
+    const x2 = width/2 + Math.sin(angle) * (Math.min(width, height)/2 - 10);
+    const y2 = height/2 - Math.cos(angle) * (Math.min(width, height)/2 - 10);
+    
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    
+    // Add hour numbers
+    const numX = width/2 + Math.sin(angle) * (Math.min(width, height)/2 - 50);
+    const numY = height/2 - Math.cos(angle) * (Math.min(width, height)/2 - 50);
+    
+    ctx.font = 'bold 16px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(i === 0 ? '12' : i.toString(), numX, numY);
+  }
+}
+
+function startDrawing(e, index) {
+  isDrawing = true;
+  const canvas = document.getElementById(`clockCanvas${index}`);
+  const rect = canvas.getBoundingClientRect();
+  lastX = e.clientX - rect.left;
+  lastY = e.clientY - rect.top;
+}
+
+function draw(e, index) {
+  if (!isDrawing) return;
+  
+  const ctx = clockCanvasContext[index];
+  const canvas = document.getElementById(`clockCanvas${index}`);
+  const rect = canvas.getBoundingClientRect();
+  const currentX = e.clientX - rect.left;
+  const currentY = e.clientY - rect.top;
+  
+  ctx.lineWidth = 3;
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = '#000000';
+  
+  ctx.beginPath();
+  ctx.moveTo(lastX, lastY);
+  ctx.lineTo(currentX, currentY);
+  ctx.stroke();
+  
+  lastX = currentX;
+  lastY = currentY;
+}
+
+function stopDrawing() {
+  isDrawing = false;
+}
+
+function clearClockHands(index) {
+  const canvas = document.getElementById(`clockCanvas${index}`);
+  const ctx = clockCanvasContext[index];
+  
+  // Clear the canvas and redraw the clock face
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawClockFace(index);
+}
+
+function captureClockDrawing(index, subQuestionId) {
+  const canvas = document.getElementById(`clockCanvas${index}`);
+  
+  try {
+    // Try to get image data
+    const imageData = canvas.toDataURL('image/png');
+    
+    // Create a hidden input field to store the image data
+    let hiddenInput = document.getElementById(`answer_${subQuestionId}`);
+    if (!hiddenInput) {
+      hiddenInput = document.createElement('input');
+      hiddenInput.type = 'hidden';
+      hiddenInput.name = `answer_${subQuestionId}`;
+      hiddenInput.id = `answer_${subQuestionId}`;
+      document.querySelector('.all-answers-form').appendChild(hiddenInput);
+    }
+    
+    // Store the image data
+    hiddenInput.value = imageData;
+    
+    // Save the image locally using the download approach
+    const link = document.createElement('a');
+    link.download = `clock_drawing_${subQuestionId}_${new Date().getTime()}.png`;
+    link.href = imageData;
+    link.click();
+    
+    // Update the completion indicator
+    updateCompletionIndicator(index, true);
+    
+    // Update submission button state
+    updateSubmissionButtonState();
+    
+    // Add a preview of the captured image
+    const previewContainer = document.createElement('div');
+    previewContainer.className = 'captured-preview';
+    previewContainer.innerHTML = `
+      <p class="text-success"><i class="fa fa-check-circle"></i> පිළිතුර ලබා ගන්නා ලදී</p>
+      <img src="${imageData}" alt="Clock drawing" class="img-thumbnail" style="max-width: 150px; margin-top: 10px;">
+    `;
+    
+    // Find existing preview and replace, or append new one
+    const existingPreview = canvas.parentElement.querySelector('.captured-preview');
+    if (existingPreview) {
+      canvas.parentElement.replaceChild(previewContainer, existingPreview);
+    } else {
+      canvas.parentElement.appendChild(previewContainer);
+    }
+    
+    // Show success notification
+    showNotification('පිළිතුර සාර්ථකව සටහන් කර ඇත! පින්තූරය භාගත කර ගන්නා ලදී.', 'success');
+    
+  } catch (error) {
+    console.error("Error capturing clock drawing:", error);
+    
+    // If there's a CORS issue, try to draw to a new untainted canvas and capture that
+    try {
+      const newCanvas = document.createElement('canvas');
+      newCanvas.width = canvas.width;
+      newCanvas.height = canvas.height;
+      const newCtx = newCanvas.getContext('2d');
+      
+      // Draw just the user's drawing (not the background image)
+      drawFallbackClockFace(newCtx, canvas.width, canvas.height);
+      
+      // Copy over the user's drawn lines from the original context
+      const userDrawingImageData = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height);
+      newCtx.putImageData(userDrawingImageData, 0, 0);
+      
+      // Try to get image data from this new canvas
+      const imageData = newCanvas.toDataURL('image/png');
+      
+      // Proceed with saving as before
+      // Create a hidden input field
+      let hiddenInput = document.getElementById(`answer_${subQuestionId}`);
+      if (!hiddenInput) {
+        hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = `answer_${subQuestionId}`;
+        hiddenInput.id = `answer_${subQuestionId}`;
+        document.querySelector('.all-answers-form').appendChild(hiddenInput);
+      }
+      
+      // Store the image data
+      hiddenInput.value = imageData;
+      
+      // Save the image locally
+      const link = document.createElement('a');
+      link.download = `clock_drawing_${subQuestionId}_${new Date().getTime()}.png`;
+      link.href = imageData;
+      link.click();
+      
+      // Update UI as before
+      updateCompletionIndicator(index, true);
+      updateSubmissionButtonState();
+      showNotification('පිළිතුර සුරකින ලදී (අඩු තත්වයෙන්)', 'warning');
+      
+    } catch (fallbackError) {
+      // If all else fails, show an error message
+      showNotification('පිළිතුර සුරැකීමට අසමත් විය. කරුණාකර නැවත උත්සාහ කරන්න.', 'error');
+      console.error("Fallback error:", fallbackError);
+    }
+  }
+}
+
+// Add helper function for showing notifications if it doesn't exist
+function showNotification(message, type) {
+  // Create notification element
+  const notification = document.createElement('div');
+  notification.className = `notification ${type}`;
+  notification.innerHTML = `
+    <div class="notification-content">
+      <i class="fa ${type === 'success' ? 'fa-check-circle' : 
+                  type === 'warning' ? 'fa-exclamation-triangle' : 
+                  'fa-exclamation-circle'}"></i>
+      <span>${message}</span>
+    </div>
+  `;
+  
+  // Add to document
+  document.body.appendChild(notification);
+  
+  // Add active class after a small delay (for animation)
+  setTimeout(() => {
+    notification.classList.add('active');
+  }, 10);
+  
+  // Remove after 3 seconds
+  setTimeout(() => {
+    notification.classList.remove('active');
+    setTimeout(() => {
+      if (notification.parentNode) {
+        document.body.removeChild(notification);
+      }
+    }, 300); // Wait for fade out animation
+  }, 3000);
+}
+
+// Function to update completion indicators
+function updateCompletionIndicator(index, completed) {
+  const indicator = document.getElementById(`completionIndicator${index}`);
+  if (indicator) {
+    indicator.innerHTML = completed ? 
+      '<i class="fa fa-check-circle completion-done"></i>' : 
+      '<i class="fa fa-circle-o"></i>';
+  }
+}
+
+// Global variables for decimal drawing
+let decimalDrawingState = {};
+let decimalCurrentTool = {};
+
+// Initialize decimal canvas when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+  // Find all decimal canvases and initialize them
+  document.querySelectorAll('[id^="decimalCanvas"]').forEach(canvas => {
+    const index = canvas.id.replace('decimalCanvas', '');
+    initializeDecimalCanvas(index);
+  });
+});
+
+function initializeDecimalCanvas(index) {
+  const canvas = document.getElementById(`decimalCanvas${index}`);
+  if (!canvas) return;
+  
+  // Default tool is shade
+  decimalCurrentTool[index] = 'shade';
+  
+  // Setup drawing state
+  decimalDrawingState[index] = {
+    isDrawing: false,
+    lastX: 0,
+    lastY: 0
+  };
+  
+  const ctx = canvas.getContext('2d');
+  
+  // Load the decimal grid image (10 squares)
+  const gridImage = new Image();
+  // Add crossOrigin attribute to prevent canvas tainting
+  gridImage.crossOrigin = "anonymous";
+  gridImage.src = "https://visuallearning000123.weebly.com/uploads/1/5/2/4/152446337/d1.png";
+  
+  gridImage.onload = function() {
+    // Draw the decimal grid
+    ctx.drawImage(gridImage, 0, 0, canvas.width, canvas.height);
+    
+    // Set up event listeners for drawing
+    setupDecimalDrawingEvents(canvas, index);
+  };
+  
+  // If image loading fails, draw the grid manually
+  gridImage.onerror = function() {
+    console.error("Failed to load the grid image, falling back to manual grid drawing");
+    // Draw 10 squares manually
+    drawDecimalGrid(ctx, canvas.width, canvas.height);
+    setupDecimalDrawingEvents(canvas, index);
+  };
+}
+
+function drawDecimalGrid(ctx, width, height) {
+  const squareSize = width / 10;
+  const squareHeight = height * 0.6; // Make squares not too tall
+  const yOffset = (height - squareHeight) / 2;
+  
+  // Draw 10 squares
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 2;
+  
+  for(let i = 0; i < 10; i++) {
+    const x = i * squareSize;
+    ctx.strokeRect(x, yOffset, squareSize, squareHeight);
+    
+    // Add fraction label below each square
+    ctx.font = '12px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#333';
+    ctx.fillText(`${i+1}/10`, x + squareSize/2, yOffset + squareHeight + 20);
+  }
+  
+  // Add a title
+  ctx.font = 'bold 16px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#333';
+  ctx.fillText('දශම සංඛ්‍යාව සෙවීමට අවශ්‍ය කොටස් වර්ණ කරන්න', width/2, yOffset - 20);
+}
+
+function setupDecimalDrawingEvents(canvas, index) {
+  // Mouse events
+  canvas.addEventListener('mousedown', function(e) {
+    startDecimalDrawing(e, canvas, index);
+  });
+  
+  canvas.addEventListener('mousemove', function(e) {
+    drawOnDecimalCanvas(e, canvas, index);
+  });
+  
+  canvas.addEventListener('mouseup', function() {
+    stopDecimalDrawing(index);
+  });
+  
+  canvas.addEventListener('mouseout', function() {
+    stopDecimalDrawing(index);
+  });
+  
+  // Touch events for mobile
+  canvas.addEventListener('touchstart', function(e) {
+    const touch = e.touches[0];
+    const mouseEvent = new MouseEvent('mousedown', {
+      clientX: touch.clientX,
+      clientY: touch.clientY
+    });
+    canvas.dispatchEvent(mouseEvent);
+    e.preventDefault();
+  });
+  
+  canvas.addEventListener('touchmove', function(e) {
+    const touch = e.touches[0];
+    const mouseEvent = new MouseEvent('mousemove', {
+      clientX: touch.clientX,
+      clientY: touch.clientY
+    });
+    canvas.dispatchEvent(mouseEvent);
+    e.preventDefault();
+  });
+  
+  canvas.addEventListener('touchend', function() {
+    const mouseEvent = new MouseEvent('mouseup');
+    canvas.dispatchEvent(mouseEvent);
+  });
+}
+
+function selectDecimalTool(index, tool) {
+  decimalCurrentTool[index] = tool;
+  
+  // Update UI to show active tool
+  const shadeBtn = document.getElementById(`shadeTool${index}`);
+  const eraserBtn = document.getElementById(`eraserTool${index}`);
+  
+  if (tool === 'shade') {
+    shadeBtn.classList.add('active');
+    eraserBtn.classList.remove('active');
+  } else {
+    eraserBtn.classList.add('active');
+    shadeBtn.classList.remove('active');
+  }
+}
+
+function startDecimalDrawing(e, canvas, index) {
+  const rect = canvas.getBoundingClientRect();
+  decimalDrawingState[index].isDrawing = true;
+  decimalDrawingState[index].lastX = e.clientX - rect.left;
+  decimalDrawingState[index].lastY = e.clientY - rect.top;
+}
+
+function drawOnDecimalCanvas(e, canvas, index) {
+  if (!decimalDrawingState[index].isDrawing) return;
+  
+  const ctx = canvas.getContext('2d');
+  const rect = canvas.getBoundingClientRect();
+  const currentX = e.clientX - rect.left;
+  const currentY = e.clientY - rect.top;
+  
+  // Set up drawing properties based on current tool
+  if (decimalCurrentTool[index] === 'shade') {
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.strokeStyle = '#3B82F6'; // Blue color for shading
+    ctx.fillStyle = '#93C5FD';   // Lighter blue for filling
+    ctx.lineWidth = 4;
+    ctx.lineCap = 'round';
+  } else { // eraser
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.lineWidth = 20;
+    ctx.lineCap = 'round';
+  }
+  
+  // Draw line
+  ctx.beginPath();
+  ctx.moveTo(decimalDrawingState[index].lastX, decimalDrawingState[index].lastY);
+  ctx.lineTo(currentX, currentY);
+  ctx.stroke();
+  
+  // Update last position
+  decimalDrawingState[index].lastX = currentX;
+  decimalDrawingState[index].lastY = currentY;
+}
+
+function stopDecimalDrawing(index) {
+  decimalDrawingState[index].isDrawing = false;
+}
+
+function clearDecimalDrawing(index) {
+  const canvas = document.getElementById(`decimalCanvas${index}`);
+  const ctx = canvas.getContext('2d');
+  
+  // Clear the canvas
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  // Reset composite operation to default
+  ctx.globalCompositeOperation = 'source-over';
+  
+  // Redraw the decimal grid
+  const gridImage = new Image();
+  gridImage.src = "/static/images/decimal_grid.png";
+  gridImage.onload = function() {
+    ctx.drawImage(gridImage, 0, 0, canvas.width, canvas.height);
+  };
+  gridImage.onerror = function() {
+    drawDecimalGrid(ctx, canvas.width, canvas.height);
+  };
+  
+  // Remove any existing preview
+  const existingPreview = canvas.parentElement.querySelector('.captured-preview');
+  if (existingPreview) {
+    existingPreview.remove();
+  }
+}
+
+function captureDecimalDrawing(index, subQuestionId) {
+  const canvas = document.getElementById(`decimalCanvas${index}`);
+  const imageData = canvas.toDataURL('image/png');
+  
+  // Create a hidden input field to store the image data
+  let hiddenInput = document.getElementById(`answer_${subQuestionId}`);
+  if (!hiddenInput) {
+    hiddenInput = document.createElement('input');
+    hiddenInput.type = 'hidden';
+    hiddenInput.name = `answer_${subQuestionId}`;
+    hiddenInput.id = `answer_${subQuestionId}`;
+    document.querySelector('.all-answers-form').appendChild(hiddenInput);
+  }
+  
+  // Store the image data
+  hiddenInput.value = imageData;
+  
+  // Update the completion indicator
+  updateCompletionIndicator(index, true);
+  
+  // Update submission button state
+  updateSubmissionButtonState();
+  
+  // Show success feedback
+  showNotification('පිළිතුර සාර්ථකව සටහන් කර ඇත!', 'success');
+  
+  // Add a preview of the captured image
+  const previewContainer = document.createElement('div');
+  previewContainer.className = 'captured-preview';
+  previewContainer.innerHTML = `
+    <p class="text-success"><i class="fa fa-check-circle"></i> පිළිතුර ලබා ගන්නා ලදී</p>
+    <img src="${imageData}" alt="Decimal representation" class="img-thumbnail" style="max-width: 150px; margin-top: 10px;">
+  `;
+  
+  // Find existing preview and replace, or append new one
+  const existingPreview = canvas.parentElement.querySelector('.captured-preview');
+  if (existingPreview) {
+    canvas.parentElement.replaceChild(previewContainer, existingPreview);
+  } else {
+    canvas.parentElement.appendChild(previewContainer);
+  }
+}
