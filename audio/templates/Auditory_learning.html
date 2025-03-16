@@ -144,7 +144,7 @@
         font-weight: 600;
       }
       .controls button.stop {
-        background-color: #ff3b30;
+        background-color: #d61c13;
       }
       .controls button:hover {
         filter: brightness(90%);
@@ -157,7 +157,7 @@
         
       }
       .extra-controls button {
-        background-color: #007bff;
+        background-color: #e2300d;
         color: white;
         width: 300px;
         margin-top: 15px;
@@ -172,7 +172,7 @@
         font-family: serif;
       }
       .extra-controls button.submit {
-        background-color: #b74217;
+        background-color: #007bff;
       }
       .extra-controls button:disabled {
         background-color: #ccc;
@@ -186,7 +186,7 @@
         text-align: center;
         font-size: 17px;
         font-weight: 600;
-        background-color: #f39c12;
+        background-color: #149d0d;
         color: #fff;
         border: none;
         border-radius: 5px;
@@ -245,11 +245,11 @@
         <!-- Display Lesson and Level -->
         <div class="lesson-level-container">
           <p>
-            <strong>Lesson:</strong>
+            <strong>පාඩම :</strong>
             <span id="lesson">{{ question['Lesson'] }}</span>
           </p>
           <p>
-            <strong>Level:</strong>
+            <strong>මට්ටම :</strong>
             <span id="level">{{ question['Level'] }}</span>
           </p>
         </div>
@@ -314,6 +314,7 @@
       let isRecording = false;
 
       document.addEventListener("DOMContentLoaded", () => {
+        //when the Flask server renders the HTML file before sending it to the browser
         const questionID = "{{ question['ID'] }}";
         audio_2 = new Audio(`/static/aud_records/tts_${questionID}_.wav`);
         audio_2.play();
@@ -378,7 +379,7 @@
         playBtn.addEventListener("click", () => {
           const questionElement = document.querySelector(".question-area span");
           const questionID = questionElement.dataset.questionId;
-          const audio = new Audio(`/static/aud_records/${questionID}.wav`);
+          const audio = new Audio(`.audio/static/aud_records/${questionID}.wav`);
           audio.play();
         });
 
@@ -410,7 +411,6 @@
                 }
 
                 // Reset or show play button depending on existing audio
-                // For demonstration, let's assume we rely on the server to let us know if audio exists
                 if (data.audio_exists) {
                   playBtn.style.display = "inline";
                 } else {
@@ -422,7 +422,7 @@
                 recordBtn.innerHTML =
                   '<i class="fas fa-microphone"></i> Record';
 
-                // (Optional) If you want to automatically play TTS for new question:
+                // (Optional) If want to automatically play TTS for new question:
                 audio_2 = new Audio(
                   `/static/aud_records/tts_${questionData.ID}_.wav`
                 );
@@ -517,7 +517,7 @@
                     recordBtn.innerHTML = '<i class="fas fa-microphone"></i> Record';
 
                     submitBtn.disabled = true;
-                } else {
+                } else {  //if server response is not successsful
                     Swal.fire({
                         icon: 'info',
                         title: 'දෝශයකි!',
@@ -526,7 +526,7 @@
                     });
                 }
             })
-            .catch((error) => {
+            .catch((error) => { // handel the networking error
                 console.error("Error fetching the next question:", error);
                 Swal.fire({
                     icon: 'error',

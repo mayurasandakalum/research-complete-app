@@ -123,16 +123,7 @@ def get_min_count_string(strings):
     no = extract_first_number(min_strings[0])
     return no
 
-
-def calculate_res(query):
-    result = []
-    for doc in query:
-        data_dict = doc.to_dict()
-        result.append(data_dict["data"]["Lesson"])
-    counts = Counter(result)
-    counts_dict = dict(counts)
-    return counts_dict
-
+# num- Total answered questions, # Total number of questions in a lesson
 def random_q_r(num, noq):
     global rd_lesson
     global rd_lesson_c
@@ -160,7 +151,7 @@ def stt_sinhala(audio_file):
 
     # Convert to mono channel if necessary
     if speech_array.shape[0] > 1:
-        speech_array = speech_array.mean(dim=0)
+        speech_array = speech_array.mean(dim=0) #it averages them to mono
 
     # Prepare the input features
     input_features = processor.feature_extractor(
@@ -182,6 +173,7 @@ def stt_sinhala(audio_file):
     print("Transcription:", transcription)
     return transcription
 
+#compares two sentences and returns their semantic similarity score
 def is_similar(target, source):
     sentences = [target, source]
 
@@ -193,10 +185,10 @@ def is_similar(target, source):
     similarity = F.cosine_similarity(
         embeddings[0].unsqueeze(0), embeddings[1].unsqueeze(0)
     )
-
+    print("Similarity Score : ", similarity)
     return similarity
 
-
+#This function converts Sinhala text into speech using gTTS (Google Text-to-Speech) and saves the generated audio file
 def sin_text_to_speech(text,qid):
     """
     Convert the given Sinhala text to speech using gTTS and play the audio.
@@ -220,17 +212,18 @@ def api_info():
 @app.route("/")
 def home():
     global username
-    return render_template("Home.html", name=username)
+    return render_template("Home.html", name=username) #pass the data to html page
 
 
 @app.route('/auditory_learning')
 def auditory_learning():
-    global AudQuestionID
-    global Aud_data
-    global no_q
+    global AudQuestionID     #current question ID
+    global Aud_data           #fetched question details
+    global no_q              #num of questions exist
     qid=random_q_r(AudQuestionID,no_q)
     print(qid)
     question_doc = db.collection('audio_questions').document(str(qid)).get()
+    #Extract Question & Convert to Audio
     if question_doc.exists:
         question_data = question_doc.to_dict()
         question = question_data.get('Question', 'No Question Available')
@@ -252,7 +245,7 @@ def next_question():
     qid=random_q_r(AudQuestionID,no_q)
     print(qid)
     question_doc = db.collection('audio_questions').document(str(qid)).get()
-
+    #Extract Question & Convert to Audio
     if question_doc.exists:
         question_data = question_doc.to_dict()
         question_id = str(AudQuestionID)
@@ -294,10 +287,12 @@ def submit_sudio():
     audio_file = "static/aud_records/"+str(Aud_data['ID'])+".wav"
 
     ans_txt=stt_sinhala(audio_file)
+    #retriev the current user's session info
     user=session.get('user', 'No user stored')
     if ans_txt:
         ori_answer=Aud_data['Answer']
         sim=is_similar(ori_answer,ans_txt)
+        print(sim)
         print(sim,ori_answer)
         if sim> 0.6:
             if rd_lesson > 0: 
@@ -326,6 +321,7 @@ def submit_sudio():
 def save_audio():
     audio = request.files.get('audio')
     question_id = request.form.get('questionID')
+    #ensure both audio file and qid are provided
     if not audio or not question_id:
         return jsonify({'success': False, 'message': 'Missing audio or question ID'}), 400
 
@@ -354,26 +350,6 @@ def save_audio():
     return jsonify({'success': True, 'message': f'Audio file {wav_filename} saved successfully.'})
 
 
-@app.route("/all_score")
-def all_score():
-    user = session.get("user", None)
-    if user:
-        if not OFFLINE_MODE and db is not None:
-            query = db.collection("audio_results").where("name", "==", user).stream()
-            query2 = db.collection("write_results").where("name", "==", user).stream()
-            res1 = calculate_res(query)
-            res2 = calculate_res(query2)
-        else:
-            # Mock results for offline mode
-            res1 = {"lesson1": 3, "lesson2": 2}
-            res2 = {"lesson1": 2, "lesson3": 1}
-        print(res1, res2)
-    else:
-        return render_template("Login.html")
-
-    return render_template("Results.html", res1=res1, res2=res2)
-
-
 @app.route('/speech_guide')
 def speech_guide():
     global Aud_results
@@ -398,18 +374,36 @@ def speech_guide():
     # sin_text_to_speech("ඕනම සංඛ්‍යාවක් නවයෙන් බෙදන්නේ කොහොමද කියල අපි දැන් බලමු. අපි දැන් බලමු නවසිය පනස් හය නවයෙන් බෙදන්න. පහත ආකාරයට අපිට නවයෙන් බෙදන්න පුළුවන්. එවිට පිළිතුර එකසිය හයයි ඉතුරු දෙකයි.",938)
     counts = Counter(Aud_results)
     counts_dict = dict(counts)
+    weak_message = "ඔබ මෙම පාඩම සඳහා ගොඩක්ම දුර්වල අයෙකි. එම නිසා මෙම පාඩම පිළිබඳව ඇති ඔබගේ පෙළපොත අද්‍යයනය කර හොඳ දැනුමක් ලබාගන්න. පසුව මෙම ක්‍රමවේදය මගින් ඔබගේ දැනුම තහවුරු කර ගන්න!"
+
     if rd_lesson > 0:
-        if len(Aud_results_2) == 0:
-            counts_dict["New Result"]=0
-            message="ඔබ තවමත් මෙම පාඩමට දුර්වල අයෙකි. එම නිසා මෙම පාඩම පිළිබඳව ඇති ඔබගේ පෙළපොත අද්‍යයනය කර හොඳ දැනුමක් ලබාගන්න. පසුව මෙම ක්‍රමවේදය මගින් ඔබගේ දැනුම තහවුරු කර ගන්න."
-            images=["imgtry.png"]
-        else:    
-            counts2 = Counter(Aud_results_2)
+        if len(Aud_results_2) == 0:  # If no new results
+            counts_dict["New Results"] = 0
+            message = weak_message
+            images = ["imgtry.png"]
+        else:
+            counts2 = Counter(Aud_results_2)  # New results
             counts_dict2 = dict(counts2)
             print(counts_dict2)
-            counts_dict["New "+"lesson"+str(rd_lesson)]=counts_dict2["lesson0"+str(rd_lesson)]
-            message="ඔබ ඔබගේ අපහසු පාඩම පිළිබඳ හොඳ අධ්‍යයනයක් ලබාගෙන ඇති අතර ඔබ ජය ගෙන ඇත."
-            images=["imagese.png"]
+            prev_score = counts_dict.get("lesson0" + str(rd_lesson), 0)  # Previous result count
+            new_score = counts_dict2.get("lesson0" + str(rd_lesson), 0)  # New result count
+            
+            # Add new result to the result dictionary
+            counts_dict["New lesson" + str(rd_lesson)] = new_score
+            
+            # Compare previous and new results
+            if new_score == 0:
+                message = weak_message  # Use the same message
+                images = ["imgtry.png"]
+            elif new_score > prev_score:
+                message = "ඔබ ඔබගේ අපහසු පාඩම පිළිබඳ හොඳ අධ්‍යයනයක් ලබාගෙන ඇති අතර ඔබ ජය ගෙන ඇත!"
+                images = ["imagese.png"]
+            elif new_score == prev_score:
+                message = "ඔබ ඔබගේ අපහසු පාඩම පිළිබඳ ප්‍රගතියක් ලබාගෙන නැහැ!"
+                images = ["imgtry.png"]
+            else:
+                message = "ඔබ තවමත් මෙම පාඩමට දුර්වල අයෙකි. එම නිසා මෙම පාඩම පිළිබඳව ඇති ඔබගේ පෙළපොත අද්‍යයනය කර හොඳ දැනුමක් ලබාගන්න. පසුව මෙම ක්‍රමවේදය මගින් ඔබගේ දැනුම තහවුරු කර ගන්න!"
+                images = ["imgtry.png"]
         return render_template('AudioGuide.html', results=counts_dict, message=message,images=images,lesson_id="Finished")
     else:
         lesson_no=get_min_count_string(counts_dict)
