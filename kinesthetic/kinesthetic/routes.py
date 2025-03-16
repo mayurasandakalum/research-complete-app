@@ -1191,6 +1191,22 @@ def process_weakest_subject_quiz():
         if final_stats["total"] > 0:
             final_stats["percentage"] = (final_stats["correct"] / final_stats["total"]) * 100
         
+        # Store this comparison data in the database
+        if not hasattr(kinesthetic_profile, 'quiz_comparisons'):
+            kinesthetic_profile.quiz_comparisons = {}
+        
+        kinesthetic_profile.quiz_comparisons[subject] = {
+            "before": initial_stats,
+            "after": final_stats,
+            "initial_score": initial_score,
+            "final_score": final_score,
+            "score_difference": score_difference,
+            "timestamp": datetime.utcnow()
+        }
+        
+        # Save the updated profile
+        kinesthetic_profile.save()
+        
         # Render the result page
         return render_template(
             "kinesthetic/weakest_subject_quiz_result.html",

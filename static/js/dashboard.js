@@ -152,6 +152,9 @@ document.addEventListener("DOMContentLoaded", function () {
         "edit_student_birthday"
       ).value;
       const studentGrade = document.getElementById("edit_student_grade").value;
+      const csrfToken = document.querySelector(
+        'input[name="csrf_token"]'
+      ).value;
 
       // Create FormData object and append all fields, even if empty
       const formData = new FormData();
@@ -160,6 +163,7 @@ document.addEventListener("DOMContentLoaded", function () {
       formData.append("student_gender", studentGender);
       formData.append("student_birthday", studentBirthday);
       formData.append("student_grade", studentGrade);
+      formData.append("csrf_token", csrfToken); // Add CSRF token to FormData
 
       // Debug - optional, remove in production
       console.log("Updating student with:");
@@ -170,11 +174,18 @@ document.addEventListener("DOMContentLoaded", function () {
       fetch(`/edit_student/${studentId}`, {
         method: "POST",
         body: formData,
+        headers: {
+          "X-Requested-With": "XMLHttpRequest", // Add this header for AJAX requests
+        },
       })
         .then((response) => {
           if (response.ok) {
-            // Reload the page to show updated data
-            window.location.reload();
+            return response.json().then((data) => {
+              // Show success message
+              alert(data.message || "Student updated successfully");
+              // Reload the page to show updated data
+              window.location.reload();
+            });
           } else {
             return response.json().then((data) => {
               throw new Error(data.error || "Failed to update student");
