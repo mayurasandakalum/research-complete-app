@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Auditory Learning</title>
+    <title>ශ්‍රව්‍ය ඉගෙනීම</title>
     <!-- Font Awesome for icons -->
     <link
       rel="stylesheet"
@@ -26,6 +26,7 @@
         align-items: center;
         padding: 20px;
         margin: 0;
+        /* min-height: 100vh; */
       }
 
       /* -------------------------
@@ -41,22 +42,9 @@
         color: #fff;
         box-sizing: border-box;
       }
-      .logo img {
-        height: 40px;
-      }
-      .logout-btn {
-        color: #fff;
-        background-color: #ff3b30;
-        padding: 10px 20px;
-        text-decoration: none;
-        border-radius: 30px;
-        transition: background 0.3s;
-        font-family: serif;
-      }
-      .logout-btn:hover {
-        filter: brightness(90%);
-      }
+      
       .title {
+        align-items: center;
         font-size: 35px;
         font-weight: bold;
         font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
@@ -68,15 +56,16 @@
        CHAT CONTAINER
     ------------------------- */
       .chat-container {
-        width: 60%;
-        max-width: 600px;
+        width: 80%;
+        max-width: 800px;
         height: auto;
         /* background: linear-gradient(135deg, #f2f5f5, #3ec8db); */
         background: rgba(255, 255, 255, 0.95);
         border-radius: 30px;
         padding: 20px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        margin-bottom: 20px;
+        margin-bottom: 220px;
+        margin-top: 100px;
         position: relative;
         text-align: center;
         box-sizing: border-box;
@@ -142,9 +131,12 @@
         background-color: #1ad846;
         color: white;
         border: none;
+        width: 200px;
+        margin-top: 15px;
         padding: 10px 15px;
         border-radius: 20px;
-        font-size: 16px;
+        font-size: 17px;
+        font-weight: 600;
         cursor: pointer;
         transition: background 0.3s;
         margin: 5px;
@@ -152,7 +144,7 @@
         font-weight: 600;
       }
       .controls button.stop {
-        background-color: #ff3b30;
+        background-color: #d61c13;
       }
       .controls button:hover {
         filter: brightness(90%);
@@ -160,22 +152,27 @@
 
       .extra-controls {
         margin-top: 20px;
-        text-align: center;
+        /* text-align: center; */
+        /* width: 300px; */
+        
       }
       .extra-controls button {
-        background-color: #007bff;
+        background-color: #e2300d;
         color: white;
+        width: 300px;
+        margin-top: 15px;
         border: none;
         padding: 10px 20px;
         border-radius: 5px;
-        font-size: 16px;
+        font-size: 17px;
+        font-style: 600;
         cursor: pointer;
         transition: background 0.3s;
         margin: 5px;
         font-family: serif;
       }
       .extra-controls button.submit {
-        background-color: #b74217;
+        background-color: #007bff;
       }
       .extra-controls button:disabled {
         background-color: #ccc;
@@ -183,13 +180,17 @@
       }
 
       .next {
+        width: 300px;
         margin-top: 15px;
         font-family: serif;
-        background-color: #f39c12;
+        text-align: center;
+        font-size: 17px;
+        font-weight: 600;
+        background-color: #149d0d;
         color: #fff;
         border: none;
         border-radius: 5px;
-        padding: 8px 16px;
+        padding: 10px 50px; 
         cursor: pointer;
         transition: background 0.3s;
       }
@@ -198,13 +199,16 @@
       }
 
       .replay {
+        width: 300px;
         margin-top: 15px;
         font-family: serif;
+        font-size: 17px;
+        font-weight: 600;
         background-color: #f39c12;
         color: #fff;
         border: none;
         border-radius: 5px;
-        padding: 8px 16px;
+        padding: 10px 20px;
         cursor: pointer;
         transition: background 0.3s;
       }
@@ -223,65 +227,15 @@
         font-family: serif;
       }
 
-      /* -------------------------
-       FOOTER
-    ------------------------- */
-      .footer {
-        width: 100%;
-        background-color: #333;
-        color: #fff;
-        padding: 20px 0;
-        display: flex;
-        justify-content: center;
-        margin-top: 40px;
-        box-sizing: border-box;
-      }
-      .footer-content {
-        width: 90%;
-        max-width: 1000px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-      }
-      .footer-logo img {
-        height: 50px;
-        margin-bottom: 10px;
-      }
-      .social-media {
-        margin: 10px 0;
-      }
-      .social-media a {
-        color: #fff;
-        margin: 0 10px;
-        font-size: 24px;
-        transition: color 0.3s;
-      }
-      .social-media a:hover {
-        color: #00acee;
-      }
-      .contact-info {
-        font-size: 14px;
-        font-family: Cambria, Cochin, Georgia, Times, "Times New Roman", serif;
-        margin-top: 10px;
-      }
-
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   </head>
 
   <body>
     <!-- Navbar -->
     <nav class="navbar">
-      <div class="logo">
-        <a href="/home"
-          ><img
-            src="/static/Images/logo.png"
-            alt="Company Logo"
-            style="width: 150px; height: 150px; border-radius: 50%"
-        /></a>
-      </div>
-      <div class="title">Auditory Learning</div>
-      <a href="logout.html" class="logout-btn">Logout</a>
+      <div class="title">ශ්‍රව්‍ය ඉගෙනීම</div>
+      
     </nav>
     <!-- <div class="wrapper"> -->
       <!-- Chatbox with Character Icon -->
@@ -291,11 +245,11 @@
         <!-- Display Lesson and Level -->
         <div class="lesson-level-container">
           <p>
-            <strong>Lesson:</strong>
+            <strong>පාඩම :</strong>
             <span id="lesson">{{ question['Lesson'] }}</span>
           </p>
           <p>
-            <strong>Level:</strong>
+            <strong>මට්ටම :</strong>
             <span id="level">{{ question['Level'] }}</span>
           </p>
         </div>
@@ -316,54 +270,32 @@
 
         <!-- Recording Controls -->
         <div class="controls">
-          <button id="recordBtn"><i class="fas fa-microphone"></i> Record</button>
+          <button id="recordBtn"><i class="fas fa-microphone"></i>පිළිතුර සැපයීම</button>
           <!-- Stopped button below (hidden by default) -->
           <!-- <button id="stopBtn" class="stop" style="display: none;">
           <i class="fas fa-stop"></i> Stop
         </button> -->
           <button id="playBtn" style="display: none">
-            <i class="fas fa-play"></i> Play
+            <i class="fas fa-play"></i>ඇසීම
           </button>
         </div>
 
         <!-- Retake and Submit Buttons -->
         <div class="extra-controls">
-          <button id="retakeBtn" disabled>Retake Answer</button>
-          <button id="submitBtn" class="submit" disabled>Submit Answer</button>
+          <button id="retakeBtn" disabled>නැවත පිළිතුර දීම</button>
+          <button id="submitBtn" class="submit" disabled>පිළිතුර තහවුරු කිරීම</button>
         </div>
 
         <!-- Next Question Button -->
-        <button id="next" class="next">Next</button>
+        <button id="next" class="next">ඊළඟ ප්‍රශ්නය</button>
 
-        <button id="replay" class="replay">Replay</button>
+        <button id="replay" class="replay">නැවත ප්‍රශ්නය ඇසීම</button>
 
         <!-- Feedback -->
         <div class="feedback" id="feedback"></div>
       </div>
 <!-- </div> -->
-    <!-- Footer -->
-    <footer class="footer">
-      <div class="footer-content">
-        <div class="social-media">
-          <a href="https://facebook.com" target="_blank"
-            ><i class="fab fa-facebook-f"></i
-          ></a>
-          <a href="https://twitter.com" target="_blank"
-            ><i class="fab fa-twitter"></i
-          ></a>
-          <a href="https://instagram.com" target="_blank"
-            ><i class="fab fa-instagram"></i
-          ></a>
-          <a href="https://linkedin.com" target="_blank"
-            ><i class="fab fa-linkedin-in"></i
-          ></a>
-        </div>
-        <div class="contact-info">
-          <p>📧 Email: info@learn-pal.com</p>
-          <p>📍 Address: 123 Learn-Pal St, Colombo, Sri Lanka</p>
-        </div>
-      </div>
-    </footer>
+  
 
     <script>
       // DOM Elements
@@ -382,6 +314,7 @@
       let isRecording = false;
 
       document.addEventListener("DOMContentLoaded", () => {
+        //when the Flask server renders the HTML file before sending it to the browser
         const questionID = "{{ question['ID'] }}";
         audio_2 = new Audio(`/static/aud_records/tts_${questionID}_.wav`);
         audio_2.play();
@@ -446,7 +379,7 @@
         playBtn.addEventListener("click", () => {
           const questionElement = document.querySelector(".question-area span");
           const questionID = questionElement.dataset.questionId;
-          const audio = new Audio(`/static/aud_records/${questionID}.wav`);
+          const audio = new Audio(`.audio/static/aud_records/${questionID}.wav`);
           audio.play();
         });
 
@@ -478,7 +411,6 @@
                 }
 
                 // Reset or show play button depending on existing audio
-                // For demonstration, let's assume we rely on the server to let us know if audio exists
                 if (data.audio_exists) {
                   playBtn.style.display = "inline";
                 } else {
@@ -490,7 +422,7 @@
                 recordBtn.innerHTML =
                   '<i class="fas fa-microphone"></i> Record';
 
-                // (Optional) If you want to automatically play TTS for new question:
+                // (Optional) If want to automatically play TTS for new question:
                 audio_2 = new Audio(
                   `/static/aud_records/tts_${questionData.ID}_.wav`
                 );
@@ -526,7 +458,7 @@
       });
 
       // Submit Answer
-      submitBtn.addEventListener("click", () => {
+      /*submitBtn.addEventListener("click", () => {
         fetch("/submit_audio")
           .then((response) => response.json())
           .then((data) => {
@@ -555,7 +487,56 @@
           .catch((error) => {
             console.error("Error fetching the next question:", error);
           });
-      });
+      });*/
+
+      submitBtn.addEventListener("click", () => {
+        fetch("/submit_audio")
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.success) {
+                    if (data.correct) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'නිවැරදියි!',
+                            text: 'ඔබගේ ශබ්ද පිළිතුර නිවැරදියි.',
+                            confirmButtonText: 'හරි',
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'වැරදියි!',
+                            html: `ඔබගේ පිළිතුර වැරදියි.<br> නිවැරදි පිළිතුර: <b>${data.answer}</b>`,
+                            confirmButtonText: 'නැවත උත්සාහ කරන්න',
+                        });
+                    }
+
+                    playBtn.style.display = "none";
+
+                    // Reset record button
+                    recordBtn.style.backgroundColor = "";
+                    recordBtn.innerHTML = '<i class="fas fa-microphone"></i> Record';
+
+                    submitBtn.disabled = true;
+                } else {  //if server response is not successsful
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'දෝශයකි!',
+                        text: data.message || 'ප්‍රශ්න අවසානයට පැමිණියෙමු.',
+                        confirmButtonText: 'හරි',
+                    });
+                }
+            })
+            .catch((error) => { // handel the networking error
+                console.error("Error fetching the next question:", error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'දෝශයකි!',
+                    text: 'දෝශයක් සිදු විය. කරුණාකර නැවත උත්සාහ කරන්න.',
+                    confirmButtonText: 'හරි',
+                });
+            });
+    });
+
     </script>
   </body>
 </html>

@@ -6,7 +6,8 @@
 
   /* Background Image */
   body {
-    background-image: url('/static/Images/dashboard.jpg'); /* Replace with your image path */
+    /* background-image: url('/static/Images/audio_learning.jpg'); */
+    background-color: rgba(146, 42, 164, 0.5);
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -17,15 +18,6 @@
     align-items: center;
 }
 
-.navbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    padding: 15px 30px;
-    background-color:transparent;
-    color: #fff;
-}
 
 .logo img {
     height: 40px;
@@ -37,27 +29,19 @@
     font-family: serif;
 }
 
-.logout-btn {
-    color: #fff;
-    background-color: #ff3b30;
-    padding: 10px 20px;
-    text-decoration: none;
-    border-radius: 30px;
-    transition: background 0.3s;
-    font-family: serif;
-}
-
-.logout-btn:hover {
-    background-color: #e03229;
+.sentence{
+    text-align: center;
+    margin-top: 70px;
 }
 
 .dashboard-container {
     text-align: center;
-    padding: 40px;
-    margin-top: 50px;
+    padding: 100px;
+    margin-top: 150px;
+    margin-left: 320px;
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    background-color: #f6e8e8;
+    background-color: #fcf0fc;
     max-width: 800px;
     width: 100%;
 }
@@ -121,36 +105,12 @@ h1 {
 
 /* Auditory - Playful Green/Blue gradient */
 .auditory {
-    background: linear-gradient(45deg, #0b521e, #44b435);
+    background: linear-gradient(45deg, #e777f6, #6b118f);
 }
 .auditory:hover {
-    background: linear-gradient(45deg, #037063, #44b435);
+    background: linear-gradient(45deg, #d83db9, #8a058f);
 }
 
-/* Reading/Writing - Ocean Blues gradient */
-.reading-writing {
-    background: linear-gradient(45deg, #07457b, #08757b);
-}
-.reading-writing:hover {
-    background: linear-gradient(45deg, #07457b, #08757b);
-}
-
-/* Visual - Sunset gradient */
-.visual {
-    background: linear-gradient(45deg, #cf4449, #fad0c4);
-    color: #444; /* Darker text for better contrast */
-}
-.visual:hover {
-    background: linear-gradient(45deg, #cf4449, #ffd8ce);
-}
-
-/* Kinesthetic - Purple/Pink gradient */
-.kinesthetic {
-    background: linear-gradient(45deg, #402b72, #e87ac9);
-}
-.kinesthetic:hover {
-    background: linear-gradient(45deg, #402b72, #e87ac9);
-}
 
 /* Optional: Add pulse animation on hover */
 @keyframes pulse {

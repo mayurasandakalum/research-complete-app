@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Audio Guide</title>
+  <title>ශ්‍රව්‍ය පුහුණුව</title>
   <!-- Font Awesome -->
   <link
     rel="stylesheet"<!DOCTYPE html>
     <html lang="en">
     <head>
-      <meta charset="UTF-8" />
+      <!-- <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-      <title>Write Guide</title>
+      <title>Write Guide</title> -->
       <!-- Font Awesome -->
       <link
         rel="stylesheet"
@@ -21,7 +21,8 @@
           /* General Styles */
           body {
               font-family: Arial, sans-serif;
-              background-image: url('/static/Images/auditory.jpg');
+              /*background-image: url('/static/Images/auditory.jpg');*/
+              background: linear-gradient(135deg,rgb(138, 140, 250),rgb(202, 148, 253),rgb(253, 150, 202));
               background-size: cover;
               background-position: center;
               background-repeat: no-repeat;
@@ -211,26 +212,26 @@
     <body>
         <!-- Navbar -->
         <nav class="navbar">
-            <div class="logo">
-                <a href="/home">
+            <!-- <div class="logo"> -->
+                <!-- <a href="/home">
                     <img
                         src="aduio/static/Images/logo.png"
                         alt="Company Logo"
                         style="width:150px;height:150px;border-radius: 50%;"
                     />
-                </a>
-            </div>
-            <div class="title">Audio input Guide</div>
-            <a href="logout.html" class="logout-btn">Logout</a>
+                </a> -->
+            <!-- </div> -->
+            <div class="title">ශ්‍රව්‍ය පිළිතුරු පුනරීක්ෂණය</div>
+            
         </nav>
     
         <div class="wrapper">
             <!-- Results Container -->
             <div class="results-container">
-                <h3>Your Results</h3>
+                <h3>ඔබගේ ප්‍රතිඵල</h3>
                 <ul>
                     {% for lesson_key, result_val in results.items() %}
-                        <li>{{ lesson_key }} Results : {{ result_val }}</li>
+                        <li>{{ lesson_key }} ප්‍රතිඵල : {{ result_val }}</li>
                     {% endfor %}
                 </ul>
             </div>
@@ -241,7 +242,7 @@
             </div>
     
             <!-- Centered Lesson Heading -->
-            <h1 class="lesson-heading">Lesson {{ lesson_id }}</h1>
+            <h1 class="lesson-heading">පාඩම {{ lesson_id }}</h1>
     
             <!-- Images Container -->
             <div class="images-container">
@@ -251,7 +252,7 @@
                     <img src="static/{{ image_path }}" alt="Lesson Image" />
                     <!-- Audio play button that calls a JS function with the image path -->
                     <button class="audio-btn" onclick="playAudio('{{ image_path }}')">
-                        <i class="fas fa-play-circle"></i>Play Audio
+                        <i class="fas fa-play-circle"></i>ශ්‍රව්‍ය වාදනය කරන්න
                     </button>
                 </div>
                 {% endfor %}
@@ -260,18 +261,10 @@
             <!-- Complete Button -->
             <!-- Example usage: returning to    ing_writing_learning page -->
             <a href="auditory_learning">
-              <button id="completeBtn" class="complete-btn">Understood</button>
+              <button id="completeBtn" class="complete-btn">අපහසු පාඩම පිළිබඳ අවබෝධයක් ලබාගත්තා</button>
             </a>
         </div>
     
-        <!-- Footer -->
-        <footer class="footer">
-            <div class="footer-content">
-                <p>📧 Email: info@learn-pal.com</p>
-                <p>📞 Fax: +94 11 2345678</p>
-                <p>📍 Address: 123 Learn-Pal St, Colombo, Sri Lanka</p>
-            </div>
-        </footer>
     
         <script>
             
@@ -279,7 +272,7 @@
     
               let baseName = imagePath.split('.')[0];
               let audio_f = `tts_${baseName}_.wav`;
-              const audioSrc = 'audio/static/aud_records/' + audio_f;
+              const audioSrc = 'static/aud_records/' + audio_f;
     
               const audio = new Audio(audioSrc);
               audio.play().catch(err => {
