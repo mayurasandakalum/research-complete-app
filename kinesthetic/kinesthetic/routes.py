@@ -943,6 +943,12 @@ def process_all_answers():
         total_questions = 15
         if kinesthetic_profile.current_lesson_attempts >= total_questions:
             kinesthetic_profile.mixed_quiz_completed = True
+            
+            # Store the weakest subject when the quiz is completed
+            if not kinesthetic_profile.weakest_subject:
+                weakest_data = kinesthetic_profile.get_weakest_subject()
+                kinesthetic_profile.weakest_subject = weakest_data.get("subject")
+            
             response_data["quiz_completed"] = True
             response_data["redirect_url"] = url_for("kinesthetic.user_home")  # Changed to user_home to show results
             

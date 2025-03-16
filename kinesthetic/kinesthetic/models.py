@@ -83,7 +83,7 @@ class QuizProfile:
                  completed_lessons=None, current_lesson_attempts=0, 
                  mixed_quiz_completed=False, subject_counts=None,
                  subject_performance=None, watched_videos=None,
-                 quiz_comparisons=None):  # Add this new parameter
+                 quiz_comparisons=None, weakest_subject=None):  # Add weakest_subject parameter
         self.user_id = user_id
         self.total_score = total_score
         self.created = created if created else datetime.utcnow()
@@ -100,6 +100,8 @@ class QuizProfile:
         # Store quiz comparison data: {subject: {"before": {"correct": a, "total": b, "percentage": c}, 
         #                                      "after": {"correct": d, "total": e, "percentage": f}}}
         self.quiz_comparisons = quiz_comparisons or {}
+        # Store the weakest subject after first quiz
+        self.weakest_subject = weakest_subject
 
     @staticmethod
     def get_by_user_id(user_id):
@@ -117,7 +119,8 @@ class QuizProfile:
                 subject_counts=data.get("subject_counts", {}),
                 subject_performance=data.get("subject_performance", {}),
                 watched_videos=data.get("watched_videos", []),
-                quiz_comparisons=data.get("quiz_comparisons", {})  # Add this line
+                quiz_comparisons=data.get("quiz_comparisons", {}),
+                weakest_subject=data.get("weakest_subject")  # Add this line
             )
             return profile
         return None
@@ -134,7 +137,8 @@ class QuizProfile:
             "subject_counts": self.subject_counts,
             "subject_performance": self.subject_performance,
             "watched_videos": self.watched_videos,
-            "quiz_comparisons": self.quiz_comparisons,  # Add this line
+            "quiz_comparisons": self.quiz_comparisons,
+            "weakest_subject": self.weakest_subject,  # Add this line
         }
         db.collection("kinesthetic_profiles").document(str(self.user_id)).set(data)
 

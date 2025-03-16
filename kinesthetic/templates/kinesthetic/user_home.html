@@ -27,9 +27,13 @@
                     <!-- Weakest Subject Analysis -->
                     {% if kinesthetic_profile.subject_performance %}
                     {% set weakest = kinesthetic_profile.get_weakest_subject() %}
-                    {% if weakest.subject %}
+
+                    <!-- Use the stored weakest_subject if available, otherwise use calculated one -->
+                    {% set weakest_subject = kinesthetic_profile.weakest_subject or weakest.subject %}
+
+                    {% if weakest_subject %}
                     <div class="card mb-4">
-                        {% if kinesthetic_profile and kinesthetic_profile.watched_videos and weakest.subject in
+                        {% if kinesthetic_profile and kinesthetic_profile.watched_videos and weakest_subject in
                         kinesthetic_profile.watched_videos %}
                         <div class="card-header bg-success text-white">
                             <h5 class="mb-0">ප්‍රශ්නාවලියට අනුව ඔබ වැඩිදුර අධ්‍යයනය කිරීමට අවශ්‍ය විෂයය</h5>
