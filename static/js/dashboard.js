@@ -32,31 +32,66 @@ function updateStatus() {
 updateStatus();
 setInterval(updateStatus, 10000);
 
-// Navigation functionality
+// Navigation functionality - consolidated version
 document.addEventListener("DOMContentLoaded", function () {
   const navLinks = document.querySelectorAll(".nav-link");
   const sections = document.querySelectorAll(".dashboard-section");
 
+  // Function to activate a specific tab
+  function activateTab(tabId) {
+    // Hide all sections
+    sections.forEach((section) => {
+      section.classList.remove("active");
+    });
+
+    // Remove active class from all nav links
+    navLinks.forEach((link) => {
+      link.classList.remove("active");
+    });
+
+    // Show the selected section
+    const targetSection = document.getElementById(tabId);
+    if (targetSection) {
+      targetSection.classList.add("active");
+    }
+
+    // Add active class to the clicked nav link
+    const activeLink = document.querySelector(`.nav-link[href="#${tabId}"]`);
+    if (activeLink) {
+      activeLink.classList.add("active");
+    }
+  }
+
+  // Add click event listeners to all nav links
   navLinks.forEach((link) => {
     link.addEventListener("click", function (e) {
-      // Don't prevent default for external links (those with href starting with http or containing url_for)
-      if (!this.getAttribute("href").startsWith("#")) {
-        return; // Let the browser handle the navigation
+      // Only handle internal links (those starting with #)
+      if (this.getAttribute("href").startsWith("#")) {
+        e.preventDefault();
+        const tabId = this.getAttribute("href").substring(1);
+        activateTab(tabId);
+
+        // Update URL fragment without reloading the page
+        history.pushState(null, null, `#${tabId}`);
       }
-
-      e.preventDefault();
-
-      // Remove active class from all links and sections
-      navLinks.forEach((l) => l.classList.remove("active"));
-      sections.forEach((s) => s.classList.remove("active"));
-
-      // Add active class to clicked link
-      this.classList.add("active");
-
-      // Show the corresponding section
-      const targetId = this.getAttribute("href").substring(1);
-      document.getElementById(targetId).classList.add("active");
     });
+  });
+
+  // Handle initial load with URL hash
+  if (window.location.hash) {
+    const tabId = window.location.hash.substring(1);
+    activateTab(tabId);
+  }
+
+  // Handle back/forward browser navigation
+  window.addEventListener("popstate", function () {
+    if (window.location.hash) {
+      const tabId = window.location.hash.substring(1);
+      activateTab(tabId);
+    } else {
+      // Default to first tab if no hash
+      activateTab("overview");
+    }
   });
 
   // Add Student Modal functionality
@@ -117,6 +152,9 @@ document.addEventListener("DOMContentLoaded", function () {
         "edit_student_birthday"
       ).value;
       const studentGrade = document.getElementById("edit_student_grade").value;
+      const csrfToken = document.querySelector(
+        'input[name="csrf_token"]'
+      ).value;
 
       // Create FormData object and append all fields, even if empty
       const formData = new FormData();
@@ -125,6 +163,7 @@ document.addEventListener("DOMContentLoaded", function () {
       formData.append("student_gender", studentGender);
       formData.append("student_birthday", studentBirthday);
       formData.append("student_grade", studentGrade);
+      formData.append("csrf_token", csrfToken); // Add CSRF token to FormData
 
       // Debug - optional, remove in production
       console.log("Updating student with:");
@@ -135,11 +174,18 @@ document.addEventListener("DOMContentLoaded", function () {
       fetch(`/edit_student/${studentId}`, {
         method: "POST",
         body: formData,
+        headers: {
+          "X-Requested-With": "XMLHttpRequest", // Add this header for AJAX requests
+        },
       })
         .then((response) => {
           if (response.ok) {
-            // Reload the page to show updated data
-            window.location.reload();
+            return response.json().then((data) => {
+              // Show success message
+              alert(data.message || "Student updated successfully");
+              // Reload the page to show updated data
+              window.location.reload();
+            });
           } else {
             return response.json().then((data) => {
               throw new Error(data.error || "Failed to update student");

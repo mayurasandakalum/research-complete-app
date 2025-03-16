@@ -20,12 +20,14 @@ except ImportError:
 login_manager = LoginManager()
 csrf = CSRFProtect()
 
+from kinesthetic.routes import kinesthetic_blueprint, mark_video_as_watched
+
 app = Flask(__name__)
-# app.config.from_object(Config)
 app.config['SECRET_KEY'] = config.SECRET_KEY
 
 # Initialize CSRF protection
 csrf.init_app(app)
+csrf.exempt(mark_video_as_watched)  # Exempt the route function directly
 
 # Initialize login manager with correct login view
 login_manager.init_app(app)

@@ -25,23 +25,7 @@ from wtforms.validators import (
 from .models import Subject  # Add this import
 
 
-class UserLoginForm(FlaskForm):
-    username = StringField("Username", validators=[DataRequired()])
-    password = PasswordField("Password", validators=[DataRequired()])
-    submit = SubmitField("Login")
-
-
-class RegistrationForm(FlaskForm):
-    username = StringField("Username", validators=[DataRequired()])
-    email = EmailField("Email", validators=[DataRequired(), Email()])
-    first_name = StringField("First Name", validators=[DataRequired()])
-    last_name = StringField("Last Name", validators=[DataRequired()])
-    password = PasswordField("Password", validators=[DataRequired()])
-    password2 = PasswordField(
-        "Repeat Password", validators=[DataRequired(), EqualTo("password")]
-    )
-    submit = SubmitField("Register")
-
+# Remove UserLoginForm and RegistrationForm as they won't be needed anymore
 
 class QuizForm(FlaskForm):
     choice_pk = RadioField("Choice", validators=[DataRequired()])

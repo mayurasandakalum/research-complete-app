@@ -1,12 +1,14 @@
-from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify, current_app
+from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify, current_app, session
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.security import generate_password_hash, check_password_hash
-from firebase_admin import firestore
+from firebase_admin import firestore, auth
 from datetime import datetime
 import random
 import base64
 import os
 import shutil
+import requests
+import json
 
 from .models import (
     User,
@@ -18,8 +20,6 @@ from .models import (
     AnswerMethod,
 )
 from .forms import (
-    UserLoginForm,
-    RegistrationForm,
     QuizForm,
     QuestionForm,
     SubQuestionForm,
@@ -36,6 +36,88 @@ kinesthetic_blueprint = Blueprint(
     static_folder="../static",
 )
 
+# New route to handle authentication from main system
+@kinesthetic_blueprint.route("/authenticate")
+def authenticate():
+    token = request.args.get('token')
+    if not token:
+        flash('Authentication token missing', 'error')
+        return redirect('http://localhost:5000/login')
+    
+    try:
+        # For custom tokens, we need to extract the user ID directly
+        # Custom tokens are in the format: header.payload.signature
+        import base64
+        import json
+        
+        # Split the token to get the payload part (second part)
+        parts = token.split('.')
+        if len(parts) != 3:
+            flash('Invalid token format', 'error')
+            return redirect('http://localhost:5000/login')
+            
+        # Decode the payload
+        payload = parts[1]
+        # Add padding if needed
+        padding = '=' * (4 - len(payload) % 4) if len(payload) % 4 != 0 else ''
+        payload_padded = payload + padding
+        
+        try:
+            decoded = base64.urlsafe_b64decode(payload_padded)
+            payload_data = json.loads(decoded)
+            
+            # Extract the user ID from the custom token payload
+            # The structure is different from ID tokens
+            user_id = payload_data.get('uid')
+            
+            if not user_id:
+                flash('Could not extract user ID from token', 'error')
+                return redirect('http://localhost:5000/login')
+                
+        except Exception as e:
+            print(f"Error decoding token: {str(e)}")
+            flash('Invalid token format', 'error')
+            return redirect('http://localhost:5000/login')
+        
+        # Rest of the authenticate function remains the same
+        # Check if user exists in kinesthetic database
+        user = User.get_by_id(user_id)
+        if not user:
+            # Fetch user details from main system
+            response = requests.get(f'http://localhost:5000/api/user/{user_id}')
+            if response.status_code != 200:
+                flash('Failed to fetch user details', 'error')
+                return redirect('http://localhost:5000/login')
+            
+            user_data = response.json()
+            # Create user in kinesthetic database
+            username = user_data['email'].split('@')[0] if '@' in user_data['email'] else user_data['email']
+            user = User(
+                username=username,
+                email=user_data['email'],
+                first_name=user_data.get('name', '').split()[0] if user_data.get('name') else '',
+                last_name=user_data.get('name', '').split()[-1] if user_data.get('name') and len(user_data.get('name').split()) > 1 else '',
+                password_hash='',  # No password needed since login is removed
+                id=user_id  # Use the same ID as main system
+            )
+            user.save()
+        
+        # Log in the user with Flask-Login
+        login_user(user)
+        
+        # Create QuizProfile if it doesn't exist
+        kinesthetic_profile = QuizProfile.get_by_user_id(user_id)
+        if not kinesthetic_profile:
+            kinesthetic_profile = QuizProfile(user_id=user_id)
+            kinesthetic_profile.save()
+        
+        return redirect(url_for('kinesthetic.user_home'))
+    
+    except Exception as e:
+        print(f"Authentication failed: {str(e)}")
+        flash(f'Authentication failed: {str(e)}', 'error')
+        return redirect('http://localhost:5000/login')
+
 
 @kinesthetic_blueprint.route("/")
 def home():
@@ -46,8 +128,62 @@ def home():
 @login_required
 def user_home():
     kinesthetic_profile = QuizProfile.get_by_user_id(current_user.id)
+    
+    # Get attempts by quiz type for performance comparison
+    attempts_by_type = {}
+    weakest_subject = None
+    
+    if kinesthetic_profile:
+        # Prioritize the stored weakest_subject instead of recalculating
+        weakest_subject = kinesthetic_profile.weakest_subject
+        
+        # Only calculate if no stored value exists (for backward compatibility)
+        if not weakest_subject and kinesthetic_profile.subject_performance:
+            weakest_data = kinesthetic_profile.get_weakest_subject()
+            weakest_subject = weakest_data.get("subject")
+        
+        if weakest_subject:
+            # Get attempts for this subject and split by quiz_type
+            attempts_query = (
+                db.collection("attempted_questions")
+                .where("user_id", "==", current_user.id)
+                .get()
+            )
+            
+            # Process the attempts to get statistics by quiz_type
+            for attempt in attempts_query:
+                attempt_data = attempt.to_dict()
+                quiz_type = attempt_data.get("quiz_type", "mixed_quiz")  # Default if not specified
+                
+                # Get the question to determine subject
+                question_id = attempt_data.get("question_id")
+                if not question_id:
+                    continue
+                    
+                question_ref = db.collection("questions").document(question_id).get()
+                if not question_ref.exists:
+                    continue
+                    
+                question_data = question_ref.to_dict()
+                subject = question_data.get("subject")
+                
+                if subject != weakest_subject:
+                    continue
+                
+                # Initialize counters if needed
+                if quiz_type not in attempts_by_type:
+                    attempts_by_type[quiz_type] = {"total": 0, "correct": 0}
+                
+                # Count the attempt
+                attempts_by_type[quiz_type]["total"] += 1
+                if attempt_data.get("is_correct", False):
+                    attempts_by_type[quiz_type]["correct"] += 1
+    
     return render_template(
-        "kinesthetic/user_home.html", kinesthetic_profile=kinesthetic_profile
+        "kinesthetic/user_home.html",
+        kinesthetic_profile=kinesthetic_profile,
+        attempts_by_type=attempts_by_type,
+        weakest_subject=weakest_subject  # Pass the weakest subject directly to the template
     )
 
 
@@ -151,6 +287,7 @@ def play():
                 is_correct=is_correct,
                 images=captured_images,
                 result_data=result_data,  # Add results to the attempt record
+                quiz_type="mixed_quiz"  # Set quiz_type to "mixed_quiz"
             )
             attempted.save()
 
@@ -160,6 +297,17 @@ def play():
                 if kinesthetic_profile:
                     kinesthetic_profile.total_score += points
                     kinesthetic_profile.save()
+                    
+                    # Sync marks with main system
+                    try:
+                        requests.post('http://localhost:5000/api/save_marks', json={
+                            'user_id': current_user.id,
+                            'quiz_id': question_id,
+                            'score': points,
+                            'subject': kinesthetic_profile.subject_counts
+                        }, headers={'Content-Type': 'application/json'})
+                    except Exception as e:
+                        flash(f'Failed to sync marks with main system: {str(e)}', 'warning')
                     
             # Pass the attempt ID to the result page
             return redirect(url_for('kinesthetic.submission_result', 
@@ -298,82 +446,6 @@ def submission_result(attempted_question_id):
     return render_template(
         "kinesthetic/submission_result.html", attempted_question=attempted_question
     )
-
-
-@kinesthetic_blueprint.route("/login", methods=["GET", "POST"])
-def login():
-    if current_user.is_authenticated:
-        return redirect(url_for("kinesthetic.home"))
-
-    form = UserLoginForm()
-    if form.validate_on_submit():
-        user = User.get_by_username(form.username.data)
-        if user and check_password_hash(user.password_hash, form.password.data):
-            login_user(user)
-            return redirect(url_for("kinesthetic.user_home"))
-        else:
-            flash("Invalid username/password!", "danger")
-    return render_template("kinesthetic/login.html", form=form, title="Login")
-
-
-@kinesthetic_blueprint.route("/register", methods=["GET", "POST"])
-def register():
-    if current_user.is_authenticated:
-        return redirect(url_for("kinesthetic.home"))
-
-    form = RegistrationForm()
-    if form.validate_on_submit():
-        user = User.get_by_username(form.username.data)
-        if user:
-            flash("Username already exists")
-            return redirect(url_for("kinesthetic.register"))
-
-        password_hash = generate_password_hash(form.password.data)
-        new_user = User(
-            username=form.username.data,
-            email=form.email.data,
-            first_name=form.first_name.data,
-            last_name=form.last_name.data,
-            password_hash=password_hash,
-        )
-
-        new_user.save()
-
-        kinesthetic_profile = QuizProfile(user_id=new_user.id)
-        kinesthetic_profile.save()
-
-        flash("Registration successful!")
-        return redirect(url_for("kinesthetic.login"))
-
-    return render_template("kinesthetic/registration.html", form=form, title="Register")
-
-
-@kinesthetic_blueprint.route("/logout")
-@login_required
-def logout():
-    logout_user()
-    return redirect(url_for("kinesthetic.home"))
-
-
-def batch_get_subquestions(question_ids):
-    """Helper function to get sub-questions in batches"""
-    sub_questions_by_question = {}
-
-    # Process question_ids in batches of 30
-    for i in range(0, len(question_ids), 30):
-        batch_ids = question_ids[i : i + 30]
-        sub_questions_ref = (
-            db.collection("sub_questions").where("question_id", "in", batch_ids).get()
-        )
-
-        # Group sub-questions by question_id
-        for sub_doc in sub_questions_ref:
-            sub_q = SubQuestion.from_doc(sub_doc)
-            if sub_q.question_id not in sub_questions_by_question:
-                sub_questions_by_question[sub_q.question_id] = []
-            sub_questions_by_question[sub_q.question_id].append(sub_q)
-
-    return sub_questions_by_question
 
 
 @kinesthetic_blueprint.route("/manage/questions")
@@ -747,6 +819,14 @@ def process_all_answers():
     total_points = 0
     correct_count = 0
     
+    # Get the question to determine its subject
+    question_ref = db.collection("questions").document(question_id).get()
+    if not question_ref.exists:
+        return jsonify({"success": False, "error": "Question not found"}), 400
+    
+    question_data = question_ref.to_dict()
+    question_subject = question_data.get("subject", Subject.ADDITION)
+    
     # Process each sub-question
     for sub_question_id in sub_question_ids:
         # Look for captured image for this sub-question
@@ -841,6 +921,26 @@ def process_all_answers():
         # Add points to the profile
         kinesthetic_profile.total_score += total_points
         
+        # Update performance tracking by subject
+        if question_subject not in kinesthetic_profile.subject_performance:
+            kinesthetic_profile.subject_performance[question_subject] = {"correct": 0, "total": 0}
+        
+        # Update the subject performance - count each sub-question as an attempt
+        kinesthetic_profile.subject_performance[question_subject]["total"] += len(response_data["results"])
+        kinesthetic_profile.subject_performance[question_subject]["correct"] += correct_count
+        
+        # Sync marks with main system if points were earned
+        if total_points > 0:
+            try:
+                requests.post('http://localhost:5000/api/save_marks', json={
+                    'user_id': current_user.id,
+                    'quiz_id': question_id,
+                    'score': total_points,
+                    'subject': kinesthetic_profile.subject_counts
+                }, headers={'Content-Type': 'application/json'})
+            except Exception as e:
+                print(f'Failed to sync marks with main system: {str(e)}')
+        
         # Update attempts counter (this counts as one attempt regardless of sub-questions)
         kinesthetic_profile.current_lesson_attempts += 1
         
@@ -848,9 +948,446 @@ def process_all_answers():
         total_questions = 15
         if kinesthetic_profile.current_lesson_attempts >= total_questions:
             kinesthetic_profile.mixed_quiz_completed = True
+            
+            # Store the weakest subject when the quiz is completed
+            if not kinesthetic_profile.weakest_subject:
+                weakest_data = kinesthetic_profile.get_weakest_subject()
+                kinesthetic_profile.weakest_subject = weakest_data.get("subject")
+            
             response_data["quiz_completed"] = True
-            response_data["redirect_url"] = url_for("kinesthetic.leaderboard")
+            response_data["redirect_url"] = url_for("kinesthetic.user_home")  # Changed to user_home to show results
             
         kinesthetic_profile.save()
     
     return jsonify(response_data)
+
+
+def batch_get_subquestions(question_ids):
+    """Helper function to get sub-questions in batches"""
+    sub_questions_by_question = {}
+
+    # Process question_ids in batches of 30
+    for i in range(0, len(question_ids), 30):
+        batch_ids = question_ids[i : i + 30]
+        sub_questions_ref = (
+            db.collection("sub_questions").where("question_id", "in", batch_ids).get()
+        )
+
+        # Group sub-questions by question_id
+        for sub_doc in sub_questions_ref:
+            sub_q = SubQuestion.from_doc(sub_doc)
+            if sub_q.question_id not in sub_questions_by_question:
+                sub_questions_by_question[sub_q.question_id] = []
+            sub_questions_by_question[sub_q.question_id].append(sub_q)
+
+    return sub_questions_by_question
+
+# Add this route to redirect to main system logout
+
+@kinesthetic_blueprint.route("/logout")
+def logout():
+    """Redirect to main system logout."""
+    # Clear the flask-login session
+    logout_user()
+    
+    # Redirect to main system logout
+    return redirect("http://localhost:5000/logout")
+
+
+@kinesthetic_blueprint.route("/subject-help/<subject>")
+@login_required
+def subject_help(subject):
+    """Show tutorial video for the specified subject."""
+    # Validate subject
+    if subject not in [Subject.ADDITION, Subject.SUBTRACTION, Subject.TIME]:
+        flash("Invalid subject specified", "error")
+        return redirect(url_for("kinesthetic.user_home"))
+        
+    # Get subject name for display
+    subject_names = {
+        "addition": "එකතු කිරීම",
+        "subtraction": "අඩු කිරීම",
+        "time": "කාලය",
+    }
+    
+    # YouTube video IDs for each subject
+    video_ids = {
+        "addition": "dZW84LMJFws",      # Example video ID for addition
+        "subtraction": "QZlOZtdJA50",   # Example video ID for subtraction
+        "time": "5M5IoW_qcIY",          # Example video ID for time
+    }
+    
+    # Get user profile to check if video has already been watched
+    kinesthetic_profile = QuizProfile.get_by_user_id(current_user.id)
+    video_already_watched = False
+    
+    if kinesthetic_profile and hasattr(kinesthetic_profile, 'watched_videos'):
+        video_already_watched = subject in kinesthetic_profile.watched_videos
+    
+    return render_template(
+        "kinesthetic/subject_help.html",
+        subject=subject,
+        subject_name=subject_names.get(subject, subject),
+        video_id=video_ids.get(subject),
+        video_already_watched=video_already_watched
+    )
+
+@kinesthetic_blueprint.route("/weakest-subject-quiz")
+@login_required
+def weakest_subject_quiz():
+    """Start a 5-question quiz for the user's weakest subject."""
+    kinesthetic_profile = QuizProfile.get_by_user_id(current_user.id)
+    if not kinesthetic_profile:
+        flash("Quiz profile not found.", "error")
+        return redirect(url_for("kinesthetic.user_home"))
+
+    weakest_subject_data = kinesthetic_profile.get_weakest_subject()
+    weakest_subject = weakest_subject_data.get("subject")
+
+    if not weakest_subject:
+        flash("Could not determine weakest subject.", "warning")
+        return redirect(url_for("kinesthetic.user_home"))
+
+    # Get questions for the weakest subject
+    questions_ref = (
+        db.collection("questions")
+        .where("subject", "==", weakest_subject)
+        .where("is_published", "==", True)
+        .limit(5)
+        .get()
+    )
+    
+    available_questions = [Question.from_doc(q) for q in questions_ref]
+    
+    # Check if there are any questions available
+    if not available_questions:
+        flash(f"No questions available for {weakest_subject}.", "warning")
+        return redirect(url_for("kinesthetic.user_home"))
+    
+    # Store initial score in session for comparison later
+    session['initial_score'] = kinesthetic_profile.total_score
+    session['weakest_subject'] = weakest_subject
+    
+    # Store question IDs in session to maintain the set of 5 questions
+    session['weakest_subject_question_ids'] = [q.id for q in available_questions]
+    session['weakest_subject_current_question'] = 0
+    session['weakest_subject_remaining'] = 5
+    
+    # Get the first question
+    question = available_questions[0]
+    
+    # Get sub-questions for the question
+    sub_questions = SubQuestion.get_by_question(question.id)
+    question._sub_questions = sub_questions
+
+    return render_template(
+        "kinesthetic/weakest_subject_quiz.html",
+        question=question,
+        subject=weakest_subject,
+        remaining_questions=5
+    )
+
+@kinesthetic_blueprint.route("/next-weakest-subject-question")
+@login_required
+def next_weakest_subject_question():
+    """Get the next question for the weakest subject quiz."""
+    # Check if there are question IDs in the session
+    question_ids = session.get('weakest_subject_question_ids', [])
+    current_question_index = session.get('weakest_subject_current_question', 0)
+    remaining = session.get('weakest_subject_remaining', 0)
+    
+    if not question_ids or current_question_index >= len(question_ids) - 1 or remaining <= 1:
+        # Quiz is completed, show results
+        return redirect(url_for('kinesthetic.process_weakest_subject_quiz'))
+    
+    # Move to the next question
+    current_question_index += 1
+    session['weakest_subject_current_question'] = current_question_index
+    session['weakest_subject_remaining'] = remaining - 1
+    
+    # Get the next question
+    question_id = question_ids[current_question_index]
+    question_ref = db.collection("questions").document(question_id).get()
+    
+    if not question_ref.exists:
+        flash("Question not found.", "error")
+        return redirect(url_for("kinesthetic.user_home"))
+    
+    question = Question.from_doc(question_ref)
+    
+    # Get sub-questions
+    sub_questions = SubQuestion.get_by_question(question.id)
+    question._sub_questions = sub_questions
+    
+    return render_template(
+        "kinesthetic/weakest_subject_quiz.html",
+        question=question,
+        subject=session.get('weakest_subject'),
+        remaining_questions=remaining
+    )
+
+@kinesthetic_blueprint.route("/process-weakest-subject-quiz", methods=["POST", "GET"])
+@login_required
+def process_weakest_subject_quiz():
+    """Process the quiz for the weakest subject and compare scores."""
+    # If it's a GET request, show the final results
+    if request.method == "GET":
+        # Get initial score from session
+        initial_score = session.pop('initial_score', 0)
+        subject = session.pop('weakest_subject', Subject.ADDITION)
+        
+        # Clear other session variables
+        session.pop('weakest_subject_question_ids', None)
+        session.pop('weakest_subject_current_question', None)
+        session.pop('weakest_subject_remaining', None)
+        
+        # Get current profile score
+        kinesthetic_profile = QuizProfile.get_by_user_id(current_user.id)
+        final_score = kinesthetic_profile.total_score
+        score_difference = final_score - initial_score
+        
+        # Get detailed statistics for both quiz types
+        # For the mixed quiz (initial)
+        initial_stats = {
+            "correct": 0,
+            "total": 0,
+            "percentage": 0
+        }
+        
+        # For the weakest subject quiz (final)
+        final_stats = {
+            "correct": 0,
+            "total": 0,
+            "percentage": 0
+        }
+        
+        # Get all attempted questions for this subject
+        attempted_questions = (
+            db.collection("attempted_questions")
+            .where("user_id", "==", current_user.id)
+            .get()
+        )
+        
+        for attempt in attempted_questions:
+            attempt_data = attempt.to_dict()
+            quiz_type = attempt_data.get("quiz_type", "mixed_quiz")
+            
+            # Get the question to check subject
+            question_id = attempt_data.get("question_id")
+            if not question_id:
+                continue
+                
+            question_ref = db.collection("questions").document(question_id).get()
+            if not question_ref.exists:
+                continue
+                
+            question_data = question_ref.to_dict()
+            if question_data.get("subject") != subject:
+                continue
+            
+            # Count based on quiz type
+            if quiz_type == "mixed_quiz":
+                initial_stats["total"] += 1
+                if attempt_data.get("is_correct", False):
+                    initial_stats["correct"] += 1
+            elif quiz_type == "weakest_subject":
+                final_stats["total"] += 1
+                if attempt_data.get("is_correct", False):
+                    final_stats["correct"] += 1
+        
+        # Calculate percentages
+        if initial_stats["total"] > 0:
+            initial_stats["percentage"] = (initial_stats["correct"] / initial_stats["total"]) * 100
+        
+        if final_stats["total"] > 0:
+            final_stats["percentage"] = (final_stats["correct"] / final_stats["total"]) * 100
+        
+        # Store this comparison data in the database
+        if not hasattr(kinesthetic_profile, 'quiz_comparisons'):
+            kinesthetic_profile.quiz_comparisons = {}
+        
+        kinesthetic_profile.quiz_comparisons[subject] = {
+            "before": initial_stats,
+            "after": final_stats,
+            "initial_score": initial_score,
+            "final_score": final_score,
+            "score_difference": score_difference,
+            "timestamp": datetime.utcnow()
+        }
+        
+        # Save the updated profile
+        kinesthetic_profile.save()
+        
+        # Render the result page
+        return render_template(
+            "kinesthetic/weakest_subject_quiz_result.html",
+            initial_score=initial_score,
+            final_score=final_score,
+            score_difference=score_difference,
+            subject=subject,
+            initial_stats=initial_stats,
+            final_stats=final_stats
+        )
+    
+    # For POST requests, process the current question's answers
+    question_id = request.form.get("question_pk")
+    answer_method = request.form.get("answer_method")
+    sub_question_ids = request.form.getlist("sub_question_ids")
+    
+    # Get subject from session
+    subject = session.get('weakest_subject', Subject.ADDITION)
+    
+    # Check if this is an AJAX request
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+    
+    # Initialize response
+    response_data = {
+        "success": True,
+        "results": [],
+        "subject": subject,
+        "redirect_url": url_for("kinesthetic.next_weakest_subject_question")
+    }
+    
+    total_points = 0
+    correct_count = 0
+    
+    # Process each sub-question (similar to process_all_answers)
+    for sub_question_id in sub_question_ids:
+        # Look for captured image for this sub-question
+        image_key = f"captured_image_{sub_question_id}"
+        base64_image = request.form.get(image_key)
+        
+        if not base64_image:
+            continue  # Skip if no image for this sub-question
+            
+        # Get sub-question details
+        sub_question_ref = db.collection("sub_questions").document(sub_question_id).get()
+        if not sub_question_ref.exists:
+            continue
+            
+        sub_question_data = sub_question_ref.to_dict()
+        correct_answer = sub_question_data.get("correct_answer")
+        sub_question_text = sub_question_data.get("text", "")
+        points = sub_question_data.get("points", 1)
+        
+        # Initialize result for this sub-question
+        result = {
+            "sub_question_id": sub_question_id,
+            "sub_question_text": sub_question_text,
+            "is_correct": False,
+            "detected_value": None,
+            "expected_value": correct_answer,
+            "annotated_image_url": None
+        }
+        
+        # Process answer based on answer method
+        if answer_method == AnswerMethod.ABACUS:
+            # Check answer using the abacus service
+            is_correct, detected_value, annotated_image_path = check_abacus_answer(
+                base64_image, correct_answer
+            )
+        elif answer_method == AnswerMethod.ANALOG_CLOCK or answer_method == AnswerMethod.DIGITAL_CLOCK:
+            # Check answer using the clock service
+            is_correct, detected_value, annotated_image_path = check_clock_answer(
+                base64_image, correct_answer
+            )
+        else:
+            # Unsupported answer method
+            continue
+            
+        # Update result data
+        result["is_correct"] = is_correct
+        result["detected_value"] = detected_value
+        
+        # If there's an annotated image path, copy it to the static folder
+        if annotated_image_path and os.path.exists(annotated_image_path):
+            static_uploads = os.path.join(current_app.static_folder, "uploads")
+            os.makedirs(static_uploads, exist_ok=True)
+            
+            filename = os.path.basename(annotated_image_path)
+            static_path = os.path.join(static_uploads, filename)
+            shutil.copy(annotated_image_path, static_path)
+            
+            # Add the public URL to the result
+            result["annotated_image_url"] = f"/static/uploads/{filename}"
+        
+        # Save attempt to database
+        captured_images = {image_key: base64_image}
+        if result["annotated_image_url"]:
+            captured_images["annotated_image"] = result["annotated_image_url"]
+            
+        result_data = {
+            "detected_value": detected_value,
+            "expected_value": correct_answer,
+        }
+        
+        attempted = AttemptedQuestion(
+            user_id=current_user.id,
+            question_id=question_id,
+            sub_question_id=sub_question_id,
+            is_correct=is_correct,
+            images=captured_images,
+            result_data=result_data,
+            quiz_type="weakest_subject"  # Set quiz_type to "weakest_subject"
+        )
+        attempted.save()
+        
+        # Update counters
+        if is_correct:
+            correct_count += 1
+            total_points += points
+            
+        # Add to results list
+        response_data["results"].append(result)
+    
+    # Update quiz profile
+    kinesthetic_profile = QuizProfile.get_by_user_id(current_user.id)
+    if kinesthetic_profile:
+        # Add points to the profile
+        kinesthetic_profile.total_score += total_points
+        
+        # Update performance tracking by subject
+        if subject not in kinesthetic_profile.subject_performance:
+            kinesthetic_profile.subject_performance[subject] = {"correct": 0, "total": 0}
+        
+        # Update the subject performance
+        kinesthetic_profile.subject_performance[subject]["total"] += len(response_data["results"])
+        kinesthetic_profile.subject_performance[subject]["correct"] += correct_count
+        
+        kinesthetic_profile.save()
+    
+    # Return JSON response for AJAX requests, otherwise redirect
+    if is_ajax:
+        return jsonify(response_data)
+    else:
+        # Get the next question or finish the quiz
+        return redirect(url_for('kinesthetic.next_weakest_subject_question'))
+
+
+@kinesthetic_blueprint.route("/api/video-watched/<subject>", methods=["POST"])
+@login_required
+def mark_video_as_watched(subject):
+    """Mark a video as watched for the current user."""
+    # Validate subject
+    if subject not in [Subject.ADDITION, Subject.SUBTRACTION, Subject.TIME]:
+        return jsonify({"success": False, "message": "Invalid subject specified"})
+        
+    # Get user profile
+    kinesthetic_profile = QuizProfile.get_by_user_id(current_user.id)
+    if not kinesthetic_profile:
+        kinesthetic_profile = QuizProfile(user_id=current_user.id)
+    
+    # Initialize watched_videos list if it doesn't exist
+    if not hasattr(kinesthetic_profile, 'watched_videos') or kinesthetic_profile.watched_videos is None:
+        kinesthetic_profile.watched_videos = []
+    
+    # Add subject to watched videos if not already there
+    if subject not in kinesthetic_profile.watched_videos:
+        kinesthetic_profile.watched_videos.append(subject)
+        kinesthetic_profile.save()
+        
+    return jsonify({
+        "success": True, 
+        "message": "Video marked as watched", 
+        "watched_videos": kinesthetic_profile.watched_videos
+    })

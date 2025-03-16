@@ -79,16 +79,29 @@ class User(UserMixin):
 
 
 class QuizProfile:
-    def __init__(self, user_id, total_score=0.0, created=None, modified=None):
+    def __init__(self, user_id, total_score=0.0, created=None, modified=None, 
+                 completed_lessons=None, current_lesson_attempts=0, 
+                 mixed_quiz_completed=False, subject_counts=None,
+                 subject_performance=None, watched_videos=None,
+                 quiz_comparisons=None, weakest_subject=None):  # Add weakest_subject parameter
         self.user_id = user_id
         self.total_score = total_score
         self.created = created if created else datetime.utcnow()
         self.modified = modified if modified else datetime.utcnow()
         self._user = None  # Cache for user object
-        self.completed_lessons = []
-        self.current_lesson_attempts = 0
-        self.mixed_quiz_completed = False  # To track if the mixed quiz is completed
-        self.subject_counts = {}  # To track how many questions from each subject have been shown
+        self.completed_lessons = completed_lessons or []
+        self.current_lesson_attempts = current_lesson_attempts
+        self.mixed_quiz_completed = mixed_quiz_completed
+        self.subject_counts = subject_counts or {}  # To track how many questions from each subject have been shown
+        # Track performance by subject: {subject: {"correct": x, "total": y}}
+        self.subject_performance = subject_performance or {}
+        # Track which subject videos have been watched
+        self.watched_videos = watched_videos or []
+        # Store quiz comparison data: {subject: {"before": {"correct": a, "total": b, "percentage": c}, 
+        #                                      "after": {"correct": d, "total": e, "percentage": f}}}
+        self.quiz_comparisons = quiz_comparisons or {}
+        # Store the weakest subject after first quiz
+        self.weakest_subject = weakest_subject
 
     @staticmethod
     def get_by_user_id(user_id):
@@ -100,11 +113,15 @@ class QuizProfile:
                 total_score=data.get("total_score", 0.0),
                 created=data.get("created"),
                 modified=data.get("modified"),
+                completed_lessons=data.get("completed_lessons", []),
+                current_lesson_attempts=data.get("current_lesson_attempts", 0),
+                mixed_quiz_completed=data.get("mixed_quiz_completed", False),
+                subject_counts=data.get("subject_counts", {}),
+                subject_performance=data.get("subject_performance", {}),
+                watched_videos=data.get("watched_videos", []),
+                quiz_comparisons=data.get("quiz_comparisons", {}),
+                weakest_subject=data.get("weakest_subject")  # Add this line
             )
-            profile.completed_lessons = data.get("completed_lessons", [])
-            profile.current_lesson_attempts = data.get("current_lesson_attempts", 0)
-            profile.mixed_quiz_completed = data.get("mixed_quiz_completed", False)
-            profile.subject_counts = data.get("subject_counts", {})
             return profile
         return None
 
@@ -118,6 +135,10 @@ class QuizProfile:
             "current_lesson_attempts": self.current_lesson_attempts,
             "mixed_quiz_completed": self.mixed_quiz_completed,
             "subject_counts": self.subject_counts,
+            "subject_performance": self.subject_performance,
+            "watched_videos": self.watched_videos,
+            "quiz_comparisons": self.quiz_comparisons,
+            "weakest_subject": self.weakest_subject,  # Add this line
         }
         db.collection("kinesthetic_profiles").document(str(self.user_id)).set(data)
 
@@ -167,6 +188,28 @@ class QuizProfile:
     @property
     def user(self):
         return self.get_user()
+
+    def get_weakest_subject(self):
+        """Returns the subject with the lowest performance percentage"""
+        weakest = None
+        lowest_percentage = 100  # Start with maximum possible percentage
+        
+        for subject, data in self.subject_performance.items():
+            correct = data.get("correct", 0)
+            total = data.get("total", 0)
+            
+            if total == 0:  # Skip subjects with no attempts
+                continue
+                
+            percentage = (correct / total) * 100
+            if percentage < lowest_percentage:
+                lowest_percentage = percentage
+                weakest = subject
+        
+        return {
+            "subject": weakest,
+            "percentage": lowest_percentage if weakest else 0
+        }
 
 
 class AnswerMethod:
@@ -359,7 +402,7 @@ class SubQuestion:
 class AttemptedQuestion:
     def __init__(
         self, user_id, question_id, sub_question_id=None, is_correct=False, images=None,
-        result_data=None
+        result_data=None, quiz_type="mixed_quiz"  # Add quiz_type field with default value
     ):
         self.id = str(uuid.uuid4())
         self.user_id = user_id
@@ -367,7 +410,8 @@ class AttemptedQuestion:
         self.sub_question_id = sub_question_id
         self.is_correct = is_correct
         self.images = images or {}
-        self.result_data = result_data or {}  # Store detection results
+        self.result_data = result_data or {}
+        self.quiz_type = quiz_type  # Initialize quiz_type
         self.attempted_at = datetime.utcnow()
 
     def save(self):
@@ -378,6 +422,7 @@ class AttemptedQuestion:
             "is_correct": self.is_correct,
             "images": self.images,
             "result_data": self.result_data,  # Add this field
+            "quiz_type": self.quiz_type,  # Save quiz_type
             "attempted_at": self.attempted_at,
         }
         db.collection("attempted_questions").document(self.id).set(data)

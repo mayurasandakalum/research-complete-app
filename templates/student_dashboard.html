@@ -53,6 +53,14 @@
                 {% if teacher %}
                 <p><strong>Your Teacher:</strong> {{ teacher.name if teacher.name else teacher.email }}</p>
                 {% endif %}
+
+                <div class="quick-stats">
+                    <h3>Your Progress</h3>
+                    <div id="progressStats" class="stats-container" {% if student and student.id
+                        %}data-user-id="{{ student.id }}" {% endif %}>
+                        <p>Loading your kinesthetic learning progress...</p>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -60,28 +68,39 @@
             <h2>Available Learning Applications</h2>
 
             <div class="app-grid">
-                <div class="app-card">
+                <div class="app-card featured">
                     <h3>Kinesthetic Learning App</h3>
                     <p>Tools and activities for kinesthetic learners who learn best through physical activities.</p>
+                    <p class="app-status">Ready to use</p>
                     <a href="{{ kinesthetic_url }}" class="app-link">Open App</a>
-                </div>
-
-                <div class="app-card">
-                    <h3>Read/Write Learning App</h3>
-                    <p>Resources for students who prefer to learn through reading and writing exercises.</p>
-                    <a href="{{ readwrite_url }}" class="app-link">Open App</a>
                 </div>
 
                 <div class="app-card">
                     <h3>Visual Learning App</h3>
                     <p>Visual tools and resources for students who learn best through images and diagrams.</p>
+                    <p class="app-status">Available</p>
                     <a href="{{ visual_url }}" class="app-link">Open App</a>
+                </div>
+
+                <div class="app-card">
+                    <h3>Auditory Learning App</h3>
+                    <p>Audio-based learning resources for students who learn best through listening and speaking.</p>
+                    <p class="app-status">Available</p>
+                    <a href="{{ audio_url }}" class="app-link">Open App</a>
+                </div>
+
+                <div class="app-card">
+                    <h3>Read/Write Learning App</h3>
+                    <p>Resources for students who prefer to learn through reading and writing exercises.</p>
+                    <p class="app-status">Available</p>
+                    <a href="{{ readwrite_url }}" class="app-link">Open App</a>
                 </div>
             </div>
         </section>
     </div>
 
-    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+    <!-- Replace dashboard.js with the new student_dashboard.js file -->
+    <script src="{{ url_for('static', filename='js/student_dashboard.js') }}"></script>
 </body>
 
 </html>

@@ -9,6 +9,7 @@ import time
 import threading
 import webbrowser
 from flask import Flask
+from flask_wtf.csrf import CSRFProtect
 import config
 from routes import init_routes
 
@@ -16,11 +17,17 @@ from routes import init_routes
 app = Flask(__name__)
 app.config['SECRET_KEY'] = config.SECRET_KEY
 
-# Add this debug line to your app initialization code
+# Initialize CSRF protection BEFORE routes
+csrf = CSRFProtect()
+csrf.init_app(app)
+
+# Now initialize routes
 print("Initializing routes...")
-# Initialize routes before defining any local routes
 init_routes(app)
 print("Routes initialized!")
+
+# Exempt specific routes if needed
+csrf.exempt("kinesthetic.mark_video_as_watched")
 
 # Store the process objects for cleanup
 app_processes = []
