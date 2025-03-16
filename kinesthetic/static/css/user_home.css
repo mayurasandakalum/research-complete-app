@@ -261,6 +261,118 @@
   animation: pulse 2s infinite;
 }
 
+/* Progress Comparison Styling */
+.comparison-stats {
+  margin: 25px 0;
+}
+
+.comparison-stats .row {
+  align-items: stretch;
+}
+
+.comparison-stats .card {
+  height: 100%;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.comparison-stats h5 {
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+
+.comparison-stats h3 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.comparison-stats .badge {
+  font-size: 0.9rem;
+  padding: 5px 10px;
+}
+
+/* Progress chart styling */
+.progress-section {
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.progress-section h5 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-weight: 700;
+}
+
+.subject-progress .subject-item {
+  padding: 15px;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.subject-progress .subject-item:hover {
+  background-color: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.subject-progress .progress {
+  margin-top: 8px;
+  margin-bottom: 8px;
+  height: 12px;
+  border-radius: 6px;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.subject-progress .badge {
+  vertical-align: middle;
+}
+
+/* Quiz progress comparison */
+.quiz-progress {
+  padding: 20px;
+}
+
+.quiz-progress .col-md-5 {
+  display: flex;
+  align-items: stretch;
+}
+
+.quiz-progress .p-3 {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.quiz-progress .col-md-2 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quiz-progress .display-4 {
+  font-size: 2.5rem;
+  font-weight: 800;
+}
+
+.quiz-progress .alert {
+  margin-top: 20px;
+  font-weight: 600;
+}
+
+/* Fix for second quiz section */
+.card .card-header h2 {
+  margin-bottom: 0;
+  font-weight: 700;
+}
+
+.card-body h6 {
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
 /* Responsive */
 @media (max-width: 992px) {
   .options {

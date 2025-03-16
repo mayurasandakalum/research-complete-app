@@ -26,4 +26,39 @@ document.addEventListener("DOMContentLoaded", function () {
         ' <span class="badge badge-pill badge-info">ප්‍රශ්න 5</span>';
     }
   }
+
+  // Fix alignment issues in the subject progress section
+  const subjectItems = document.querySelectorAll(".subject-item");
+  subjectItems.forEach((item) => {
+    const progressBar = item.querySelector(".progress-bar");
+    if (progressBar) {
+      // Ensure proper width calculation
+      const percentage = progressBar.style.width;
+      if (percentage) {
+        progressBar.style.width = percentage;
+      }
+    }
+  });
+
+  // Fix height consistency in comparison cards
+  const fixComparisonCardHeights = () => {
+    const cards = document.querySelectorAll(".comparison-stats .card");
+    if (cards.length >= 2) {
+      let maxHeight = 0;
+      cards.forEach((card) => {
+        card.style.height = "auto";
+        maxHeight = Math.max(maxHeight, card.offsetHeight);
+      });
+      cards.forEach((card) => {
+        card.style.height = `${maxHeight}px`;
+      });
+    }
+  };
+
+  // Run once on load and again after a slight delay to ensure content is rendered
+  fixComparisonCardHeights();
+  setTimeout(fixComparisonCardHeights, 100);
+
+  // Re-run when window is resized
+  window.addEventListener("resize", fixComparisonCardHeights);
 });
