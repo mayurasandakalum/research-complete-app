@@ -257,13 +257,8 @@ async function openCamera(webcamId, btnElement) {
     btnElement.style.display = "none";
     captureBtn.style.display = "block";
 
-    // Make mirror button visible for time-related questions
-    const answerMethod = document.querySelector(
-      'input[name="answer_method"]'
-    ).value;
-    if (answerMethod === "analog_clock" || answerMethod === "digital_clock") {
-      mirrorBtn.style.display = "block";
-    }
+    // Always show mirror button for all question types
+    mirrorBtn.style.display = "block";
 
     // Get available cameras after initial camera is opened
     await getAvailableCameras(cameraSelect);
