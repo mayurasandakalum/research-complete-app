@@ -95,11 +95,12 @@
             </div>
 
             <div class="student-list">
-                <h3>My Students</h3>
+                <h3>My Students ({{ students|length }})</h3>
                 {% if students %}
                 <table class="student-table">
                     <thead>
                         <tr>
+                            <th>No.</th>
                             <th>Name</th>
                             <th>Email</th>
                             <th>Gender</th>
@@ -111,6 +112,7 @@
                     <tbody>
                         {% for student in students %}
                         <tr>
+                            <td>{{ loop.index }}</td>
                             <td>{{ student.name }}</td>
                             <td>{{ student.email }}</td>
                             <td>{{ student.gender|capitalize if student.gender else 'N/A' }}</td>
