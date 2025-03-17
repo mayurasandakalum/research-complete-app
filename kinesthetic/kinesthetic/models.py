@@ -83,7 +83,8 @@ class QuizProfile:
                  completed_lessons=None, current_lesson_attempts=0, 
                  mixed_quiz_completed=False, subject_counts=None,
                  subject_performance=None, watched_videos=None,
-                 quiz_comparisons=None, weakest_subject=None):  # Add weakest_subject parameter
+                 quiz_comparisons=None, weakest_subject=None,
+                 weakest_subject_performance=None):  # Add new parameter
         self.user_id = user_id
         self.total_score = total_score
         self.created = created if created else datetime.utcnow()
@@ -93,8 +94,10 @@ class QuizProfile:
         self.current_lesson_attempts = current_lesson_attempts
         self.mixed_quiz_completed = mixed_quiz_completed
         self.subject_counts = subject_counts or {}  # To track how many questions from each subject have been shown
-        # Track performance by subject: {subject: {"correct": x, "total": y, "score": z}}
+        # Track performance by subject for first quiz: {subject: {"correct": x, "total": y, "score": z}}
         self.subject_performance = subject_performance or {}
+        # Track performance by subject for second quiz (weakest subject): {subject: {"correct": x, "total": y, "score": z}}
+        self.weakest_subject_performance = weakest_subject_performance or {}
         # Track which subject videos have been watched
         self.watched_videos = watched_videos or []
         # Store quiz comparison data: {subject: {"before": {"correct": a, "total": b, "percentage": c}, 
@@ -120,7 +123,8 @@ class QuizProfile:
                 subject_performance=data.get("subject_performance", {}),
                 watched_videos=data.get("watched_videos", []),
                 quiz_comparisons=data.get("quiz_comparisons", {}),
-                weakest_subject=data.get("weakest_subject")  # Add this line
+                weakest_subject=data.get("weakest_subject"),
+                weakest_subject_performance=data.get("weakest_subject_performance", {})  # Add this line
             )
             return profile
         return None
@@ -138,7 +142,8 @@ class QuizProfile:
             "subject_performance": self.subject_performance,
             "watched_videos": self.watched_videos,
             "quiz_comparisons": self.quiz_comparisons,
-            "weakest_subject": self.weakest_subject,  # Add this line
+            "weakest_subject": self.weakest_subject,
+            "weakest_subject_performance": self.weakest_subject_performance,  # Add this line
         }
         db.collection("kinesthetic_profiles").document(str(self.user_id)).set(data)
 
