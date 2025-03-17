@@ -299,7 +299,6 @@ def submit_sudio():
 
     ans_txt=stt_sinhala(audio_file)
     #retriev the current user's session info
-    user=session.get('user', 'No user stored')
     ori_answer=Aud_data['Answer']
     lesson = Aud_data['Lesson']
 
@@ -316,7 +315,6 @@ def submit_sudio():
                 Aud_results.append(Aud_data['Lesson'])     
             
         db.collection('audio_results').add({
-            "user": user,
             "question_id": qid,
             "student_answer": ans_txt,
             "correct_answer": ori_answer,
