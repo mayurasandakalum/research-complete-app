@@ -6,7 +6,7 @@
 
   /* Background Image */
   body {
-    background-color: #fae7f8;
+    background-color: #f2eff2;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -29,20 +29,32 @@
     font-size: 34px;
     text-align: center;
     padding: 40px;
-    margin-top: 50px;
-    margin-left: 350px;
+    margin-left: 330px;
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    background-color: #c5a8bc;
-    max-width: 800px;
+    background-color: #f8f5f7;
+    max-width: 900px;
     width: 100%;
 }
 
 h1 {
     margin-bottom: 20px;
     font-size: 35px;
-    color: #333;
+    color: #0c0c0c;
     font-family: serif;
+   
+}
+.card-title {
+    margin-bottom: 20px;
+    font-size: 40px;
+    color: #0a0745;
+    font-family: serif;
+    margin-bottom: 10px;
+    padding-bottom: 20px;
+}
+.card-text {
+    font-size: 25px;
+
 }
 
 .learning-methods {
@@ -60,7 +72,7 @@ h1 {
     color: #fff;
     border-radius: 8px;
     text-align: center;
-    width: 180px;
+    width: 350px;
     position: relative;
     overflow: hidden;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
@@ -99,10 +111,10 @@ h1 {
 
 /* Reading/Writing - Ocean Blues gradient */
 .reading-writing {
-    background: linear-gradient(45deg, #453f47, #8e7d8d);
+    background: linear-gradient(45deg, #6b56be, #2f19f5);
 }
 .reading-writing:hover {
-    background: linear-gradient(45deg, #6c4265, #4c3045);
+    background: linear-gradient(45deg, #3b1da9, #6375ed);
 }
 
 
