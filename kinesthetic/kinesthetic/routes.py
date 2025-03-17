@@ -1024,9 +1024,9 @@ def subject_help(subject):
     
     # YouTube video IDs for each subject
     video_ids = {
-        "addition": "Cdx4fyEe3RY",      # Example video ID for addition
-        "subtraction": "wUhllXSYzd0",   # Example video ID for subtraction
-        "time": "EUg4HF2JoC0",          # Example video ID for time
+        "addition": "Cdx4fyEe3RY",      
+        "subtraction": "wUhllXSYzd0",   
+        "time": "EUg4HF2JoC0",          
     }
     
     # Get user profile to check if video has already been watched
