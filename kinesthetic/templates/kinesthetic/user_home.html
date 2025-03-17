@@ -342,8 +342,10 @@
                     {% set perf = kinesthetic_profile.subject_performance[subject] %}
                     {% if perf.total > 0 %}
                     <div class="small text-muted mt-1">
+                        {# Cache the calculation result to avoid repeated division operations #}
+                        {% set percentage = (perf.correct / perf.total) * 100 %}
                         නිවැරදි: {{ perf.correct }}/{{ perf.total }}
-                        ({{ "%.1f"|format((perf.correct / perf.total) * 100) }}%)
+                        ({{ "%.1f"|format(percentage) }}%)
                     </div>
                     {% endif %}
                     {% endif %}
