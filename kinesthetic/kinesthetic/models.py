@@ -93,7 +93,7 @@ class QuizProfile:
         self.current_lesson_attempts = current_lesson_attempts
         self.mixed_quiz_completed = mixed_quiz_completed
         self.subject_counts = subject_counts or {}  # To track how many questions from each subject have been shown
-        # Track performance by subject: {subject: {"correct": x, "total": y}}
+        # Track performance by subject: {subject: {"correct": x, "total": y, "score": z}}
         self.subject_performance = subject_performance or {}
         # Track which subject videos have been watched
         self.watched_videos = watched_videos or []

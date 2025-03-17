@@ -298,16 +298,16 @@ def play():
                     kinesthetic_profile.total_score += points
                     kinesthetic_profile.save()
                     
-                    # Sync marks with main system
-                    try:
-                        requests.post('http://localhost:5000/api/save_marks', json={
-                            'user_id': current_user.id,
-                            'quiz_id': question_id,
-                            'score': points,
-                            'subject': kinesthetic_profile.subject_counts
-                        }, headers={'Content-Type': 'application/json'})
-                    except Exception as e:
-                        flash(f'Failed to sync marks with main system: {str(e)}', 'warning')
+                    # # Sync marks with main system
+                    # try:
+                    #     requests.post('http://localhost:5000/api/save_marks', json={
+                    #         'user_id': current_user.id,
+                    #         'quiz_id': question_id,
+                    #         'score': points,
+                    #         'subject': kinesthetic_profile.subject_counts
+                    #     }, headers={'Content-Type': 'application/json'})
+                    # except Exception as e:
+                    #     flash(f'Failed to sync marks with main system: {str(e)}', 'warning')
                     
             # Pass the attempt ID to the result page
             return redirect(url_for('kinesthetic.submission_result', 
@@ -923,11 +923,16 @@ def process_all_answers():
         
         # Update performance tracking by subject
         if question_subject not in kinesthetic_profile.subject_performance:
-            kinesthetic_profile.subject_performance[question_subject] = {"correct": 0, "total": 0}
+            kinesthetic_profile.subject_performance[question_subject] = {"correct": 0, "total": 0, "score": 0}
         
         # Update the subject performance - count each sub-question as an attempt
         kinesthetic_profile.subject_performance[question_subject]["total"] += len(response_data["results"])
         kinesthetic_profile.subject_performance[question_subject]["correct"] += correct_count
+        
+        # Add the score - check if 'score' key exists first (for backward compatibility)
+        if "score" not in kinesthetic_profile.subject_performance[question_subject]:
+            kinesthetic_profile.subject_performance[question_subject]["score"] = 0
+        kinesthetic_profile.subject_performance[question_subject]["score"] += total_points
         
         # Sync marks with main system if points were earned
         if total_points > 0:
@@ -1348,11 +1353,16 @@ def process_weakest_subject_quiz():
         
         # Update performance tracking by subject
         if subject not in kinesthetic_profile.subject_performance:
-            kinesthetic_profile.subject_performance[subject] = {"correct": 0, "total": 0}
+            kinesthetic_profile.subject_performance[subject] = {"correct": 0, "total": 0, "score": 0}
         
         # Update the subject performance
         kinesthetic_profile.subject_performance[subject]["total"] += len(response_data["results"])
         kinesthetic_profile.subject_performance[subject]["correct"] += correct_count
+        
+        # Add the score - check if 'score' key exists first (for backward compatibility)
+        if "score" not in kinesthetic_profile.subject_performance[subject]:
+            kinesthetic_profile.subject_performance[subject]["score"] = 0
+        kinesthetic_profile.subject_performance[subject]["score"] += total_points
         
         kinesthetic_profile.save()
     
