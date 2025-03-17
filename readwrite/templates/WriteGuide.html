@@ -114,22 +114,9 @@
 
       .complete-btn:hover {
           filter: brightness(90%);
-      }
+      }   
 
-    
-
-      /* Navbar */
-      .navbar {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          width: 100%;
-          padding: 15px 30px;
-          background-color: transparent;
-          color: #fff;
-      }
-
-     
+          
       .title {
           font-size: 35px;
           font-weight: bold;
@@ -139,22 +126,10 @@
   </style>
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar">
-        <!--vgv
-        <div class="logo">
-            <a href="/home">
-                <img
-                    src="/static/Images/logo.png"
-                    alt="Company Logo"
-                    style="width:150px;height:150px;border-radius: 50%;"
-                />
-            </a>
-        </div> -->
-        <div class="title">කියවා ලිවීමේ මාර්ගෝපදේශය</div>
+    {% include 'base.html' %}
+    <div class="title">කියවා ලිවීමේ මාර්ගෝපදේශය</div>
         
-    </nav>
-
+    
     <div class="wrapper">
         <!-- Results Container -->
         <div class="results-container">
