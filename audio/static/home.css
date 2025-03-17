@@ -24,21 +24,35 @@
 }
 
 .title {
-    font-size: 24px;
-    font-weight: bold;
-    font-family: serif;
+        align-items: center;
+        font-size: 35px;
+        font-weight: bold;
+        font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
+          "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+        color: #333;
+        padding-top: 20px;
 }
+    /* font-size: 24px;
+    font-weight: bold;
+    font-family: serif; */
 
-.sentence{
+
+/* .sentencee{
     text-align: center;
     margin-top: 70px;
+    font-size: 16px;
 }
+
+.sentencesnew {
+    font-size: 10px;
+} */
 
 .dashboard-container {
     text-align: center;
-    padding: 100px;
-    margin-top: 150px;
-    margin-left: 320px;
+    padding: 50px;
+    margin-top: 50px;
+    font-size: 10px;
+    margin-left: 400px;
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     background-color: #fcf0fc;
@@ -48,7 +62,7 @@
 
 h1 {
     margin-bottom: 20px;
-    font-size: 24px;
+    font-size: 16px;
     color: #333;
     font-family: serif;
 }
@@ -57,18 +71,19 @@ h1 {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
+    font-size: 5px;
     justify-content: center;
-    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-}
+    /* font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;*/
+} 
 
 .learning-btn {
-    padding: 20px 30px;
+    padding: 10px 28px;
     font-size: 18px;
     text-decoration: none;
     color: #fff;
     border-radius: 8px;
     text-align: center;
-    width: 180px;
+    width: 350px;
     position: relative;
     overflow: hidden;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
@@ -88,6 +103,35 @@ h1 {
     animation: shine 4s infinite;
 }
 
+
+.sen {
+    text-align: center;
+    font-size: 10px;
+
+}
+
+.card-text{
+    font-size: 20px;
+    padding-top: 20px;
+
+
+}
+
+.que {
+    padding-bottom: 20px;
+    padding-top: 10px;
+}
+
+.quesub {
+    color: #0828dd;
+}
+
+.qu {
+    text-align: center;
+    padding-top: 40px;
+}
+
+
 @keyframes shine {
     0% {
         transform: translateX(-100%) rotate(45deg);
@@ -105,10 +149,10 @@ h1 {
 
 /* Auditory - Playful Green/Blue gradient */
 .auditory {
-    background: linear-gradient(45deg, #e777f6, #6b118f);
+    background: linear-gradient(45deg, #666de7, #1006cf);
 }
 .auditory:hover {
-    background: linear-gradient(45deg, #d83db9, #8a058f);
+    background: linear-gradient(45deg, #3d78d8, #11058f);
 }
 
 
