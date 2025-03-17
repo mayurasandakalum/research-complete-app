@@ -134,13 +134,20 @@ def user_home():
     weakest_subject = None
     
     if kinesthetic_profile:
-        # Prioritize the stored weakest_subject instead of recalculating
+        # First check if we already have a stored weakest subject
         weakest_subject = kinesthetic_profile.weakest_subject
         
-        # Only calculate if no stored value exists (for backward compatibility)
+        # If no stored value exists or we need to recalculate
         if not weakest_subject and kinesthetic_profile.subject_performance:
-            weakest_data = kinesthetic_profile.get_weakest_subject()
-            weakest_subject = weakest_data.get("subject")
+            # Only calculate if we have performance data
+            if len(kinesthetic_profile.subject_performance) > 0:
+                weakest_data = kinesthetic_profile.get_weakest_subject()
+                weakest_subject = weakest_data.get("subject")
+                
+                # Store the weakest subject in the profile for future use
+                if weakest_subject and not kinesthetic_profile.weakest_subject:
+                    kinesthetic_profile.weakest_subject = weakest_subject
+                    kinesthetic_profile.save()
         
         if weakest_subject:
             # Get attempts for this subject and split by quiz_type

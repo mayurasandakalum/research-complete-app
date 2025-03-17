@@ -300,12 +300,42 @@ window.addEventListener("DOMContentLoaded", function () {
       element.classList.add("math-symbol");
     }
   });
+
+  // Initialize performance metrics visualization if present
+  initializePerformanceMetrics();
 });
 
 // Add pulsing effect to important elements
 function addPulsingEffect() {
   document.querySelectorAll(".btn-success").forEach((btn) => {
     btn.classList.add("pulse-subtle");
+  });
+}
+
+// New function to initialize performance metrics visualization
+function initializePerformanceMetrics() {
+  const performanceElements = document.querySelectorAll(
+    ".subject-performance-meter"
+  );
+
+  performanceElements.forEach((element) => {
+    const percentage = parseFloat(
+      element.getAttribute("data-percentage") || "0"
+    );
+    const barElement = element.querySelector(".performance-bar");
+
+    if (barElement) {
+      barElement.style.width = `${percentage}%`;
+
+      // Color coding based on performance
+      if (percentage < 50) {
+        barElement.classList.add("bg-danger");
+      } else if (percentage < 70) {
+        barElement.classList.add("bg-warning");
+      } else {
+        barElement.classList.add("bg-success");
+      }
+    }
   });
 }
 

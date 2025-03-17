@@ -242,30 +242,56 @@
                             </a>
                             {% endif %}
                         </span>
-                        <!-- <span>{{ count }} ප්‍රශ්න</span> -->
                         <span>ප්‍රශ්න 5</span>
                     </div>
-                    <div class="progress" style="height: 10px;">
-                        <div class="progress-bar 
-                                            {% if subject == 'addition' %}bg-success
-                                            {% elif subject == 'subtraction' %}bg-warning
-                                            {% elif subject == 'time' %}bg-info
-                                            {% else %}bg-primary
-                                            {% endif %}" style="width: {{ count / 15 * 100 }}%" role="progressbar">
-                        </div>
-                    </div>
 
-                    {% if kinesthetic_profile.subject_performance and subject in
-                    kinesthetic_profile.subject_performance %}
+                    {% if kinesthetic_profile.subject_performance and subject in kinesthetic_profile.subject_performance
+                    %}
                     {% set perf = kinesthetic_profile.subject_performance[subject] %}
                     {% if perf.total > 0 %}
-                    <div class="small text-muted mt-1">
-                        {# Cache the calculation result to avoid repeated division operations #}
-                        {% set percentage = (perf.correct / perf.total) * 100 %}
-                        නිවැරදි: {{ perf.correct }}/{{ perf.total }}
-                        ({{ "%.1f"|format(percentage) }}%)
+                    {% set percentage = (perf.correct / perf.total) * 100 %}
+                    <div class="progress subject-performance-meter" style="height: 15px;"
+                        data-percentage="{{ percentage }}">
+                        <div class="progress-bar performance-bar
+                            {% if percentage < 50 %}bg-danger
+                            {% elif percentage < 70 %}bg-warning
+                            {% else %}bg-success{% endif %}" style="width: {{ percentage }}%" role="progressbar"
+                            aria-valuenow="{{ percentage }}" aria-valuemin="0" aria-valuemax="100">
+                            {{ "%.1f"|format(percentage) }}%
+                        </div>
                     </div>
+                    <div class="d-flex justify-content-between mt-1">
+                        <div class="small text-muted">
+                            නිවැරදි: {{ perf.correct }}/{{ perf.total }}
+                        </div>
+                        <div class="small {% if percentage < 50 %}text-danger
+                            {% elif percentage < 70 %}text-warning
+                            {% else %}text-success{% endif %}">
+                            <strong>ලකුණු: {{ perf.score }}</strong>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="progress" style="height: 15px;">
+                        <div class="progress-bar bg-secondary" style="width: 0%" role="progressbar">
+                            0%
+                        </div>
+                    </div>
+                    <div class="small text-muted mt-1">තවම උත්තර දී නැත</div>
                     {% endif %}
+                    {% else %}
+                    <div class="progress" style="height: 15px;">
+                        <div class="progress-bar bg-secondary" style="width: 0%" role="progressbar">
+                            0%
+                        </div>
+                    </div>
+                    <div class="small text-muted mt-1">තවම උත්තර දී නැත</div>
+                    {% endif %}
+
+                    <!-- Visual indicator if this is the weakest subject -->
+                    {% if subject == weakest_subject %}
+                    <div class="weakest-subject-indicator mt-1">
+                        <span class="badge badge-pill badge-warning">වැඩිදුර අධ්‍යයනය කිරීමට අවශ්‍ය විෂයය</span>
+                    </div>
                     {% endif %}
                 </div>
                 {% endfor %}

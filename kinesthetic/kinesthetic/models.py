@@ -205,6 +205,13 @@ class QuizProfile:
             if percentage < lowest_percentage:
                 lowest_percentage = percentage
                 weakest = subject
+            # If percentages are equal, compare the raw scores
+            elif percentage == lowest_percentage and weakest is not None:
+                # If the current subject has a lower score, it becomes the weakest
+                current_score = data.get("score", 0)
+                weakest_score = self.subject_performance[weakest].get("score", 0)
+                if current_score < weakest_score:
+                    weakest = subject
         
         return {
             "subject": weakest,
