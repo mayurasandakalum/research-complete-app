@@ -260,7 +260,7 @@ def submit_write():
     ans_txt = get_text(
         model_path, _file, class_mapping_path, class_mapping_path2, number, qid
     )
-    user = session.get("user", "No user stored")
+    #user = session.get("user", "No user stored")
 
     ori_answer = Wri_data["Answer"]
     lesson = Wri_data['Lesson']
@@ -280,7 +280,6 @@ def submit_write():
 
         #Store all answers in the Firestore database.           
         db.collection('write_results').add({
-            "user": user,
             "question_id": qid,
             "student_answer": ans_txt,
             "correct_answer": ori_answer,
@@ -308,7 +307,7 @@ def write_guide():
     counts_dict = dict(counts)
     
     # Default message for 0 correct answers
-    weak_message = "ඔබ මෙම පාඩම සඳහා ගොඩක්ම දුර්වලයි!"
+    weak_message = "ඔබ මෙම පාඩම සඳහා ගොඩක්ම දුර්වලයි.එම නිසා මෙම පාඩම පිළිබඳව ඇති ඔබගේ පෙළපොත අද්‍යයනය කර හොඳ දැනුමක් ලබාගන්න. පසුව මෙම ක්‍රමවේදය මගින් ඔබගේ දැනුම තහවුරු කර ගන්න!"
     
     if wr_lesson > 0:
         if len(Wr_results_2) == 0:  # If no new results
