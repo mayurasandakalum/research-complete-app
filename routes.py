@@ -628,7 +628,7 @@ def init_routes(app):
                 available_visualizations = []
                 for viz_file in visualization_files:
                     viz_path = os.path.join(visualizations_dir, viz_file)
-                    if os.path.exists(viz_path):
+                    if (os.path.exists(viz_path)):
                         available_visualizations.append(viz_file)
                         
                 # Load analysis text files
@@ -660,3 +660,122 @@ def init_routes(app):
     
     # Ensure this function is registered, debug it
     app.logger.info("Registered route: /system_overview")
+
+    @app.route('/api/student/<student_id>/progress')
+    @teacher_required
+    def student_progress(student_id):
+        """Get detailed progress data for a specific student."""
+        try:
+            # Get student info
+            student = Student.get(student_id)
+            if not student:
+                return jsonify({'error': 'Student not found'}), 404
+                
+            # Get Firestore client
+            db = firestore.client()
+            
+            # Get student's kinesthetic marks/quiz results
+            marks_ref = db.collection('kinesthetic_marks').where('user_id', '==', student_id).get()
+            
+            # Process the marks data
+            total_score = 0
+            completed_quiz_ids = set()
+            subject_progress = {
+                'addition': 0,
+                'subtraction': 0,
+                'time': 0,
+                'measurement': 0,
+                'geometry': 0,
+                'overall': 0
+            }
+            
+            quiz_attempts = []
+            recent_activities = []
+            
+            # Process each mark/quiz result
+            for mark in marks_ref:
+                mark_data = mark.to_dict()
+                score = mark_data.get('score', 0)
+                quiz_id = mark_data.get('quiz_id', 'unknown')
+                timestamp = mark_data.get('timestamp')
+                subject_data = mark_data.get('subject_data', {})
+                
+                # Calculate totals
+                total_score += score
+                if quiz_id:
+                    completed_quiz_ids.add(quiz_id)
+                
+                # Calculate subject progress
+                if subject_data:
+                    subject = subject_data.get('subject', '').lower()
+                    if subject in subject_progress:
+                        # Add to the subject's score
+                        subject_progress[subject] += score
+                
+                # Add to quiz attempts
+                quiz_attempts.append({
+                    'quiz_id': quiz_id,
+                    'score': score,
+                    'timestamp': timestamp.isoformat() if timestamp else None,
+                    'subject': subject_data.get('subject', 'Unknown')
+                })
+                
+                # Add to recent activities
+                recent_activities.append({
+                    'type': 'quiz',
+                    'details': f"Completed {subject_data.get('subject', 'Quiz')}",
+                    'score': score,
+                    'timestamp': timestamp.isoformat() if timestamp else None
+                })
+            
+            # Normalize subject progress to percentages (mock calculation)
+            for subject in subject_progress:
+                # Simple mock calculation for demo purposes
+                max_subject_score = 100  # Theoretical maximum
+                subject_score = min(subject_progress[subject], max_subject_score)
+                subject_progress[subject] = int((subject_score / max_subject_score) * 100)
+            
+            # Calculate overall progress
+            if subject_progress:
+                non_zero_subjects = [score for score in subject_progress.values() if score > 0]
+                subject_progress['overall'] = int(sum(non_zero_subjects) / max(len(non_zero_subjects), 1))
+            
+            # Get VARK learning style data if available
+            learning_style = "Unknown"
+            vark_scores = None
+            
+            # Try to find the most recent VARK classification
+            try:
+                # Check if there's a vark_results.json file
+                if os.path.exists('vark_results.json'):
+                    with open('vark_results.json', 'r') as f:
+                        vark_data = json.load(f)
+                        
+                    for classification in vark_data.get('classifications', []):
+                        if classification.get('student_id') == student_id:
+                            learning_style = classification.get('learning_style', 'Unknown')
+                            vark_scores = classification.get('scores')
+                            break
+            except Exception as e:
+                app.logger.error(f"Error getting learning style: {e}")
+            
+            # Sort recent activities by timestamp
+            recent_activities.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
+            
+            return jsonify({
+                'student_id': student_id,
+                'student_name': student.get('name', 'Unknown'),
+                'total_score': total_score,
+                'questions_completed': len(completed_quiz_ids),
+                'subject_progress': subject_progress,
+                'quiz_attempts': quiz_attempts[:10],  # Limit to most recent 10
+                'recent_activities': recent_activities[:5],  # Limit to most recent 5
+                'learning_style': learning_style,
+                'vark_scores': vark_scores,
+                'grade': student.get('grade', 'Unknown'),
+                'last_active': recent_activities[0].get('timestamp') if recent_activities else None
+            })
+                
+        except Exception as e:
+            app.logger.error(f"Error getting student progress: {str(e)}")
+            return jsonify({'error': str(e)}), 500
