@@ -43,7 +43,7 @@ def main():
         for student in firebase_students:
             # Check if student has VARK scores (stored in learning_styles field)
             if "learning_styles" not in student or not student["learning_styles"]:
-                print(f"Warning: Student {student.get('id', 'unknown')} missing learning styles")
+                print(f"Warning: Student {student.get('name', student.get('id', 'unknown'))} missing learning styles")
                 continue
                 
             vark_scores = student["learning_styles"]
@@ -52,13 +52,14 @@ def main():
             required_fields = ["visual", "auditory", "reading", "kinesthetic"]
             if not all(key in vark_scores for key in required_fields):
                 missing = [field for field in required_fields if field not in vark_scores]
-                print(f"Warning: Student {student.get('id', 'unknown')} missing fields: {', '.join(missing)}")
+                print(f"Warning: Student {student.get('name', student.get('id', 'unknown'))} missing fields: {', '.join(missing)}")
                 continue
             
             # Ensure values are numeric
             try:
                 vark_student = {
                     "id": student["id"],
+                    "name": student.get("name", student["id"]),  # Include the name
                     "visual": float(vark_scores["visual"]),
                     "auditory": float(vark_scores["auditory"]),
                     "reading": float(vark_scores["reading"]),
@@ -66,7 +67,7 @@ def main():
                 }
                 vark_data["students"].append(vark_student)
             except (ValueError, TypeError) as e:
-                print(f"Warning: Student {student.get('id', 'unknown')} has non-numeric VARK scores: {e}")
+                print(f"Warning: Student {student.get('name', student.get('id', 'unknown'))} has non-numeric VARK scores: {e}")
         
         if not vark_data["students"]:
             print("Error: No valid student VARK data found.")

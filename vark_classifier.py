@@ -10,10 +10,11 @@ from collections import Counter
 @dataclass
 class StudentScore:
     id: str
-    visual: float
-    auditory: float
-    reading: float
-    kinesthetic: float
+    name: str = None  # Add name field with None default
+    visual: float = 0.0
+    auditory: float = 0.0
+    reading: float = 0.0
+    kinesthetic: float = 0.0
 
 
 class VARKClassifier:
@@ -160,6 +161,7 @@ class VARKClassifier:
 
         return {
             "student_id": scores.id,
+            "student_name": scores.name,  # Include name in the output
             "scores": scores_dict,
             "learning_style": learning_style,
         }

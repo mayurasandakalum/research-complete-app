@@ -563,7 +563,6 @@ def init_routes(app):
         
         if request.method == 'POST':
             # Use the specified teacher ID for testing purposes
-            # In a production environment, you'd use the logged-in user's ID
             teacher_id = "uPSpxGSRFYdnexxEDh45TxUznRJ3"  # Using the fixed ID as requested
             
             try:
@@ -595,7 +594,25 @@ def init_routes(app):
                     
                 with open(results_file, 'r') as f:
                     classification_results = json.load(f)
+                
+                # No need for this block anymore since we're adding names directly in the
+                # classifier, but keep it as a fallback in case any names are missing
+                # Load student data to add any missing names
+                with open(students_file, 'r') as f:
+                    students_data = json.load(f)
+                
+                # Create a dictionary mapping student IDs to names
+                student_names = {}
+                for student in students_data:
+                    student_id = student.get("id")
+                    if student_id:
+                        student_names[student_id] = student.get("name", "Unknown")
                     
+                # Fill in any missing student names
+                for student in classification_results["classifications"]:
+                    if not student.get("student_name") and student["student_id"] in student_names:
+                        student["student_name"] = student_names[student["student_id"]]
+                
                 # Step 4: Load the visualization images
                 visualization_files = [
                     "learning_styles_bar.png", "score_distributions_box.png", 
