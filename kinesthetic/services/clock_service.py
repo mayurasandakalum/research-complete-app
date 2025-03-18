@@ -115,8 +115,9 @@ def process_clock_image(image_path):
         print("[MODEL 6] Raw prediction index: {0}".format(max_pred[0]))
         print("[MODEL 7] Parsed time: {0}h {1}m".format(int(max_h), int(max_m)))
 
-        # Format the time prediction
-        time_prediction = f"{int(max_h):02d}:{int(max_m):02d}"
+        # Format the time prediction - convert hour 0 to hour 12 for display
+        display_h = 12 if int(max_h) == 0 else int(max_h)
+        time_prediction = f"{display_h:02d}:{int(max_m):02d}"
         print("[MODEL 8] Formatted prediction: {0}".format(time_prediction))
 
     # Create annotated image with prediction
@@ -142,7 +143,7 @@ def process_clock_image(image_path):
     
     result = {
         'detected_time': time_prediction,
-        'hours': int(max_h),
+        'hours': display_h,  # Use the display hour value
         'minutes': int(max_m),
         'original_path': image_path,
         'annotated_path': str(annotated_path)

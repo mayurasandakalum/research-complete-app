@@ -88,7 +88,7 @@
       <h1 class="mb-0">
         <a href="{{ url_for('kinesthetic.user_home') }}" class="navbar-brand">
           <i class="bi bi-stars me-2"></i>
-          <strong>Math Learning Hub</strong>
+          <strong>විදුමග</strong>
         </a>
       </h1>
       <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar"
@@ -148,6 +148,7 @@
     integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
     crossorigin="anonymous"></script>
   <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  <script src="{{ url_for('kinesthetic.static', filename='js/loading_optimization.js') }}"></script>
   {% block js %}{% endblock js %}
 </body>
 

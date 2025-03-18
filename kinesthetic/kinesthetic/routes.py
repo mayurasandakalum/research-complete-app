@@ -134,13 +134,20 @@ def user_home():
     weakest_subject = None
     
     if kinesthetic_profile:
-        # Prioritize the stored weakest_subject instead of recalculating
+        # First check if we already have a stored weakest subject
         weakest_subject = kinesthetic_profile.weakest_subject
         
-        # Only calculate if no stored value exists (for backward compatibility)
+        # If no stored value exists or we need to recalculate
         if not weakest_subject and kinesthetic_profile.subject_performance:
-            weakest_data = kinesthetic_profile.get_weakest_subject()
-            weakest_subject = weakest_data.get("subject")
+            # Only calculate if we have performance data
+            if len(kinesthetic_profile.subject_performance) > 0:
+                weakest_data = kinesthetic_profile.get_weakest_subject()
+                weakest_subject = weakest_data.get("subject")
+                
+                # Store the weakest subject in the profile for future use
+                if weakest_subject and not kinesthetic_profile.weakest_subject:
+                    kinesthetic_profile.weakest_subject = weakest_subject
+                    kinesthetic_profile.save()
         
         if weakest_subject:
             # Get attempts for this subject and split by quiz_type
@@ -298,16 +305,16 @@ def play():
                     kinesthetic_profile.total_score += points
                     kinesthetic_profile.save()
                     
-                    # Sync marks with main system
-                    try:
-                        requests.post('http://localhost:5000/api/save_marks', json={
-                            'user_id': current_user.id,
-                            'quiz_id': question_id,
-                            'score': points,
-                            'subject': kinesthetic_profile.subject_counts
-                        }, headers={'Content-Type': 'application/json'})
-                    except Exception as e:
-                        flash(f'Failed to sync marks with main system: {str(e)}', 'warning')
+                    # # Sync marks with main system
+                    # try:
+                    #     requests.post('http://localhost:5000/api/save_marks', json={
+                    #         'user_id': current_user.id,
+                    #         'quiz_id': question_id,
+                    #         'score': points,
+                    #         'subject': kinesthetic_profile.subject_counts
+                    #     }, headers={'Content-Type': 'application/json'})
+                    # except Exception as e:
+                    #     flash(f'Failed to sync marks with main system: {str(e)}', 'warning')
                     
             # Pass the attempt ID to the result page
             return redirect(url_for('kinesthetic.submission_result', 
@@ -923,11 +930,16 @@ def process_all_answers():
         
         # Update performance tracking by subject
         if question_subject not in kinesthetic_profile.subject_performance:
-            kinesthetic_profile.subject_performance[question_subject] = {"correct": 0, "total": 0}
+            kinesthetic_profile.subject_performance[question_subject] = {"correct": 0, "total": 0, "score": 0}
         
         # Update the subject performance - count each sub-question as an attempt
         kinesthetic_profile.subject_performance[question_subject]["total"] += len(response_data["results"])
         kinesthetic_profile.subject_performance[question_subject]["correct"] += correct_count
+        
+        # Add the score - check if 'score' key exists first (for backward compatibility)
+        if "score" not in kinesthetic_profile.subject_performance[question_subject]:
+            kinesthetic_profile.subject_performance[question_subject]["score"] = 0
+        kinesthetic_profile.subject_performance[question_subject]["score"] += total_points
         
         # Sync marks with main system if points were earned
         if total_points > 0:
@@ -1012,9 +1024,9 @@ def subject_help(subject):
     
     # YouTube video IDs for each subject
     video_ids = {
-        "addition": "dZW84LMJFws",      # Example video ID for addition
-        "subtraction": "QZlOZtdJA50",   # Example video ID for subtraction
-        "time": "5M5IoW_qcIY",          # Example video ID for time
+        "addition": "Cdx4fyEe3RY",      
+        "subtraction": "wUhllXSYzd0",   
+        "time": "EUg4HF2JoC0",          
     }
     
     # Get user profile to check if video has already been watched
@@ -1151,56 +1163,35 @@ def process_weakest_subject_quiz():
         initial_stats = {
             "correct": 0,
             "total": 0,
-            "percentage": 0
+            "percentage": 0,
+            "score": 0
         }
         
         # For the weakest subject quiz (final)
         final_stats = {
             "correct": 0,
             "total": 0,
-            "percentage": 0
+            "percentage": 0,
+            "score": 0
         }
         
-        # Get all attempted questions for this subject
-        attempted_questions = (
-            db.collection("attempted_questions")
-            .where("user_id", "==", current_user.id)
-            .get()
-        )
-        
-        for attempt in attempted_questions:
-            attempt_data = attempt.to_dict()
-            quiz_type = attempt_data.get("quiz_type", "mixed_quiz")
-            
-            # Get the question to check subject
-            question_id = attempt_data.get("question_id")
-            if not question_id:
-                continue
+        # Get mixed quiz stats from subject_performance
+        if subject in kinesthetic_profile.subject_performance:
+            perf_data = kinesthetic_profile.subject_performance[subject]
+            initial_stats["correct"] = perf_data.get("correct", 0)
+            initial_stats["total"] = perf_data.get("total", 0)
+            initial_stats["score"] = perf_data.get("score", 0)
+            if initial_stats["total"] > 0:
+                initial_stats["percentage"] = (initial_stats["correct"] / initial_stats["total"]) * 100
                 
-            question_ref = db.collection("questions").document(question_id).get()
-            if not question_ref.exists:
-                continue
-                
-            question_data = question_ref.to_dict()
-            if question_data.get("subject") != subject:
-                continue
-            
-            # Count based on quiz type
-            if quiz_type == "mixed_quiz":
-                initial_stats["total"] += 1
-                if attempt_data.get("is_correct", False):
-                    initial_stats["correct"] += 1
-            elif quiz_type == "weakest_subject":
-                final_stats["total"] += 1
-                if attempt_data.get("is_correct", False):
-                    final_stats["correct"] += 1
-        
-        # Calculate percentages
-        if initial_stats["total"] > 0:
-            initial_stats["percentage"] = (initial_stats["correct"] / initial_stats["total"]) * 100
-        
-        if final_stats["total"] > 0:
-            final_stats["percentage"] = (final_stats["correct"] / final_stats["total"]) * 100
+        # Get weakest subject quiz stats from weakest_subject_performance
+        if subject in kinesthetic_profile.weakest_subject_performance:
+            perf_data = kinesthetic_profile.weakest_subject_performance[subject]
+            final_stats["correct"] = perf_data.get("correct", 0)
+            final_stats["total"] = perf_data.get("total", 0)
+            final_stats["score"] = perf_data.get("score", 0)
+            if final_stats["total"] > 0:
+                final_stats["percentage"] = (final_stats["correct"] / final_stats["total"]) * 100
         
         # Store this comparison data in the database
         if not hasattr(kinesthetic_profile, 'quiz_comparisons'):
@@ -1346,23 +1337,35 @@ def process_weakest_subject_quiz():
         # Add points to the profile
         kinesthetic_profile.total_score += total_points
         
-        # Update performance tracking by subject
-        if subject not in kinesthetic_profile.subject_performance:
-            kinesthetic_profile.subject_performance[subject] = {"correct": 0, "total": 0}
+        # Initialize weakest_subject_performance if it doesn't exist
+        if not hasattr(kinesthetic_profile, 'weakest_subject_performance'):
+            kinesthetic_profile.weakest_subject_performance = {}
+            
+        # Update performance tracking by subject in weakest_subject_performance instead of subject_performance
+        if subject not in kinesthetic_profile.weakest_subject_performance:
+            kinesthetic_profile.weakest_subject_performance[subject] = {"correct": 0, "total": 0, "score": 0}
         
-        # Update the subject performance
-        kinesthetic_profile.subject_performance[subject]["total"] += len(response_data["results"])
-        kinesthetic_profile.subject_performance[subject]["correct"] += correct_count
+        # Update the weakest subject performance
+        kinesthetic_profile.weakest_subject_performance[subject]["total"] += len(response_data["results"])
+        kinesthetic_profile.weakest_subject_performance[subject]["correct"] += correct_count
+        kinesthetic_profile.weakest_subject_performance[subject]["score"] += total_points
         
         kinesthetic_profile.save()
     
-    # Return JSON response for AJAX requests, otherwise redirect
+    # Update the remaining questions counter
+    remaining = session.get('weakest_subject_remaining', 0) - 1
+    session['weakest_subject_remaining'] = remaining
+
+    # If this was the last question, redirect to the results page
+    if remaining <= 0:
+        response_data["redirect_url"] = url_for("kinesthetic.process_weakest_subject_quiz")
+
+    # Return JSON response for AJAX requests
     if is_ajax:
         return jsonify(response_data)
     else:
         # Get the next question or finish the quiz
         return redirect(url_for('kinesthetic.next_weakest_subject_question'))
-
 
 @kinesthetic_blueprint.route("/api/video-watched/<subject>", methods=["POST"])
 @login_required

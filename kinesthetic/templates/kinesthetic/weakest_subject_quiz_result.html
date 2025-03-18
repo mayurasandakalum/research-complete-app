@@ -71,6 +71,18 @@
                                             </div>
                                         </div>
                                     </div>
+
+                                    <!-- Show raw score details -->
+                                    <div class="score-details mt-3">
+                                        <div class="score-row">
+                                            <span class="score-label">ලකුණු:</span>
+                                            <span class="score-value font-weight-bold">{{ initial_score }}</span>
+                                        </div>
+                                        <div class="score-row">
+                                            <span class="score-label">නිවැරදි:</span>
+                                            <span class="score-value">{{ mixed_correct }}/{{ mixed_total }}</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -96,6 +108,18 @@
                                         </div>
                                     </div>
 
+                                    <!-- Show raw score details -->
+                                    <div class="score-details mt-3">
+                                        <div class="score-row">
+                                            <span class="score-label">ලකුණු:</span>
+                                            <span class="score-value font-weight-bold">{{ final_score }}</span>
+                                        </div>
+                                        <div class="score-row">
+                                            <span class="score-label">නිවැරදි:</span>
+                                            <span class="score-value">{{ weakest_correct }}/{{ weakest_total }}</span>
+                                        </div>
+                                    </div>
+
                                     <!-- Improvement indicator -->
                                     {% if weakest_percentage > mixed_percentage %}
                                     <div class="improvement mt-2 text-success">
@@ -111,13 +135,78 @@
                                     {% else %}
                                     <div class="improvement mt-2 text-danger">
                                         <i class="fa fa-arrow-down"></i>
-                                        <span class="ml-1">{{ "%.1f"|format(mixed_percentage - weakest_percentage)|abs
+                                        <span class="ml-1">{{ "%.1f"|format((mixed_percentage - weakest_percentage)|abs)
                                             }}% අඩුවීම</span>
                                     </div>
                                     {% endif %}
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Score Comparison -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">ලකුණු සංසන්දනය</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>සංසන්දන අයිතමය</th>
+                                    <th class="text-center">පළමු ප්‍රශ්නාවලිය</th>
+                                    <th class="text-center">දෙවන ප්‍රශ්නාවලිය</th>
+                                    <th class="text-center">වෙනස</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>මුළු ලකුණු</td>
+                                    <td class="text-center">{{ initial_score }}</td>
+                                    <td class="text-center">{{ final_score }}</td>
+                                    <td class="text-center">
+                                        {% set score_diff = final_score - initial_score %}
+                                        <span
+                                            class="badge {% if score_diff > 0 %}badge-success{% elif score_diff < 0 %}badge-danger{% else %}badge-secondary{% endif %}">
+                                            {% if score_diff > 0 %}+{% endif %}{{ score_diff }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>සාර්ථකත්ව අනුපාතය</td>
+                                    <td class="text-center">{{ mixed_correct }}/{{ mixed_total }}</td>
+                                    <td class="text-center">{{ weakest_correct }}/{{ weakest_total }}</td>
+                                    <td class="text-center">
+                                        {% set ratio_diff = (weakest_correct/weakest_total) -
+                                        (mixed_correct/mixed_total) if mixed_total > 0 and weakest_total > 0 else 0 %}
+                                        <span
+                                            class="badge {% if ratio_diff > 0 %}badge-success{% elif ratio_diff < 0 %}badge-danger{% else %}badge-secondary{% endif %}">
+                                            {% if ratio_diff > 0 %}+{% endif %}{{ "%.2f"|format(ratio_diff*100) }}%
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>සාමාන්‍ය ලකුණු (ප්‍රශ්න 1කට)</td>
+                                    <td class="text-center">
+                                        {{ "%.1f"|format(initial_score / mixed_total) if mixed_total > 0 else "-" }}
+                                    </td>
+                                    <td class="text-center">
+                                        {{ "%.1f"|format(final_score / weakest_total) if weakest_total > 0 else "-" }}
+                                    </td>
+                                    <td class="text-center">
+                                        {% set avg_diff = (final_score / weakest_total) - (initial_score / mixed_total)
+                                        if mixed_total > 0 and weakest_total > 0 else 0 %}
+                                        <span
+                                            class="badge {% if avg_diff > 0 %}badge-success{% elif avg_diff < 0 %}badge-danger{% else %}badge-secondary{% endif %}">
+                                            {% if avg_diff > 0 %}+{% endif %}{{ "%.1f"|format(avg_diff) }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -198,6 +287,28 @@
 </div>
 
 <style>
+    /* Score details styling */
+    .score-details {
+        padding: 10px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    .score-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 5px;
+    }
+
+    .score-label {
+        font-weight: 500;
+        color: #6c757d;
+    }
+
+    .score-value {
+        color: #495057;
+    }
+
     /* Custom styles for the progress circles */
     .progress-circle {
         width: 100%;
