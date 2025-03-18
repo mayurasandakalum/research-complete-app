@@ -123,18 +123,28 @@ def get_min_count_string(strings):
     no = extract_first_number(min_strings[0])
     return no
 
+# for all score
+def calculate_res(query):
+    result = []
+    for doc in query:
+        data_dict = doc.to_dict()
+        result.append(data_dict["data"]["Lesson"])
+    counts = Counter(result)
+    counts_dict = dict(counts)
+    return counts_dict
+
 # num- Total answered questions, # Total number of questions in a lesson
 def random_q_r(num, noq):
     global rd_lesson
     global rd_lesson_c
     if rd_lesson > 0:
-        if rd_lesson_c > 5:
+        if rd_lesson_c > 4:
             lesson = 100
         else:
-            rd_lesson_c += 1
+            rd_lesson_c = rd_lesson_c + 1
             lesson = rd_lesson - 1
     else:
-        lesson = int(num / noq)
+        lesson = int((num-1) / noq)
     start = lesson * 50
     qid = random.randint(start, start + 50)
     return qid
@@ -284,27 +294,36 @@ def submit_sudio():
     global Aud_results_2
 
     correct = False
+    qid = Aud_data['ID']
     audio_file = "static/aud_records/"+str(Aud_data['ID'])+".wav"
 
     ans_txt=stt_sinhala(audio_file)
     #retriev the current user's session info
-    user=session.get('user', 'No user stored')
+    ori_answer=Aud_data['Answer']
+    lesson = Aud_data['Lesson']
+
     if ans_txt:
-        ori_answer=Aud_data['Answer']
+        
         sim=is_similar(ori_answer,ans_txt)
         print(sim)
         print(sim,ori_answer)
         if sim> 0.6:
+            correct = True
             if rd_lesson > 0: 
-                correct = True
                 Aud_results_2.append(Aud_data['Lesson'])
             else:
-                correct = True
                 Aud_results.append(Aud_data['Lesson'])     
-            db.collection('audio_results').add({"name":user,"data":Aud_data})
+            
+        db.collection('audio_results').add({
+            "question_id": qid,
+            "student_answer": ans_txt,
+            "correct_answer": ori_answer,
+            "lesson": lesson,
+            "is_correct": correct
+        })
 
-        print(Aud_results_2)
-        print(Aud_results)    
+        # print(Aud_results_2)
+        # print(Aud_results)    
            
         return jsonify({
             'success': True,
