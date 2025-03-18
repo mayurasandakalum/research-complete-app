@@ -237,6 +237,7 @@ def submit_write():
     qid = Wri_data["ID"] #The current question ID is retrieved
     _file = "./readwrite/static/write_img/" + str(qid) + ".png"
 
+    # Get the handwritten answer (image) and number input from the frontend.
     data = request.get_json()
     image_data = data.get("image")
     number = data.get("number")
@@ -244,7 +245,7 @@ def submit_write():
     if not image_data:
         return jsonify({"message": "No image data received."}), 400
 
-    # Remove the data URL prefix (data:image/png;base64,)
+    # Convert base64 image data into binary format and save it as an image
     image_data = re.sub("^data:image/.+;base64,", "", image_data)
     image_binary = base64.b64decode(image_data)
     # Save the file
@@ -259,34 +260,43 @@ def submit_write():
     ans_txt = get_text(
         model_path, _file, class_mapping_path, class_mapping_path2, number, qid
     )
-    user = session.get("user", "No user stored")
+    #user = session.get("user", "No user stored")
 
-    #The extracted answer is compared to the correct answer
+    ori_answer = Wri_data["Answer"]
+    lesson = Wri_data['Lesson']
+
+    #Compare the student's answer (ans_txt) with the original correct answer (ori_answer).
     if ans_txt:
-        ori_answer = Wri_data["Answer"]
         sim = is_similar(ori_answer, ans_txt)
         print(ans_txt,"===",ori_answer,"===",sim)
 
-        if sim> 0.7 or is_75_percent_match(ori_answer,ans_txt):
+        # If the similarity score is greater than 0.7 or matches 75%, consider it correct
+        if sim > 0.7 or is_75_percent_match(ori_answer, ans_txt):
+            correct = True
             if wr_lesson > 0: 
-                correct = True
-                Wr_results_2.append(Wri_data['Lesson'])
+                Wr_results_2.append(lesson)
             else:
-                correct = True
-                Wr_results.append(Wri_data['Lesson'])
-                     
-            db.collection('write_results').add({"name":user,"data":Wri_data}) #The correct answers are stored in db
-           
+                Wr_results.append(lesson)
+
+        #Store all answers in the Firestore database.           
+        db.collection('write_results').add({
+            "question_id": qid,
+            "student_answer": ans_txt,
+            "correct_answer": ori_answer,
+            "lesson": lesson,
+            "is_correct": correct
+        })           
+        #Send the response to the frontend        
         return jsonify({
             'success': True,
             'correct': correct,
-            'answer':ori_answer
+            'answer': ori_answer
         })
 
     else:
         WrQuestionID -= 1
         return jsonify({"success": False, "message": "OCR model not working"}), 404
-
+    
 
 @app.route("/write_guide")
 def write_guide():
@@ -297,7 +307,7 @@ def write_guide():
     counts_dict = dict(counts)
     
     # Default message for 0 correct answers
-    weak_message = "ඔබ මෙම පාඩම සඳහා ගොඩක්ම දුර්වලයි!"
+    weak_message = "ඔබ මෙම පාඩම සඳහා ගොඩක්ම දුර්වලයි.එම නිසා මෙම පාඩම පිළිබඳව ඇති ඔබගේ පෙළපොත අද්‍යයනය කර හොඳ දැනුමක් ලබාගන්න. පසුව මෙම ක්‍රමවේදය මගින් ඔබගේ දැනුම තහවුරු කර ගන්න!"
     
     if wr_lesson > 0:
         if len(Wr_results_2) == 0:  # If no new results

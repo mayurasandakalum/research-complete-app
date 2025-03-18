@@ -6,7 +6,7 @@
 
   /* Background Image */
   body {
-    background-color: #fae7f8;
+    background-color: #f2eff2;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -29,20 +29,36 @@
     font-size: 34px;
     text-align: center;
     padding: 40px;
-    margin-top: 50px;
-    margin-left: 350px;
+    margin-left: 330px;
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    background-color: #c5a8bc;
-    max-width: 800px;
+    background-color: #f8f5f7;
+    max-width: 900px;
     width: 100%;
 }
 
-h1 {
+.card-title2 {
     margin-bottom: 20px;
-    font-size: 35px;
-    color: #333;
+    font-size: 27px;
+    color: #524cbf;
     font-family: serif;
+    padding-top: 20px;
+   
+}
+.card-title {
+    margin-bottom: 20px;
+    font-size: 38px;
+    color: #0a0745;
+    font-family: serif;
+    margin-bottom: 10px;
+    padding-bottom: 20px;
+    font-weight: bold;
+}
+.card-text {
+    font-size: 25px;
+    color: #03021a;
+    font-weight: bold;
+
 }
 
 .learning-methods {
@@ -53,22 +69,23 @@ h1 {
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
 }
 
-.learning-btn {
-    padding: 20px 30px;
-    font-size: 18px;
+.learning-btn1 {
+    padding: 15px 20px;
+    font-size: 22px;
     text-decoration: none;
     color: #fff;
     border-radius: 8px;
     text-align: center;
-    width: 180px;
+    width: 400px;
     position: relative;
     overflow: hidden;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;
+    font-weight: bold;
 }
 
 /* Shine effect for all buttons */
-.learning-btn::after {
+.learning-btn1::after {
     content: '';
     position: absolute;
     top: -50%;
@@ -90,7 +107,7 @@ h1 {
 }
 
 /* Hover effect */
-.learning-btn:hover {
+.learning-btn1:hover {
     transform: translateY(-3px);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
 }
@@ -99,10 +116,10 @@ h1 {
 
 /* Reading/Writing - Ocean Blues gradient */
 .reading-writing {
-    background: linear-gradient(45deg, #453f47, #8e7d8d);
+    background: linear-gradient(45deg, #5d4aa8, #21139d);
 }
 .reading-writing:hover {
-    background: linear-gradient(45deg, #6c4265, #4c3045);
+    background: linear-gradient(45deg, #3b1da9, #6375ed);
 }
 
 
@@ -119,6 +136,6 @@ h1 {
     }
 }
 
-.learning-btn:hover {
+.learning-btn1:hover {
     animation: pulse 2s infinite;
 }
