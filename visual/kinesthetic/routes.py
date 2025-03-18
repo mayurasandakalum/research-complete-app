@@ -351,8 +351,12 @@ def register():
 @kinesthetic_blueprint.route("/logout")
 @login_required
 def logout():
+    """Redirect to main system logout."""
+    # Clear the flask-login session
     logout_user()
-    return redirect(url_for("kinesthetic.home"))
+   
+    # Redirect to main system logout
+    return redirect("http://localhost:5000/logout")
 
 
 def batch_get_subquestions(question_ids):
