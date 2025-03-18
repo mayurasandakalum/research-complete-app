@@ -50,19 +50,108 @@ def warp(img, M):
 def decode_base64_image(base64_string):
     """Convert base64 string to OpenCV image"""
     print("[IMAGE 1] Decoding base64 image for clock processing")
-    if "base64," in base64_string:
-        base64_string = base64_string.split("base64,")[1]
     
-    image_bytes = base64.b64decode(base64_string)
-    np_array = np.frombuffer(image_bytes, np.uint8)
-    image = cv2.imdecode(np_array, cv2.IMREAD_COLOR)
-    print("[IMAGE 2] Image decoded: shape={0}".format(image.shape if image is not None else 'None'))
-    return image
+    try:
+        # Validate that we have some data
+        if not base64_string or len(base64_string) < 10:
+            print("[IMAGE ERROR] Base64 string is empty or too short")
+            return None
+            
+        # Strip the prefix if it exists
+        if "base64," in base64_string:
+            base64_string = base64_string.split("base64,")[1]
+        
+        # Clean the base64 string by removing invalid characters
+        valid_chars = set("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=")
+        invalid_chars = []
+        
+        for i, char in enumerate(base64_string[:100]):
+            if char not in valid_chars:
+                invalid_chars.append(char)
+        
+        if invalid_chars:
+            print(f"[IMAGE WARNING] Found invalid characters in base64 string: {invalid_chars}")
+            clean_base64 = ''.join(c for c in base64_string if c in valid_chars)
+            base64_string = clean_base64
+            print(f"[IMAGE WARNING] Cleaned base64 string, length: {len(base64_string)}")
+        
+        # Add padding if needed (base64 requires length to be multiple of 4)
+        padding_needed = len(base64_string) % 4
+        if padding_needed > 0:
+            print(f"[IMAGE 1.1] Fixing base64 padding (adding {4 - padding_needed} characters)")
+            base64_string += '=' * (4 - padding_needed)
+        
+        # Decode the base64 data with better error handling
+        try:
+            image_bytes = base64.b64decode(base64_string)
+            if not image_bytes or len(image_bytes) < 100:  # Basic validation
+                print(f"[IMAGE ERROR] Decoded image bytes too small: {len(image_bytes) if image_bytes else 0} bytes")
+                return None
+                
+            np_array = np.frombuffer(image_bytes, np.uint8)
+            image = cv2.imdecode(np_array, cv2.IMREAD_COLOR)
+            
+            if image is None:
+                print("[IMAGE ERROR] OpenCV could not decode the image data")
+                return None
+                
+            print("[IMAGE 2] Image decoded successfully: shape={0}".format(image.shape))
+            return image
+            
+        except base64.binascii.Error as e:
+            print(f"[IMAGE ERROR] Base64 decoding error: {str(e)}")
+            
+            # One more try with aggressive cleaning
+            try:
+                # Try with more aggressive cleaning - keep only alphanumeric, +, /, and =
+                import re
+                cleaned = re.sub(r'[^A-Za-z0-9+/=]', '', base64_string)
+                padding_needed = len(cleaned) % 4
+                if padding_needed > 0:
+                    cleaned += '=' * (4 - padding_needed)
+                    
+                print(f"[IMAGE RETRY] Attempting with aggressively cleaned base64, length: {len(cleaned)}")
+                image_bytes = base64.b64decode(cleaned)
+                np_array = np.frombuffer(image_bytes, np.uint8)
+                image = cv2.imdecode(np_array, cv2.IMREAD_COLOR)
+                
+                if image is not None:
+                    print("[IMAGE 2] Image decoded successfully after cleaning: shape={0}".format(image.shape))
+                    return image
+                else:
+                    print("[IMAGE ERROR] OpenCV could not decode the image data even after cleaning")
+                    return None
+            except Exception as inner_e:
+                print(f"[IMAGE ERROR] Failed after aggressive cleaning: {str(inner_e)}")
+                return None
+            
+    except Exception as e:
+        print(f"[IMAGE ERROR] Failed to decode base64 image: {str(e)}")
+        return None
 
 def save_base64_image(base64_string, prefix="clock"):
     """Save base64 image to a temporary file and return the path"""
     print("[SAVE 1] Saving base64 image to temporary file")
+    
+    # Decode the image
     image = decode_base64_image(base64_string)
+    
+    if image is None:
+        print("[SAVE ERROR] Could not decode image from base64 data")
+        # Create a placeholder image so we can continue processing
+        print("[SAVE FALLBACK] Creating a blank placeholder image")
+        image = np.zeros((224, 224, 3), dtype=np.uint8)  # Create a blank black image
+        
+        # Draw text on the image to indicate error
+        cv2.putText(
+            image,
+            "Invalid Image Data",
+            (30, 112),  # Position in center
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.7,
+            (0, 0, 255),  # Red color
+            2,
+        )
     
     # Create temporary file with .jpg extension
     temp_file = tempfile.NamedTemporaryFile(prefix=prefix, suffix=".jpg", delete=False)
@@ -70,9 +159,18 @@ def save_base64_image(base64_string, prefix="clock"):
     temp_file.close()
     
     # Save image to the temporary file
-    cv2.imwrite(temp_path, image)
-    print("[SAVE 2] Image saved to temporary file: {0}".format(temp_path))
-    return temp_path
+    try:
+        success = cv2.imwrite(temp_path, image)
+        if not success:
+            print(f"[SAVE ERROR] Failed to write image to {temp_path}")
+            return None
+            
+        print("[SAVE 2] Image saved to temporary file: {0}".format(temp_path))
+        return temp_path
+        
+    except Exception as e:
+        print(f"[SAVE ERROR] Error saving image: {str(e)}")
+        return None
 
 def process_clock_image(image_path):
     """Process a clock image and return the detected time"""
@@ -162,11 +260,21 @@ def check_clock_answer(base64_image, expected_answer):
     try:
         # Save the base64 image to a file
         image_path = save_base64_image(base64_image)
+        
+        if not image_path or not os.path.exists(image_path):
+            print("[CHECK ERROR] Failed to save valid image")
+            return False, "Error: Invalid image", None
+            
         print("[CHECK 2] Base64 image saved to: {0}".format(image_path))
         
         # Process the image
         print("\n[CHECK 3] Processing clock image...")
         result = process_clock_image(image_path)
+        
+        if not result:
+            print("[CHECK ERROR] Failed to process clock image")
+            return False, "Error: Processing failed", None
+            
         detected_time = result['detected_time']
         annotated_path = result['annotated_path']
         
@@ -264,4 +372,4 @@ def check_clock_answer(base64_image, expected_answer):
         # Log the error and return False
         print("\n[ERROR] Error checking clock answer: {0}".format(str(e)))
         print("="*50 + "\n")
-        return False, None, None
+        return False, f"Error: {str(e)}", None

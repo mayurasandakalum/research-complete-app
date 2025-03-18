@@ -478,44 +478,74 @@ function captureImage(webcamId, subQuestionId, index) {
     // Get base64 image data
     const imageData = canvas.toDataURL('image/jpeg');
 
-    // Add hidden input field with the captured image data
-    const form = document.querySelector('.all-answers-form');
-    const hiddenInput = document.createElement('input');
-    hiddenInput.type = 'hidden';
-    hiddenInput.name = `captured_image_${subQuestionId}`;
-    hiddenInput.value = imageData;
-    form.appendChild(hiddenInput);
+    // Generate a unique filename
+    const timestamp = new Date().getTime();
+    const filename = `capture_${subQuestionId}_${timestamp}.jpg`;
 
-    // Show thumbnail of captured image
-    const thumbnailContainer = document.createElement('div');
+    // First save the image to the server
+    fetch('/kinesthetic/save-captured-image', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+      },
+      body: JSON.stringify({
+        image_data: imageData,
+        filename: filename,
+        sub_question_id: subQuestionId
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        console.log("Image saved to server:", data.file_path);
+        
+        // Add hidden input field with the saved image path
+        const form = document.querySelector('.all-answers-form');
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = `captured_image_${subQuestionId}`;
+        hiddenInput.value = data.file_path;  // Use the server-provided path
+        form.appendChild(hiddenInput);
 
-    thumbnailContainer.classList.add('capture-thumbnail-container');
-    thumbnailContainer.innerHTML = `
-      <div class="capture-thumbnail">
-        <img src="${imageData}" alt="Captured image">
-        <div class="capture-success">
-          <i class="fa fa-check-circle"></i>
-          <span>ඡායාරූපය ගනු ලැබීය</span>
-        </div>
-      </div>
-    `;
+        // Show thumbnail of captured image
+        const thumbnailContainer = document.createElement('div');
+        thumbnailContainer.classList.add('capture-thumbnail-container');
+        thumbnailContainer.innerHTML = `
+          <div class="capture-thumbnail">
+            <img src="${data.file_path}" alt="Captured image">
+            <div class="capture-success">
+              <i class="fa fa-check-circle"></i>
+              <span>ඡායාරූපය ගනු ලැබීය</span>
+            </div>
+          </div>
+        `;
 
-    // Add the thumbnail after the video
-    const webcamContainer = video.closest('.webcam-container');
-    webcamContainer.appendChild(thumbnailContainer);
+        // Add the thumbnail after the video
+        const webcamContainer = video.closest('.webcam-container');
+        webcamContainer.appendChild(thumbnailContainer);
 
-    // Disable the capture button
-    const captureBtn = document.getElementById('capture' + index);
-    captureBtn.disabled = true;
-    captureBtn.innerHTML = '<i class="fa fa-check"></i> ඡායාරූපය ලබා ගන්නා ලදී';
+        // Disable the capture button
+        const captureBtn = document.getElementById('capture' + index);
+        captureBtn.disabled = true;
+        captureBtn.innerHTML = '<i class="fa fa-check"></i> ඡායාරූපය ලබා ගන්නා ලදී';
 
-    // Update completion indicator
-    const completionIndicator = document.getElementById('completionIndicator' + index);
-    completionIndicator.innerHTML = '<i class="fa fa-check-circle completion-done"></i>';
+        // Update completion indicator
+        const completionIndicator = document.getElementById('completionIndicator' + index);
+        completionIndicator.innerHTML = '<i class="fa fa-check-circle completion-done"></i>';
 
-    // Update captured answers count and check if all are done
-    updateCapturedAnswersCount();
-  }
+        // Update captured answers count and check if all are done
+        updateCapturedAnswersCount();
+      } else {
+        console.error("Error saving image:", data.error);
+        alert("ඡායාරූපය සුරැකීමට නොහැකි විය. කරුණාකර නැවත උත්සාහ කරන්න.");
+      }
+    })
+    .catch(error => {
+      console.error("Error:", error);
+      alert("ඡායාරූපය සුරැකීමට නොහැකි විය. කරුණාකර නැවත උත්සාහ කරන්න.");
+    });
+}
 
 // Function to update captured answers count
 function updateCapturedAnswersCount() {
@@ -907,61 +937,104 @@ function clearClockHands(index) {
   const canvas = document.getElementById(`clockCanvas${index}`);
   const ctx = clockCanvasContext[index];
   
-  // Clear the canvas and redraw the clock face
+  // Clear the entire canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  drawClockFace(index);
+  
+  // Redraw just the clock face image
+  if (clockImage && clockImage.complete && clockImage.naturalWidth > 0) {
+    // If the image is already loaded, draw it directly
+    ctx.drawImage(clockImage, 0, 0, canvas.width, canvas.height);
+  } else {
+    // If there's an issue with the image, draw a fallback clock face
+    drawFallbackClockFace(ctx, canvas.width, canvas.height);
+  }
+  
+  // Remove any preview that might be showing
+  const existingPreview = canvas.parentElement.querySelector('.captured-preview');
+  if (existingPreview) {
+    existingPreview.remove();
+  }
 }
 
 function captureClockDrawing(index, subQuestionId) {
   const canvas = document.getElementById(`clockCanvas${index}`);
   
   try {
-    // Try to get image data
+    // Get the image data
     const imageData = canvas.toDataURL('image/png');
     
-    // Create a hidden input field to store the image data
-    let hiddenInput = document.getElementById(`answer_${subQuestionId}`);
-    if (!hiddenInput) {
-      hiddenInput = document.createElement('input');
-      hiddenInput.type = 'hidden';
-      hiddenInput.name = `answer_${subQuestionId}`;
-      hiddenInput.id = `answer_${subQuestionId}`;
-      document.querySelector('.all-answers-form').appendChild(hiddenInput);
-    }
+    // Generate a unique filename
+    const timestamp = new Date().getTime();
+    const filename = `clock_drawing_${subQuestionId}_${timestamp}.png`;
     
-    // Store the image data
-    hiddenInput.value = imageData;
+    // Show loading indicator
+    showNotification('පිළිතුර විශ්ලේෂණය කරමින්...', 'info');
     
-    // Save the image locally using the download approach
-    const link = document.createElement('a');
-    link.download = `clock_drawing_${subQuestionId}_${new Date().getTime()}.png`;
-    link.href = imageData;
-    link.click();
-    
-    // Update the completion indicator
-    updateCompletionIndicator(index, true);
-    
-    // Update submission button state
-    updateSubmissionButtonState();
-    
-    // Add a preview of the captured image
-    const previewContainer = document.createElement('div');
-    previewContainer.className = 'captured-preview';
-    previewContainer.innerHTML = `
-      <p class="text-success"><i class="fa fa-check-circle"></i> පිළිතුර ලබා ගන්නා ලදී</p>
-      <img src="${imageData}" alt="Clock drawing" class="img-thumbnail" style="max-width: 150px; margin-top: 10px;">
-    `;
-    
-    // Find existing preview and replace, or append new one
-    const existingPreview = canvas.parentElement.querySelector('.captured-preview');
-    if (existingPreview) {
-      canvas.parentElement.replaceChild(previewContainer, existingPreview);
-    } else {
-      canvas.parentElement.appendChild(previewContainer);
-    }
-    
-    // Show success notification
-    showNotification('පිළිතුර සාර්ථකව සටහන් කර ඇත! පින්තූරය භාගත කර ගන්නා ලදී.', 'success');
+    // Save image and process with the clock model - Fix the URL to match the route
+    fetch('/save-and-process-clock', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+      },
+      body: JSON.stringify({
+        image_data: imageData,
+        filename: filename,
+        sub_question_id: subQuestionId
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        console.log("Clock drawing saved and processed:", data);
+        
+        // Add hidden input field with the saved image path
+        const form = document.querySelector('.all-answers-form');
+        let hiddenInput = document.getElementById(`answer_${subQuestionId}`);
+        if (!hiddenInput) {
+          hiddenInput = document.createElement('input');
+          hiddenInput.type = 'hidden';
+          hiddenInput.name = `captured_image_${subQuestionId}`;
+          hiddenInput.id = `answer_${subQuestionId}`;
+          form.appendChild(hiddenInput);
+        }
+        
+        hiddenInput.value = data.file_path;  // Use the server-provided path
+        
+        // Update the completion indicator
+        updateCompletionIndicator(index, true);
+        
+        // Update submission button state
+        updateSubmissionButtonState();
+        
+        // Add a preview of the captured image with detected time
+        const previewContainer = document.createElement('div');
+        previewContainer.className = 'captured-preview';
+        previewContainer.innerHTML = `
+          <p class="text-success"><i class="fa fa-check-circle"></i> පිළිතුර ලබා ගන්නා ලදී</p>
+          ${data.detected_time ? `<p class="detected-time">Detected time: ${data.detected_time}</p>` : ''}
+          <img src="${data.annotated_image_url || data.file_path}" alt="Clock drawing" class="img-thumbnail" style="max-width: 150px; margin-top: 10px;">
+        `;
+        
+        // Find existing preview and replace, or append new one
+        const existingPreview = canvas.parentElement.querySelector('.captured-preview');
+        if (existingPreview) {
+          canvas.parentElement.replaceChild(previewContainer, existingPreview);
+        } else {
+          canvas.parentElement.appendChild(previewContainer);
+        }
+        
+        // Show success notification
+        showNotification('පිළිතුර සාර්ථකව සුරකින ලදී', 'success');
+      } else {
+        console.error("Error processing clock drawing:", data.error);
+        showNotification('පිළිතුර සුරැකීමට අසමත් විය', 'error');
+      }
+    })
+    .catch(error => {
+      console.error("Error:", error);
+      showNotification('පිළිතුර සුරැකීමට අසමත් විය', 'error');
+    });
     
   } catch (error) {
     console.error("Error capturing clock drawing:", error);
@@ -983,85 +1056,58 @@ function captureClockDrawing(index, subQuestionId) {
       // Try to get image data from this new canvas
       const imageData = newCanvas.toDataURL('image/png');
       
-      // Proceed with saving as before
-      // Create a hidden input field
-      let hiddenInput = document.getElementById(`answer_${subQuestionId}`);
-      if (!hiddenInput) {
-        hiddenInput = document.createElement('input');
-        hiddenInput.type = 'hidden';
-        hiddenInput.name = `answer_${subQuestionId}`;
-        hiddenInput.id = `answer_${subQuestionId}`;
-        document.querySelector('.all-answers-form').appendChild(hiddenInput);
-      }
+      // Try saving the fallback image
+      const timestamp = new Date().getTime();
+      const filename = `clock_drawing_fallback_${subQuestionId}_${timestamp}.png`;
       
-      // Store the image data
-      hiddenInput.value = imageData;
-      
-      // Save the image locally
-      const link = document.createElement('a');
-      link.download = `clock_drawing_${subQuestionId}_${new Date().getTime()}.png`;
-      link.href = imageData;
-      link.click();
-      
-      // Update UI as before
-      updateCompletionIndicator(index, true);
-      updateSubmissionButtonState();
-      showNotification('පිළිතුර සුරකින ලදී (අඩු තත්වයෙන්)', 'warning');
+      fetch('/kinesthetic/save-captured-image', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+        },
+        body: JSON.stringify({
+          image_data: imageData,
+          filename: filename,
+          sub_question_id: subQuestionId
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Similar handling for success case with fallback
+          const form = document.querySelector('.all-answers-form');
+          let hiddenInput = document.getElementById(`answer_${subQuestionId}`);
+          if (!hiddenInput) {
+            hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = `captured_image_${subQuestionId}`;
+            hiddenInput.id = `answer_${subQuestionId}`;
+            form.appendChild(hiddenInput);
+          }
+          
+          hiddenInput.value = data.file_path;
+          updateCompletionIndicator(index, true);
+          updateSubmissionButtonState();
+          showNotification('පිළිතුර සුරකින ලදී (අඩු තත්වයෙන්)', 'warning');
+        }
+      })
+      .catch(fallbackError => {
+        console.error("Fallback error:", fallbackError);
+        showNotification('පිළිතුර සුරැකීමට අසමත් විය', 'error');
+      });
       
     } catch (fallbackError) {
-      // If all else fails, show an error message
-      showNotification('පිළිතුර සුරැකීමට අසමත් විය. කරුණාකර නැවත උත්සාහ කරන්න.', 'error');
+      showNotification('පිළිතුර සුරැකීමට අසමත් විය', 'error');
       console.error("Fallback error:", fallbackError);
     }
-  }
-}
-
-// Add helper function for showing notifications if it doesn't exist
-function showNotification(message, type) {
-  // Create notification element
-  const notification = document.createElement('div');
-  notification.className = `notification ${type}`;
-  notification.innerHTML = `
-    <div class="notification-content">
-      <i class="fa ${type === 'success' ? 'fa-check-circle' : 
-                  type === 'warning' ? 'fa-exclamation-triangle' : 
-                  'fa-exclamation-circle'}"></i>
-      <span>${message}</span>
-    </div>
-  `;
-  
-  // Add to document
-  document.body.appendChild(notification);
-  
-  // Add active class after a small delay (for animation)
-  setTimeout(() => {
-    notification.classList.add('active');
-  }, 10);
-  
-  // Remove after 3 seconds
-  setTimeout(() => {
-    notification.classList.remove('active');
-    setTimeout(() => {
-      if (notification.parentNode) {
-        document.body.removeChild(notification);
-      }
-    }, 300); // Wait for fade out animation
-  }, 3000);
-}
-
-// Function to update completion indicators
-function updateCompletionIndicator(index, completed) {
-  const indicator = document.getElementById(`completionIndicator${index}`);
-  if (indicator) {
-    indicator.innerHTML = completed ? 
-      '<i class="fa fa-check-circle completion-done"></i>' : 
-      '<i class="fa fa-circle-o"></i>';
   }
 }
 
 // Global variables for decimal drawing
 let decimalDrawingState = {};
 let decimalCurrentTool = {};
+let decimalGridImages = {};
 
 // Initialize decimal canvas when the page loads
 document.addEventListener('DOMContentLoaded', function() {
@@ -1097,6 +1143,9 @@ function initializeDecimalCanvas(index) {
   gridImage.onload = function() {
     // Draw the decimal grid
     ctx.drawImage(gridImage, 0, 0, canvas.width, canvas.height);
+    
+    // Store the grid image for later use
+    decimalGridImages[index] = gridImage;
     
     // Set up event listeners for drawing
     setupDecimalDrawingEvents(canvas, index);
@@ -1252,15 +1301,25 @@ function clearDecimalDrawing(index) {
   // Reset composite operation to default
   ctx.globalCompositeOperation = 'source-over';
   
-  // Redraw the decimal grid
-  const gridImage = new Image();
-  gridImage.src = "/static/images/decimal_grid.png";
-  gridImage.onload = function() {
-    ctx.drawImage(gridImage, 0, 0, canvas.width, canvas.height);
-  };
-  gridImage.onerror = function() {
-    drawDecimalGrid(ctx, canvas.width, canvas.height);
-  };
+  // Use cached grid image if available
+  if (decimalGridImages[index]) {
+    ctx.drawImage(decimalGridImages[index], 0, 0, canvas.width, canvas.height);
+  } else {
+    // Fallback to loading the image again
+    const gridImage = new Image();
+    gridImage.crossOrigin = "anonymous";
+    gridImage.src = "https://visuallearning000123.weebly.com/uploads/1/5/2/4/152446337/d1.png";
+    
+    gridImage.onload = function() {
+      ctx.drawImage(gridImage, 0, 0, canvas.width, canvas.height);
+      // Cache the image for future use
+      decimalGridImages[index] = gridImage;
+    };
+    
+    gridImage.onerror = function() {
+      drawDecimalGrid(ctx, canvas.width, canvas.height);
+    };
+  }
   
   // Remove any existing preview
   const existingPreview = canvas.parentElement.querySelector('.captured-preview');
@@ -1271,43 +1330,171 @@ function clearDecimalDrawing(index) {
 
 function captureDecimalDrawing(index, subQuestionId) {
   const canvas = document.getElementById(`decimalCanvas${index}`);
-  const imageData = canvas.toDataURL('image/png');
   
-  // Create a hidden input field to store the image data
-  let hiddenInput = document.getElementById(`answer_${subQuestionId}`);
-  if (!hiddenInput) {
-    hiddenInput = document.createElement('input');
-    hiddenInput.type = 'hidden';
-    hiddenInput.name = `answer_${subQuestionId}`;
-    hiddenInput.id = `answer_${subQuestionId}`;
-    document.querySelector('.all-answers-form').appendChild(hiddenInput);
+  try {
+    // Get the image data
+    const imageData = canvas.toDataURL('image/png');
+    
+    // Generate a unique filename
+    const timestamp = new Date().getTime();
+    const filename = `decimal_drawing_${subQuestionId}_${timestamp}.png`;
+    
+    // Save image to server
+    fetch('/save-captured-image', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+      },
+      body: JSON.stringify({
+        image_data: imageData,
+        filename: filename,
+        sub_question_id: subQuestionId
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        console.log("Decimal drawing saved to server:", data.file_path);
+        
+        // Add hidden input field with the saved image path
+        const form = document.querySelector('.all-answers-form');
+        let hiddenInput = document.getElementById(`answer_${subQuestionId}`);
+        if (!hiddenInput) {
+          hiddenInput = document.createElement('input');
+          hiddenInput.type = 'hidden';
+          hiddenInput.name = `captured_image_${subQuestionId}`;
+          hiddenInput.id = `answer_${subQuestionId}`;
+          form.appendChild(hiddenInput);
+        }
+        
+        hiddenInput.value = data.file_path;
+        
+        // Update the completion indicator
+        updateCompletionIndicator(index, true);
+        
+        // Update submission button state
+        updateSubmissionButtonState();
+        
+        // Add a preview of the captured image
+        const previewContainer = document.createElement('div');
+        previewContainer.className = 'captured-preview';
+        previewContainer.innerHTML = `
+          <p class="text-success"><i class="fa fa-check-circle"></i> පිළිතුර ලබා ගන්නා ලදී</p>
+          <img src="${data.file_path}" alt="Decimal representation" class="img-thumbnail" style="max-width: 150px; margin-top: 10px;">
+        `;
+        
+        // Find existing preview and replace, or append new one
+        const existingPreview = canvas.parentElement.querySelector('.captured-preview');
+        if (existingPreview) {
+          canvas.parentElement.replaceChild(previewContainer, existingPreview);
+        } else {
+          canvas.parentElement.appendChild(previewContainer);
+        }
+        
+        // Show success notification
+        showNotification('පිළිතුර සාර්ථකව සුරකින ලදී', 'success');
+      } else {
+        console.error("Error saving decimal drawing:", data.error);
+        showNotification('පිළිතුර සුරැකීමට අසමත් විය', 'error');
+      }
+    })
+    .catch(error => {
+      console.error("Error:", error);
+      showNotification('පිළිතුර සුරැකීමට අසමත් විය', 'error');
+    });
+  } catch (error) {
+    console.error("Error capturing decimal drawing:", error);
+    showNotification('පිළිතුර සුරැකීමට අසමත් විය', 'error');
+  }
+}
+
+// Add the missing function for updating submission button state
+function updateSubmissionButtonState() {
+  const form = document.querySelector('.all-answers-form');
+  if (!form) return;
+  
+  // Get all sub-question IDs
+  const subQuestionIds = Array.from(form.querySelectorAll('input[name="sub_question_ids"]')).map(el => el.value);
+  
+  // Count how many have answers
+  let answeredCount = 0;
+  subQuestionIds.forEach(id => {
+    // Check if we have either a captured image or a drawn answer
+    const hasCapturedImage = form.querySelector(`input[name="captured_image_${id}"]`);
+    const hasDrawnAnswer = form.querySelector(`input[name="answer_${id}"]`);
+    
+    if (hasCapturedImage || hasDrawnAnswer) {
+      answeredCount++;
+    }
+  });
+  
+  // Enable/disable the submit all button based on whether all are answered
+  const submitAllBtn = document.getElementById('submitAllBtn');
+  if (submitAllBtn) {
+    const allAnswered = (answeredCount >= subQuestionIds.length);
+    submitAllBtn.disabled = !allAnswered;
+    
+    if (allAnswered) {
+      submitAllBtn.classList.add('ready');
+    } else {
+      submitAllBtn.classList.remove('ready');
+    }
+    
+    // Update the counter display
+    const counterElement = document.getElementById('capturedAnswersCount');
+    if (counterElement) {
+      counterElement.textContent = answeredCount;
+    }
   }
   
-  // Store the image data
-  hiddenInput.value = imageData;
-  
-  // Update the completion indicator
-  updateCompletionIndicator(index, true);
-  
-  // Update submission button state
-  updateSubmissionButtonState();
-  
-  // Show success feedback
-  showNotification('පිළිතුර සාර්ථකව සටහන් කර ඇත!', 'success');
-  
-  // Add a preview of the captured image
-  const previewContainer = document.createElement('div');
-  previewContainer.className = 'captured-preview';
-  previewContainer.innerHTML = `
-    <p class="text-success"><i class="fa fa-check-circle"></i> පිළිතුර ලබා ගන්නා ලදී</p>
-    <img src="${imageData}" alt="Decimal representation" class="img-thumbnail" style="max-width: 150px; margin-top: 10px;">
+  console.log(`Submission state updated: ${answeredCount}/${subQuestionIds.length} questions answered`);
+}
+
+// First, add the showNotification function if it doesn't exist or fix references to it
+function showNotification(message, type) {
+  // Create notification element
+  const notification = document.createElement('div');
+  notification.className = `notification ${type}`;
+  notification.innerHTML = `
+    <div class="notification-content">
+      <i class="fa ${type === 'success' ? 'fa-check-circle' : 
+                  type === 'warning' ? 'fa-exclamation-triangle' : 
+                  'fa-exclamation-circle'}"></i>
+      <span>${message}</span>
+    </div>
   `;
   
-  // Find existing preview and replace, or append new one
-  const existingPreview = canvas.parentElement.querySelector('.captured-preview');
-  if (existingPreview) {
-    canvas.parentElement.replaceChild(previewContainer, existingPreview);
+  // Add to document
+  document.body.appendChild(notification);
+  
+  // Add active class after a small delay (for animation)
+  setTimeout(() => {
+    notification.classList.add('active');
+  }, 10);
+  
+  // Remove after 3 seconds
+  setTimeout(() => {
+    notification.classList.remove('active');
+    setTimeout(() => {
+      if (notification.parentNode) {
+        document.body.removeChild(notification);
+      }
+    }, 300); // Wait for fade out animation
+  }, 3000);
+}
+
+// Add function to update completion indicator
+function updateCompletionIndicator(index, isComplete) {
+  const completionIndicator = document.getElementById(`completionIndicator${index}`);
+  if (!completionIndicator) return;
+  
+  if (isComplete) {
+    completionIndicator.innerHTML = '<i class="fa fa-check-circle completion-done"></i>';
   } else {
-    canvas.parentElement.appendChild(previewContainer);
+    completionIndicator.innerHTML = '<i class="fa fa-circle-o"></i>';
   }
+  
+  // Update the count of captured answers
+  updateCapturedAnswersCount();
 }

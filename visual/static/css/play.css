@@ -665,6 +665,27 @@
   margin-top: 5px;
 }
 
+/* Style for detected time display */
+.detected-time {
+  font-size: 16px;
+  margin: 5px 0;
+  padding: 4px 8px;
+  background-color: rgba(59, 130, 246, 0.1);
+  border-radius: 4px;
+  display: inline-block;
+  color: #3b82f6;
+  font-weight: bold;
+}
+
+/* Add style for info notification */
+.notification.info {
+  border-left: 4px solid #3b82f6;
+}
+
+.notification.info i {
+  color: #3b82f6;
+}
+
 /* Responsiveness */
 @media (max-width: 768px) {
   .card {
@@ -1440,6 +1461,10 @@
   border-left: 4px solid #ef4444;
 }
 
+.notification.info {
+  border-left: 4px solid #3b82f6;
+}
+
 .notification-content {
   display: flex;
   align-items: center;
@@ -1460,4 +1485,8 @@
 
 .notification.error i {
   color: #ef4444;
+}
+
+.notification.info i {
+  color: #3b82f6;
 }

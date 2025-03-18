@@ -12,7 +12,7 @@ from firebase_admin import credentials, auth, firestore
 from models import login_required, teacher_required, student_required, User, Teacher, Student
 
 # Initialize the kinesthetic Firebase app with its service account
-kinesthetic_cred_path = "c:\\Users\\Makara\\Documents\\projects\\research\\combined-1\\kinesthetic\\serviceAccountKey.json"
+kinesthetic_cred_path = "./kinesthetic/serviceAccountKey.json"
 try:
     kinesthetic_cred = credentials.Certificate(kinesthetic_cred_path)
     kinesthetic_app = firebase_admin.initialize_app(kinesthetic_cred, name='kinesthetic')
