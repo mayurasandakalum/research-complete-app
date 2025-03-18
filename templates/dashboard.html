@@ -38,6 +38,7 @@
                 <!-- <li><a href="#apps" class="nav-link">Learning Apps</a></li> -->
                 <li><a href="#students" class="nav-link">My Students</a></li>
                 <li><a href="#reports" class="nav-link">Progress Reports</a></li>
+                <li><a href="#learning-style-analysis" class="nav-link">Learning Styles</a></li>
                 <li><a href="/system_overview" class="nav-link">System Overview</a></li>
             </ul>
         </nav>
@@ -55,6 +56,16 @@
                 <h2>Welcome, {{ teacher.name if teacher and teacher.name else 'Teacher' }}!</h2>
                 <p><strong>Email:</strong> {{ teacher.email }}</p>
                 <p><strong>School:</strong> {{ teacher.school }}</p>
+
+                <div class="quick-actions">
+                    <form action="{{ url_for('classify_students') }}" method="post"
+                        style="display:inline-block; margin-top: 15px;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="submit-btn">
+                            <i class="fas fa-brain"></i> Analyze Learning Styles
+                        </button>
+                    </form>
+                </div>
             </div>
         </section>
 
@@ -152,6 +163,25 @@
 
                 <div id="reportContent" class="report-content">
                     <p>Select a student to view their progress report.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="learning-style-analysis" class="dashboard-section">
+            <h2>Learning Style Analysis</h2>
+            <div class="card">
+                <div class="card-body">
+                    <p>Run VARK learning style classification on all your students to identify their learning
+                        preferences.</p>
+                    <form action="{{ url_for('classify_students') }}" method="post">
+                        <!-- Add CSRF token here -->
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="submit-btn">
+                            Classify Students
+                        </button>
+                    </form>
+                    <p class="mt-3" style="color: #666;">This process analyzes student data to determine Visual,
+                        Auditory, Reading, and Kinesthetic learning preferences.</p>
                 </div>
             </div>
         </section>

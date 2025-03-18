@@ -14,15 +14,27 @@ class FirestoreEncoder(json.JSONEncoder):
         # Handle any other Firebase special types if needed
         return super().default(obj)
 
-# Initialize Firebase with the service account
-cred = credentials.Certificate("research-app-9fff9-firebase-adminsdk-fbsvc-35cdf97b1e.json")
-firebase_admin.initialize_app(cred)
-
-# Get Firestore instance
-db = firestore.client()
-
+# Move Firebase initialization inside the function to avoid conflicts
+# when this module is imported by routes.py
 def retrieve_students_data(teacher_id="uPSpxGSRFYdnexxEDh45TxUznRJ3"):
+    # Initialize Firebase only if needed
+    db = None
+    app = None
+    
     try:
+        # Check if Firebase is already initialized
+        try:
+            # Try to get an existing app
+            app = firebase_admin.get_app()
+            db = firestore.client()
+            print("Using existing Firebase app")
+        except ValueError:
+            # No default app exists, so initialize one with a name
+            cred = credentials.Certificate("research-app-9fff9-firebase-adminsdk-fbsvc-35cdf97b1e.json")
+            app = firebase_admin.initialize_app(cred, name='student_retrieval')
+            db = firestore.client(app=app)
+            print("Initialized new Firebase app for student retrieval")
+        
         # First, get ALL students to analyze the data structure
         all_students_ref = db.collection("students")
         all_snapshot = all_students_ref.get()
@@ -104,12 +116,17 @@ def retrieve_students_data(teacher_id="uPSpxGSRFYdnexxEDh45TxUznRJ3"):
         
         print(f"Successfully retrieved {len(students_data)} student records for teacher ID: {teacher_id}")
         print(f"Data saved to: {output_path}")
+        
     except Exception as error:
         print(f"Error retrieving student data: {error}")
     finally:
-        # Clean up resources
-        firebase_admin.delete_app(firebase_admin.get_app())
+        # Don't delete apps that existed before this function was called
+        if app and app.name == 'student_retrieval':
+            try:
+                firebase_admin.delete_app(app)
+            except:
+                pass
 
-# Execute the function
+# Execute the function only if this script is run directly
 if __name__ == "__main__":
     retrieve_students_data()

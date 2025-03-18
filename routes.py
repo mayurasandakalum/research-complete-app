@@ -10,6 +10,12 @@ import datetime
 import firebase_admin
 from firebase_admin import credentials, auth, firestore
 from models import login_required, teacher_required, student_required, User, Teacher, Student
+import os
+import json
+import sys
+from flask import send_from_directory
+from retrieve_students import retrieve_students_data
+from classify_students import main as classify_main
 
 # Initialize the kinesthetic Firebase app with its service account
 kinesthetic_cred_path = "c:\\Users\\Makara\\Documents\\projects\\research\\combined-1\\kinesthetic\\serviceAccountKey.json"
@@ -548,6 +554,92 @@ def init_routes(app):
         
         return render_template('system_overview.html', 
                               user_type=user_type)
+    
+    @app.route('/classify_students', methods=['GET', 'POST'])
+    @teacher_required
+    def classify_students():
+        """Classify students using the VARK model."""
+        user_id = session.get('user_id')
+        
+        if request.method == 'POST':
+            # Use the specified teacher ID for testing purposes
+            # In a production environment, you'd use the logged-in user's ID
+            teacher_id = "uPSpxGSRFYdnexxEDh45TxUznRJ3"  # Using the fixed ID as requested
+            
+            try:
+                # Step 1: Retrieve student data using the function from retrieve_students.py
+                retrieve_students_data(teacher_id=teacher_id)
+                
+                # The file will be saved as teacher-{teacher_id}-students.json
+                students_file = f"teacher-{teacher_id}-students.json"
+                
+                if not os.path.exists(students_file):
+                    flash(f"No student data found for teacher ID: {teacher_id}")
+                    return redirect(url_for('dashboard'))
+                    
+                # Step 2: Run the classification process
+                original_argv = sys.argv.copy()
+                sys.argv = ["classify_students.py", "--teacher", teacher_id, "--input", students_file]
+                
+                try:
+                    classify_main()
+                finally:
+                    # Restore original sys.argv
+                    sys.argv = original_argv
+                
+                # Step 3: Load the classification results
+                results_file = "vark_results.json"
+                if not os.path.exists(results_file):
+                    flash("Classification process did not generate results")
+                    return redirect(url_for('dashboard'))
+                    
+                with open(results_file, 'r') as f:
+                    classification_results = json.load(f)
+                    
+                # Step 4: Load the visualization images
+                visualization_files = [
+                    "learning_styles_bar.png", "score_distributions_box.png", 
+                    "threshold_comparison_violin.png", "modality_correlations.png",
+                    "learning_style_radar.png", "learning_style_pie.png",
+                    "modality_distributions.png"
+                ]
+                
+                # Check if the visualization directory exists
+                visualizations_dir = "visualizations"
+                
+                # Verify each file exists
+                available_visualizations = []
+                for viz_file in visualization_files:
+                    viz_path = os.path.join(visualizations_dir, viz_file)
+                    if os.path.exists(viz_path):
+                        available_visualizations.append(viz_file)
+                        
+                # Load analysis text files
+                analysis_text = {}
+                for text_file in ["analysis_summary.txt", "statistical_analysis.txt"]:
+                    text_path = os.path.join(visualizations_dir, text_file)
+                    if os.path.exists(text_path):
+                        with open(text_path, 'r') as f:
+                            analysis_text[text_file] = f.read()
+                            
+                # Return the classification results template
+                return render_template('classify_results.html', 
+                                      results=classification_results,
+                                      visualizations=available_visualizations,
+                                      analysis_text=analysis_text)
+                
+            except Exception as e:
+                app.logger.error(f"Error in classification process: {str(e)}")
+                flash(f"Error during classification: {str(e)}")
+                return redirect(url_for('dashboard'))
+        
+        # If GET request, just return to dashboard
+        return redirect(url_for('dashboard'))
+    
+    @app.route('/visualizations/<path:filename>')
+    def visualization_file(filename):
+        """Serve visualization files."""
+        return send_from_directory('visualizations', filename)
     
     # Ensure this function is registered, debug it
     app.logger.info("Registered route: /system_overview")
