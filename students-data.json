@@ -1,0 +1,1213 @@
+[
+  {
+    "created_at": "2025-03-17T21:49:33.478000+00:00",
+    "learning_styles": {
+      "reading": 63,
+      "visual": 88,
+      "kinesthetic": 58,
+      "auditory": 72
+    },
+    "name": "Jeewan",
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "grade": "4",
+    "email": "jeewan01@gmail.com",
+    "birthday": "2006-02-26",
+    "gender": "Female",
+    "classified_learning_style": "Undefined",
+    "id": "0eXBnvK7KIblNtroHE6gp2T1hfn2"
+  },
+  {
+    "email": "lasantha@gmail.com",
+    "grade": "5",
+    "gender": "Male",
+    "birthday": "2005-08-12",
+    "created_at": "2025-03-17T21:44:32.907000+00:00",
+    "teacher_id": "QJ1GjKhJ9EOMeDZHsbl4waEvsTh1",
+    "name": "Lasantha",
+    "id": "0vz0hoMIpPTLNKn3mdukVVX3jIi1"
+  },
+  {
+    "teacher_id": "QJ1GjKhJ9EOMeDZHsbl4waEvsTh1",
+    "birthday": "2005-01-24",
+    "created_at": "2025-03-17T21:44:19.292000+00:00",
+    "name": "Sumudu",
+    "grade": "4",
+    "gender": "Male",
+    "email": "sumudu@gmail.com",
+    "id": "1aWNu5oyUwPBHFokpUGgEMKHjgw1"
+  },
+  {
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "name": "Thushari",
+    "learning_styles": {
+      "reading": 88,
+      "kinesthetic": 71,
+      "visual": 85,
+      "auditory": 66
+    },
+    "email": "thushari01@gmail.com",
+    "grade": "4",
+    "gender": "Female",
+    "birthday": "2005-06-14",
+    "classified_learning_style": "Undefined",
+    "created_at": "2025-03-17T21:50:36.678000+00:00",
+    "id": "1kgHnUOmiVeR0hmWQeqyqm2RNWu1"
+  },
+  {
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "learning_styles": {
+      "reading": 77,
+      "kinesthetic": 80,
+      "visual": 64,
+      "auditory": 92
+    },
+    "email": "damayanthi01@gmail.com",
+    "name": "Damayanthi",
+    "grade": "4",
+    "birthday": "2006-03-12",
+    "gender": "",
+    "classified_learning_style": "Undefined",
+    "created_at": "2025-03-17T21:50:41.359000+00:00",
+    "id": "1o5e05dx9vOGyEpg4xUMs7qlf962"
+  },
+  {
+    "name": "Dinesh",
+    "email": "dinesh@gmail.com",
+    "created_at": "2025-03-17T21:44:39.392000+00:00",
+    "birthday": "2005-12-01",
+    "gender": "",
+    "grade": "5",
+    "teacher_id": "QJ1GjKhJ9EOMeDZHsbl4waEvsTh1",
+    "id": "256YSnl56UVxZxfX94ouW1wso2G3"
+  },
+  {
+    "email": "nimal@gmail.com",
+    "birthday": "2006-11-03",
+    "created_at": "2025-03-12T15:44:08.233000+00:00",
+    "grade": "grade5",
+    "gender": "male",
+    "teacher_id": "yCVTl5sEs3YMIK5MfWR9gmSOirf2",
+    "name": "Nimal",
+    "id": "2GF5nadQDWVS0Q8Bk40cut47b9Y2"
+  },
+  {
+    "birthday": "2006-07-06",
+    "classified_learning_style": "Undefined",
+    "grade": "5",
+    "created_at": "2025-03-17T21:49:30.035000+00:00",
+    "gender": "Other",
+    "learning_styles": {
+      "reading": 65,
+      "visual": 55,
+      "kinesthetic": 70,
+      "auditory": 82
+    },
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "name": "Kamal",
+    "email": "kamal01@gmail.com",
+    "id": "2fjp1QqCxbfTsDt8oMRXCJNsRrs2"
+  },
+  {
+    "created_at": "2025-03-15T08:54:33.928000+00:00",
+    "name": "Janka",
+    "teacher_id": "IfDYwBXglLcJTNqm7XqVOSBh4Sn1",
+    "email": "janaka@gmail.com",
+    "grade": "grade5",
+    "birthday": "2005-03-16",
+    "gender": "male",
+    "id": "2g1sUfNwD7VER5WRldAhfkJ43Mu2"
+  },
+  {
+    "classified_learning_style": "Undefined",
+    "birthday": "2005-07-08",
+    "learning_styles": {
+      "reading": 72,
+      "visual": 59,
+      "kinesthetic": 76,
+      "auditory": 88
+    },
+    "name": "Sumudu",
+    "grade": "5",
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "gender": "Other",
+    "email": "sumudu01@gmail.com",
+    "created_at": "2025-03-17T21:49:43.981000+00:00",
+    "id": "3JLzrVpzrZhYdsitRLv3ysrN5dW2"
+  },
+  {
+    "teacher_id": "51VSsr0hKqQ2r05OFev0TZmwBlm1",
+    "name": "Ananda",
+    "email": "ananda@gmail.com",
+    "grade": "grade5",
+    "birthday": "2005-03-17",
+    "gender": "male",
+    "created_at": "2025-03-17T15:43:12.474000+00:00",
+    "id": "4Jxhw1XKoTXPGYbxs996y3EFcr33"
+  },
+  {
+    "name": "Amal",
+    "grade": "grade4",
+    "teacher_id": "IfDYwBXglLcJTNqm7XqVOSBh4Sn1",
+    "email": "amal@gmail.com",
+    "created_at": "2025-03-16T16:17:27.912000+00:00",
+    "gender": "male",
+    "birthday": "2005-03-08",
+    "id": "6PRdhF1aaXO7KaSr1yvnw8tvyIk1"
+  },
+  {
+    "gender": "Female",
+    "grade": "5",
+    "email": "malintha01@gmail.com",
+    "birthday": "2005-08-29",
+    "created_at": "2025-03-17T21:50:35.156000+00:00",
+    "classified_learning_style": "Undefined",
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "learning_styles": {
+      "reading": 76,
+      "kinesthetic": 78,
+      "visual": 67,
+      "auditory": 89
+    },
+    "name": "Malintha",
+    "id": "9gXdTb16gzbsdzq10I2t3KkxMQG3"
+  },
+  {
+    "created_at": "2025-03-17T21:50:27.200000+00:00",
+    "learning_styles": {
+      "reading": 79,
+      "kinesthetic": 67,
+      "visual": 91,
+      "auditory": 70
+    },
+    "name": "Pradeep",
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "grade": "4",
+    "email": "pradeep01@gmail.com",
+    "birthday": "2006-05-05",
+    "gender": "",
+    "classified_learning_style": "Undefined",
+    "id": "A2KaDtyFSqZIrYValN8WRt51W8w2"
+  },
+  {
+    "gender": "male",
+    "grade": "grade5",
+    "birthday": "2005-03-18",
+    "created_at": "2025-03-17T17:07:00.837000+00:00",
+    "teacher_id": "yCVTl5sEs3YMIK5MfWR9gmSOirf2",
+    "name": "kumara",
+    "email": "kumara@gmail.com",
+    "id": "CHswoLDO9HVgQSFPCd8bk6aMjAQ2"
+  },
+  {
+    "teacher_id": "QJ1GjKhJ9EOMeDZHsbl4waEvsTh1",
+    "name": "Eranda",
+    "birthday": "2006-07-27",
+    "email": "eranda@gmail.com",
+    "gender": "Other",
+    "grade": "5",
+    "created_at": "2025-03-17T21:44:24.172000+00:00",
+    "id": "CILymz6G8jRFo8Kddjj9E7g9l282"
+  },
+  {
+    "created_at": "2025-03-14T16:54:35.328000+00:00",
+    "name": "Kapila",
+    "teacher_id": "IfDYwBXglLcJTNqm7XqVOSBh4Sn1",
+    "grade": "grade4",
+    "email": "kapila@gmail.com",
+    "birthday": "2025-03-10",
+    "gender": "male",
+    "id": "DUoCVowLXBefaE9WcUPvsQiJIhv2"
+  },
+  {
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "learning_styles": {
+      "reading": 86,
+      "visual": 82,
+      "kinesthetic": 73,
+      "auditory": 65
+    },
+    "email": "chamil01@gmail.com",
+    "name": "Chamil",
+    "grade": "5",
+    "birthday": "2005-03-19",
+    "gender": "Other",
+    "classified_learning_style": "Undefined",
+    "created_at": "2025-03-17T21:50:42.956000+00:00",
+    "id": "DtwijjZHAye8mByF9NQh8cewB622"
+  },
+  {
+    "teacher_id": "QJ1GjKhJ9EOMeDZHsbl4waEvsTh1",
+    "name": "Sachini",
+    "email": "sachini@gmail.com",
+    "birthday": "2006-08-26",
+    "created_at": "2025-03-17T21:44:34.531000+00:00",
+    "grade": "5",
+    "gender": "Female",
+    "id": "EVmIc8CqrGU9jflgoeXURi2OqsR2"
+  },
+  {
+    "birthday": "2006-12-26",
+    "classified_learning_style": "Undefined",
+    "grade": "4",
+    "created_at": "2025-03-17T21:50:52.770000+00:00",
+    "gender": "",
+    "learning_styles": {
+      "reading": 81,
+      "visual": 92,
+      "kinesthetic": 70,
+      "auditory": 71
+    },
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "name": "Ruwanthi",
+    "email": "ruwanthi01@gmail.com",
+    "id": "G0eR3nPuBKgqrbdu0KVRCUW9PK72"
+  },
+  {
+    "email": "priyani@gmail.com",
+    "grade": "4",
+    "created_at": "2025-03-17T21:44:36.083000+00:00",
+    "gender": "",
+    "name": "Priyani",
+    "birthday": "2006-02-02",
+    "teacher_id": "QJ1GjKhJ9EOMeDZHsbl4waEvsTh1",
+    "id": "GMV8nDL25uWdUB0MZ11kM942azw2"
+  },
+  {
+    "email": "oshadhi01@gmail.com",
+    "gender": "Female",
+    "birthday": "2005-02-15",
+    "classified_learning_style": "Undefined",
+    "created_at": "2025-03-17T21:50:25.621000+00:00",
+    "learning_styles": {
+      "reading": 65,
+      "visual": 73,
+      "kinesthetic": 92,
+      "auditory": 88
+    },
+    "name": "Oshadhi",
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "grade": "5",
+    "id": "HRrAOIoqx7e5XUM5gGDyxAzX9Xg2"
+  },
+  {
+    "created_at": "2025-03-17T21:50:15.591000+00:00",
+    "gender": "Male",
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "learning_styles": {
+      "reading": 73,
+      "visual": 66,
+      "kinesthetic": 79,
+      "auditory": 87
+    },
+    "name": "Nimesha",
+    "email": "nimesha01@gmail.com",
+    "birthday": "2005-11-14",
+    "classified_learning_style": "Undefined",
+    "grade": "4",
+    "id": "HxOgj974urgeJABCZNlo7tMGEjq2"
+  },
+  {
+    "email": "seenu@gmail.com",
+    "name": "Seenu",
+    "created_at": "2025-03-16T08:53:40.397000+00:00",
+    "birthday": "2025-03-04",
+    "gender": "female",
+    "grade": "grade4",
+    "teacher_id": "yCVTl5sEs3YMIK5MfWR9gmSOirf2",
+    "id": "IjaWzlCiPbWKvIFOoFg4kVVqM9f1"
+  },
+  {
+    "learning_styles": {
+      "reading": 89,
+      "kinesthetic": 71,
+      "visual": 67,
+      "auditory": 55
+    },
+    "created_at": "2025-03-17T21:49:38.441000+00:00",
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "name": "Samanthi",
+    "email": "samanthi01@gmail.com",
+    "classified_learning_style": "Undefined",
+    "grade": "4",
+    "birthday": "2006-02-01",
+    "gender": "Other",
+    "id": "Jiped4wf1Ha2TIDe89dUAXmIQp12"
+  },
+  {
+    "created_at": "2025-03-17T21:50:13.353000+00:00",
+    "learning_styles": {
+      "reading": 82,
+      "kinesthetic": 66,
+      "visual": 93,
+      "auditory": 69
+    },
+    "name": "Pasindu",
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "email": "pasindu01@gmail.com",
+    "grade": "4",
+    "birthday": "2006-07-01",
+    "gender": "",
+    "classified_learning_style": "Undefined",
+    "id": "K1SWHaHWyRaNKEflmCBZ35jUkZq2"
+  },
+  {
+    "gender": "Male",
+    "email": "harsha@gmail.com",
+    "birthday": "2005-02-08",
+    "created_at": "2025-03-17T21:44:12.202000+00:00",
+    "name": "Harsha",
+    "grade": "4",
+    "teacher_id": "QJ1GjKhJ9EOMeDZHsbl4waEvsTh1",
+    "id": "KCQnYjXSTcWOS67CCV0pcELfg4m1"
+  },
+  {
+    "created_at": "2025-03-17T21:50:18.900000+00:00",
+    "learning_styles": {
+      "visual": 70,
+      "reading": 68,
+      "kinesthetic": 86,
+      "auditory": 83
+    },
+    "name": "Akila",
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "grade": "4",
+    "email": "akila01@gmail.com",
+    "birthday": "2005-02-20",
+    "gender": "Male",
+    "classified_learning_style": "Undefined",
+    "id": "KxaElsGajhMNlteiZVjfbsoBviK2"
+  },
+  {
+    "updated_at": "2025-03-12T10:22:31.173000+00:00",
+    "grade": "grade4",
+    "gender": "male",
+    "birthday": "2025-03-18",
+    "created_at": "2025-03-12T10:06:58.547000+00:00",
+    "teacher_id": "yCVTl5sEs3YMIK5MfWR9gmSOirf2",
+    "name": "Kamal Perera",
+    "email": "kamal@gmail.com",
+    "id": "LV8kdd9unAMKL1fEWYF35WSyuAJ2"
+  },
+  {
+    "classified_learning_style": "Undefined",
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "learning_styles": {
+      "visual": 85,
+      "reading": 67,
+      "kinesthetic": 89,
+      "auditory": 73
+    },
+    "name": "Chandana",
+    "birthday": "2006-05-11",
+    "email": "chandana01@gmail.com",
+    "gender": "Female",
+    "grade": "5",
+    "created_at": "2025-03-17T21:49:53.632000+00:00",
+    "id": "LnSaHCOBwEUSeSzsWn5uGFjJXEJ2"
+  },
+  {
+    "name": "Thilina",
+    "created_at": "2025-03-17T11:44:40.358000+00:00",
+    "teacher_id": "51VSsr0hKqQ2r05OFev0TZmwBlm1",
+    "email": "thilina@gmail.com",
+    "grade": "grade4",
+    "birthday": "2007-03-14",
+    "gender": "male",
+    "id": "M28k63MWuXVdiQzv3OH8jlQnjZq1"
+  },
+  {
+    "name": "Sunil",
+    "teacher_id": "yCVTl5sEs3YMIK5MfWR9gmSOirf2",
+    "grade": "grade4",
+    "email": "sunil@gmail.com",
+    "created_at": "2025-03-13T14:20:13.043000+00:00",
+    "gender": "male",
+    "birthday": "2025-03-24",
+    "id": "MBVwSnfFqANthiHJlO920anBKmD3"
+  },
+  {
+    "classified_learning_style": "Undefined",
+    "birthday": "2006-05-07",
+    "learning_styles": {
+      "reading": 69,
+      "kinesthetic": 63,
+      "visual": 82,
+      "auditory": 75
+    },
+    "name": "Indika",
+    "grade": "5",
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "email": "indika01@gmail.com",
+    "gender": "",
+    "created_at": "2025-03-17T21:49:42.329000+00:00",
+    "id": "MZz2FXCyX5RecsCqo6fudkuMRKk1"
+  },
+  {
+    "email": "lakshan@gmail.com",
+    "grade": "5",
+    "created_at": "2025-03-17T21:44:20.870000+00:00",
+    "gender": "",
+    "name": "Lakshan",
+    "teacher_id": "QJ1GjKhJ9EOMeDZHsbl4waEvsTh1",
+    "birthday": "2006-11-03",
+    "id": "NsQ9Xl1ogJRaMRsDLE5sXOdaG893"
+  },
+  {
+    "gender": "female",
+    "email": "hima@gmail.com",
+    "birthday": "2019-03-15",
+    "created_at": "2025-03-17T06:26:57.303000+00:00",
+    "name": "Himashi",
+    "teacher_id": "yNhdiiuV00Qt3SgBVPyXmNSnkuP2",
+    "grade": "grade5",
+    "id": "OBATQJjaAsOgraYvH1Ccb93OoTJ3"
+  },
+  {
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "learning_styles": {
+      "visual": 68,
+      "reading": 61,
+      "kinesthetic": 82,
+      "auditory": 79
+    },
+    "name": "Tharushi",
+    "email": "tharushi01@gmail.com",
+    "birthday": "2005-01-08",
+    "created_at": "2025-03-17T21:49:47.143000+00:00",
+    "classified_learning_style": "Undefined",
+    "gender": "Male",
+    "grade": "4",
+    "id": "OYGTCyz4IrZa59yTdlbpvBMyk3S2"
+  },
+  {
+    "birthday": "2005-09-25",
+    "classified_learning_style": "Undefined",
+    "grade": "5",
+    "created_at": "2025-03-17T21:50:20.726000+00:00",
+    "gender": "",
+    "learning_styles": {
+      "reading": 77,
+      "kinesthetic": 63,
+      "visual": 88,
+      "auditory": 74
+    },
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "name": "Thilini",
+    "email": "thilini01@gmail.com",
+    "id": "QHNHQDsf9gdybDlSr4vMfGzKnTi2"
+  },
+  {
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "learning_styles": {
+      "kinesthetic": 67,
+      "auditory": 92,
+      "reading": 78,
+      "visual": 45
+    },
+    "name": "Harsha",
+    "email": "harsha01@gmail.com",
+    "birthday": "2006-10-27",
+    "created_at": "2025-03-17T21:49:35.091000+00:00",
+    "classified_learning_style": "Undefined",
+    "gender": "Other",
+    "grade": "5",
+    "id": "Qu0fCpBxovRxDSjD1ZZHkEJpDS72"
+  },
+  {
+    "teacher_id": "QJ1GjKhJ9EOMeDZHsbl4waEvsTh1",
+    "name": "Indika",
+    "created_at": "2025-03-17T21:44:17.645000+00:00",
+    "email": "indika@gmail.com",
+    "grade": "4",
+    "gender": "Other",
+    "birthday": "2006-10-17",
+    "id": "SH1XZ4cuwCO6w6MarvO3uKDi3uh2"
+  },
+  {
+    "gender": "Male",
+    "grade": "4",
+    "birthday": "2005-10-05",
+    "created_at": "2025-03-17T21:44:28.928000+00:00",
+    "teacher_id": "QJ1GjKhJ9EOMeDZHsbl4waEvsTh1",
+    "name": "Chandana",
+    "email": "chandana@gmail.com",
+    "id": "SITjjZ5yYJdcThvlJXtUkKyCymh1"
+  },
+  {
+    "email": "priyani01@gmail.com",
+    "gender": "",
+    "birthday": "2006-08-03",
+    "classified_learning_style": "Undefined",
+    "created_at": "2025-03-17T21:50:00.026000+00:00",
+    "learning_styles": {
+      "visual": 61,
+      "reading": 75,
+      "kinesthetic": 68,
+      "auditory": 89
+    },
+    "name": "Priyani",
+    "grade": "5",
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "id": "SVh96AqWicO2jtrrI15doOpDdVo1"
+  },
+  {
+    "classified_learning_style": "Undefined",
+    "grade": "4",
+    "gender": "Female",
+    "birthday": "2005-08-13",
+    "created_at": "2025-03-17T21:49:56.765000+00:00",
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "learning_styles": {
+      "reading": 83,
+      "kinesthetic": 77,
+      "visual": 76,
+      "auditory": 62
+    },
+    "name": "Lasantha",
+    "email": "lasantha01@gmail.com",
+    "id": "SacVKRpo3BWx9L4IfvTXHpwZgMp1"
+  },
+  {
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "learning_styles": {
+      "reading": 63,
+      "kinesthetic": 84,
+      "visual": 71,
+      "auditory": 87
+    },
+    "name": "Sameera",
+    "created_at": "2025-03-17T21:50:38.195000+00:00",
+    "email": "sameera01@gmail.com",
+    "grade": "5",
+    "gender": "",
+    "classified_learning_style": "Undefined",
+    "birthday": "2005-02-26",
+    "id": "UIXKR3lQKsON6jUSQsU7hVfyf2Y2"
+  },
+  {
+    "classified_learning_style": "Undefined",
+    "birthday": "2006-03-19",
+    "learning_styles": {
+      "kinesthetic": 69,
+      "reading": 82,
+      "visual": 89,
+      "auditory": 68
+    },
+    "name": "Chaminda",
+    "grade": "5",
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "email": "chaminda01@gmail.com",
+    "gender": "Other",
+    "created_at": "2025-03-17T21:50:39.716000+00:00",
+    "id": "VQ4git6jQzN7Vw5mLERf08Zdkhk1"
+  },
+  {
+    "learning_styles": {
+      "visual": 90,
+      "reading": 80,
+      "kinesthetic": 65,
+      "auditory": 72
+    },
+    "email": "harini01@gmail.com",
+    "name": "Harini",
+    "created_at": "2025-03-17T21:50:33.592000+00:00",
+    "birthday": "2005-01-14",
+    "classified_learning_style": "Undefined",
+    "gender": "Female",
+    "grade": "5",
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "id": "WqXABB4AoPg7RqI75kkppNgPifz1"
+  },
+  {
+    "email": "eranda01@gmail.com",
+    "birthday": "2005-02-12",
+    "created_at": "2025-03-17T21:49:48.731000+00:00",
+    "gender": "Female",
+    "grade": "4",
+    "classified_learning_style": "Undefined",
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "learning_styles": {
+      "reading": 73,
+      "kinesthetic": 68,
+      "visual": 92,
+      "auditory": 65
+    },
+    "name": "Eranda",
+    "id": "XmIl1lPXi9bgyGwhufDDrjRaWgC3"
+  },
+  {
+    "birthday": "2006-08-25",
+    "learning_styles": {
+      "reading": 90,
+      "kinesthetic": 72,
+      "visual": 84,
+      "auditory": 61
+    },
+    "created_at": "2025-03-17T21:50:17.316000+00:00",
+    "name": "Viraj",
+    "gender": "Other",
+    "email": "viraj01@gmail.com",
+    "grade": "5",
+    "classified_learning_style": "Undefined",
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "id": "ZAS1bx4cv4XmtO4unPWWxq53Rgw2"
+  },
+  {
+    "gender": "Male",
+    "email": "tharushi@gmail.com",
+    "birthday": "2006-11-25",
+    "created_at": "2025-03-17T21:44:22.647000+00:00",
+    "name": "Tharushi",
+    "teacher_id": "QJ1GjKhJ9EOMeDZHsbl4waEvsTh1",
+    "grade": "5",
+    "id": "ZJedSw3lEvV45soA5hlhDRVXzUK2"
+  },
+  {
+    "teacher_id": "yCVTl5sEs3YMIK5MfWR9gmSOirf2",
+    "name": "Devika",
+    "email": "devika@gmail.com",
+    "birthday": "2005-03-18",
+    "created_at": "2025-03-15T13:05:32.182000+00:00",
+    "gender": "female",
+    "grade": "grade4",
+    "id": "ZZbLOCW4qGRESqz0buv6clG0Lkx2"
+  },
+  {
+    "email": "nayana@gmail.com",
+    "gender": "Other",
+    "birthday": "2006-10-10",
+    "created_at": "2025-03-17T21:44:07.822000+00:00",
+    "name": "Nayana",
+    "teacher_id": "QJ1GjKhJ9EOMeDZHsbl4waEvsTh1",
+    "grade": "5",
+    "id": "a4I2zHHUTIV4zqu1q9AfIKqRn1W2"
+  },
+  {
+    "classified_learning_style": "Undefined",
+    "grade": "4",
+    "gender": "Other",
+    "birthday": "2005-12-31",
+    "created_at": "2025-03-17T21:50:03.112000+00:00",
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "learning_styles": {
+      "visual": 99,
+      "reading": 81,
+      "kinesthetic": 99,
+      "auditory": 84
+    },
+    "name": "Dinesh",
+    "email": "dinesh01@gmail.com",
+    "id": "aP9snWrCm4ZqyvY5KWzxnbpoppt1"
+  },
+  {
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "learning_styles": {
+      "reading": 89,
+      "kinesthetic": 72,
+      "visual": 87,
+      "auditory": 67
+    },
+    "name": "Menaka",
+    "email": "menaka01@gmail.com",
+    "birthday": "2006-08-06",
+    "created_at": "2025-03-17T21:50:49.620000+00:00",
+    "classified_learning_style": "Undefined",
+    "grade": "5",
+    "gender": "Other",
+    "id": "c0Lr02GizIRAAkDyytzKO9EKVjz1"
+  },
+  {
+    "learning_styles": {
+      "reading": 84,
+      "kinesthetic": 74,
+      "visual": 86,
+      "auditory": 64
+    },
+    "name": "Gayan",
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "grade": "5",
+    "email": "gayan01@gmail.com",
+    "created_at": "2025-03-17T21:50:24.025000+00:00",
+    "gender": "Female",
+    "classified_learning_style": "Undefined",
+    "birthday": "2005-09-16",
+    "id": "dgxpARC3ZpXBGROmck5bgiFNWNR2"
+  },
+  {
+    "email": "buddhika01@gmail.com",
+    "birthday": "2005-04-21",
+    "created_at": "2025-03-17T21:50:46.488000+00:00",
+    "gender": "Other",
+    "grade": "4",
+    "classified_learning_style": "Undefined",
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "learning_styles": {
+      "reading": 83,
+      "kinesthetic": 68,
+      "visual": 91,
+      "auditory": 73
+    },
+    "name": "Buddhika",
+    "id": "e5q4bRZOVhSNoRcuTLqpHP9MgsH3"
+  },
+  {
+    "teacher_id": "QJ1GjKhJ9EOMeDZHsbl4waEvsTh1",
+    "name": "Hasitha",
+    "grade": "5",
+    "email": "hasitha@gmail.com",
+    "gender": "Male",
+    "birthday": "2006-08-18",
+    "created_at": "2025-03-17T21:44:37.799000+00:00",
+    "id": "fEJfxRVeEMe8zvEFs3ItSgHGvfG3"
+  },
+  {
+    "classified_learning_style": "Undefined",
+    "grade": "4",
+    "birthday": "2006-12-13",
+    "gender": "Male",
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "learning_styles": {
+      "reading": 59,
+      "kinesthetic": 91,
+      "visual": 83,
+      "auditory": 78
+    },
+    "name": "Sachini",
+    "created_at": "2025-03-17T21:49:58.458000+00:00",
+    "email": "sachini01@gmail.com",
+    "id": "fwgIxdIGWnRhCBZngLo9OEZZsLF2"
+  },
+  {
+    "email": "lakshan01@gmail.com",
+    "birthday": "2006-05-22",
+    "created_at": "2025-03-17T21:49:45.592000+00:00",
+    "grade": "4",
+    "gender": "",
+    "classified_learning_style": "Undefined",
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "learning_styles": {
+      "reading": 85,
+      "kinesthetic": 59,
+      "visual": 71,
+      "auditory": 63
+    },
+    "name": "Lakshan",
+    "id": "guFaYQqFZiOtVYduRGegWLcLr4o2"
+  },
+  {
+    "name": "Sujith",
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "learning_styles": {
+      "reading": 91,
+      "kinesthetic": 76,
+      "visual": 83,
+      "auditory": 63
+    },
+    "email": "sujith01@gmail.com",
+    "created_at": "2025-03-17T21:50:30.237000+00:00",
+    "grade": "5",
+    "classified_learning_style": "Undefined",
+    "gender": "Other",
+    "birthday": "2006-04-26",
+    "id": "gxKptsu9WuOdeSl0rYL4NaPcbZu1"
+  },
+  {
+    "created_at": "2025-03-17T21:44:30.458000+00:00",
+    "name": "Sanduni",
+    "teacher_id": "QJ1GjKhJ9EOMeDZHsbl4waEvsTh1",
+    "birthday": "2005-04-13",
+    "email": "sanduni@gmail.com",
+    "grade": "5",
+    "gender": "Female",
+    "id": "gxNpLtvjKGZHgKLSUzZq4ap79TB3"
+  },
+  {
+    "gender": "Male",
+    "email": "chamila01@gmail.com",
+    "birthday": "2005-12-02",
+    "classified_learning_style": "Undefined",
+    "created_at": "2025-03-17T21:49:52.066000+00:00",
+    "learning_styles": {
+      "reading": 88,
+      "visual": 78,
+      "kinesthetic": 72,
+      "auditory": 59
+    },
+    "name": "Chamila",
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "grade": "4",
+    "id": "hYSdOlAflzaWzpQm9t7Mm0eCk2B3"
+  },
+  {
+    "classified_learning_style": "Undefined",
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "birthday": "2006-04-04",
+    "learning_styles": {
+      "reading": 85,
+      "kinesthetic": 45,
+      "visual": 75,
+      "auditory": 60
+    },
+    "name": "Nayana",
+    "gender": "Other",
+    "grade": "4",
+    "created_at": "2025-03-17T21:49:28.295000+00:00",
+    "email": "nayana01@gmail.com",
+    "id": "hoQRl4cflnVCe23hYtZMnX69Vdg1"
+  },
+  {
+    "birthday": "2005-09-05",
+    "email": "amila01@gmail.com",
+    "created_at": "2025-03-17T21:50:51.174000+00:00",
+    "gender": "Male",
+    "grade": "4",
+    "classified_learning_style": "Undefined",
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "learning_styles": {
+      "reading": 66,
+      "kinesthetic": 90,
+      "visual": 76,
+      "auditory": 84
+    },
+    "name": "Amila",
+    "id": "hvB8A914fEZL547nKylTg4Y9lg52"
+  },
+  {
+    "birthday": "2019-03-05",
+    "name": "jayani",
+    "grade": "grade5",
+    "teacher_id": "xskulo1pHSVuvxAnbPkwyrcLCg53",
+    "gender": "female",
+    "email": "jaya@gmail.com",
+    "created_at": "2025-03-17T06:32:45.547000+00:00",
+    "id": "jzcfWqD1ljhiKJsHGFYksaCS1wl1"
+  },
+  {
+    "created_at": "2025-03-17T21:50:08.951000+00:00",
+    "learning_styles": {
+      "visual": 81,
+      "reading": 87,
+      "kinesthetic": 70,
+      "auditory": 58
+    },
+    "name": "Lahiru",
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "birthday": "2005-05-05",
+    "email": "lahiru01@gmail.com",
+    "grade": "4",
+    "classified_learning_style": "Undefined",
+    "gender": "Other",
+    "id": "keBH9uH7vVUZXCthgGWXRikKgti2"
+  },
+  {
+    "birthday": "2005-07-12",
+    "name": "Samanthi",
+    "grade": "4",
+    "teacher_id": "QJ1GjKhJ9EOMeDZHsbl4waEvsTh1",
+    "gender": "",
+    "email": "samanthi@gmail.com",
+    "created_at": "2025-03-17T21:44:13.797000+00:00",
+    "id": "kqjnhhd94pV38ag6tWDQjflzC603"
+  },
+  {
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "learning_styles": {
+      "reading": 71,
+      "kinesthetic": 81,
+      "visual": 62,
+      "auditory": 90
+    },
+    "name": "Kavindu",
+    "email": "kavindu01@gmail.com",
+    "grade": "5",
+    "birthday": "2005-04-14",
+    "gender": "Male",
+    "classified_learning_style": "Undefined",
+    "created_at": "2025-03-17T21:50:22.307000+00:00",
+    "id": "lJMPlNCkigbZwsGvra2djBSAsUr1"
+  },
+  {
+    "name": "Chamila",
+    "grade": "5",
+    "teacher_id": "QJ1GjKhJ9EOMeDZHsbl4waEvsTh1",
+    "email": "chamila@gmail.com",
+    "created_at": "2025-03-17T21:44:27.371000+00:00",
+    "gender": "Female",
+    "birthday": "2005-03-29",
+    "id": "m3rINfzhC7Vfaog7Ic7ABVwmfPp2"
+  },
+  {
+    "created_at": "2025-03-15T12:23:52.033000+00:00",
+    "name": "Jeewan",
+    "teacher_id": "IfDYwBXglLcJTNqm7XqVOSBh4Sn1",
+    "birthday": "2025-03-16",
+    "email": "jeewan@gmail.com",
+    "grade": "grade5",
+    "gender": "male",
+    "id": "m9oHWsxECAekb9igyzzHmw7owZE3"
+  },
+  {
+    "learning_styles": {
+      "kinesthetic": 83,
+      "reading": 74,
+      "visual": 65,
+      "auditory": 86
+    },
+    "name": "Rasika",
+    "created_at": "2025-03-17T21:50:28.711000+00:00",
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "email": "rasika01@gmail.com",
+    "grade": "4",
+    "classified_learning_style": "Undefined",
+    "birthday": "2005-09-22",
+    "gender": "Other",
+    "id": "meJgWGxVOWf3WveHjN5bhJ3wg2f1"
+  },
+  {
+    "grade": "4",
+    "gender": "Female",
+    "email": "sirimal@gmail.com",
+    "birthday": "2006-05-12",
+    "created_at": "2025-03-17T21:44:10.088000+00:00",
+    "teacher_id": "QJ1GjKhJ9EOMeDZHsbl4waEvsTh1",
+    "name": "Sirimal",
+    "id": "muWAiXe3Affc1IjBNo4MLqMCdJb2"
+  },
+  {
+    "learning_styles": {
+      "kinesthetic": 64,
+      "reading": 71,
+      "auditory": 86,
+      "visual": 69
+    },
+    "name": "Sanduni",
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "grade": "4",
+    "email": "sanduni01@gmail.com",
+    "created_at": "2025-03-17T21:49:55.220000+00:00",
+    "gender": "",
+    "classified_learning_style": "Undefined",
+    "birthday": "2005-05-20",
+    "id": "nESmGLPJN4gF2CZXKWz3xYC16jF2"
+  },
+  {
+    "email": "suresh01@gmail.com",
+    "birthday": "2005-07-18",
+    "created_at": "2025-03-17T21:50:48.035000+00:00",
+    "gender": "",
+    "grade": "4",
+    "classified_learning_style": "Undefined",
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "learning_styles": {
+      "kinesthetic": 82,
+      "reading": 75,
+      "auditory": 90,
+      "visual": 69
+    },
+    "name": "Suresh",
+    "id": "nIJHKV4vTHaIJm4lUiDJk2becQN2"
+  },
+  {
+    "learning_styles": {
+      "kinesthetic": 87,
+      "reading": 70,
+      "visual": 74,
+      "auditory": 85
+    },
+    "created_at": "2025-03-17T21:50:44.946000+00:00",
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "name": "Rashmi",
+    "email": "rashmi01@gmail.com",
+    "classified_learning_style": "Undefined",
+    "grade": "4",
+    "birthday": "2006-10-08",
+    "gender": "Other",
+    "id": "qTsbdgeXRkRTVzuTAAvsEkfrnhb2"
+  },
+  {
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "learning_styles": {
+      "reading": 77,
+      "kinesthetic": 65,
+      "visual": 63,
+      "auditory": 81
+    },
+    "name": "Dilani",
+    "email": "dilani01@gmail.com",
+    "birthday": "2005-09-21",
+    "created_at": "2025-03-17T21:49:50.507000+00:00",
+    "classified_learning_style": "Undefined",
+    "grade": "4",
+    "gender": "Other",
+    "id": "qmuiG5JMngZsUtUM6EnOzH1ZDmU2"
+  },
+  {
+    "birthday": "2006-03-31",
+    "created_at": "2025-03-17T21:50:10.516000+00:00",
+    "learning_styles": {
+      "kinesthetic": 88,
+      "reading": 64,
+      "visual": 77,
+      "auditory": 85
+    },
+    "name": "Uditha",
+    "email": "uditha01@gmail.com",
+    "classified_learning_style": "Undefined",
+    "grade": "5",
+    "gender": "",
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "id": "rfNd90lsFuYJIkXREUJc71NJFtG3"
+  },
+  {
+    "email": "sathuta@gmail.com",
+    "gender": "male",
+    "grade": "grade5",
+    "birthday": "2007-03-06",
+    "created_at": "2025-03-17T13:15:32.388000+00:00",
+    "teacher_id": "51VSsr0hKqQ2r05OFev0TZmwBlm1",
+    "name": "Sathuta",
+    "id": "s2ZLoXNNref8prLGCg260uWClxX2"
+  },
+  {
+    "birthday": "2005-07-23",
+    "learning_styles": {
+      "reading": 78,
+      "visual": 89,
+      "kinesthetic": 85,
+      "auditory": 67
+    },
+    "created_at": "2025-03-17T21:50:04.820000+00:00",
+    "name": "Madushi",
+    "email": "madushi01@gmail.com",
+    "grade": "4",
+    "gender": "Other",
+    "classified_learning_style": "Undefined",
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "id": "sKeMUyo8VbgPqyNGz1ZsdSzY5bG3"
+  },
+  {
+    "gender": "Female",
+    "email": "priyantha@gmail.com",
+    "birthday": "2006-02-28",
+    "created_at": "2025-03-17T21:44:16.060000+00:00",
+    "name": "Priyantha",
+    "grade": "4",
+    "teacher_id": "QJ1GjKhJ9EOMeDZHsbl4waEvsTh1",
+    "id": "tB9kb7KZT8cV5oSIOj4Iodit9Eo2"
+  },
+  {
+    "gender": "Other",
+    "grade": "5",
+    "classified_learning_style": "Undefined",
+    "birthday": "2006-05-15",
+    "created_at": "2025-03-17T21:49:40.418000+00:00",
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "learning_styles": {
+      "reading": 45,
+      "visual": 73,
+      "kinesthetic": 85,
+      "auditory": 68
+    },
+    "name": "Priyantha",
+    "email": "priyantha01@gmail.com",
+    "id": "tBPz7394wdfuREbx0D99OqAX8tD3"
+  },
+  {
+    "created_at": "2025-03-17T21:50:31.970000+00:00",
+    "gender": "Other",
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "learning_styles": {
+      "reading": 67,
+      "kinesthetic": 89,
+      "visual": 75,
+      "auditory": 81
+    },
+    "name": "Chathuri",
+    "email": "chathuri01@gmail.com",
+    "birthday": "2006-06-30",
+    "classified_learning_style": "Undefined",
+    "grade": "4",
+    "id": "uS3qQqoJG0V3sQEIYu7YzzU8Y1s1"
+  },
+  {
+    "teacher_id": "yCVTl5sEs3YMIK5MfWR9gmSOirf2",
+    "name": "Rohitha",
+    "birthday": "2006-03-21",
+    "email": "rohitha@gmail.com",
+    "gender": "male",
+    "grade": "grade4",
+    "created_at": "2025-03-16T06:49:01.340000+00:00",
+    "id": "vdhbAaIloJdm81KDRNRlOLuAdJ63"
+  },
+  {
+    "learning_styles": {
+      "kinesthetic": 73,
+      "reading": 66,
+      "visual": 87,
+      "auditory": 99
+    },
+    "name": "Hasitha",
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "grade": "5",
+    "email": "hasitha01@gmail.com",
+    "created_at": "2025-03-17T21:50:01.598000+00:00",
+    "gender": "Other",
+    "classified_learning_style": "Undefined",
+    "birthday": "2006-03-06",
+    "id": "wPr4mJFUHdbNnRcsq5bIefdTFOs1"
+  },
+  {
+    "created_at": "2025-03-16T05:29:44.358000+00:00",
+    "name": "Sidath",
+    "teacher_id": "yCVTl5sEs3YMIK5MfWR9gmSOirf2",
+    "birthday": "2005-03-17",
+    "email": "sidath@gmail.com",
+    "grade": "grade5",
+    "gender": "male",
+    "id": "wYB3KLAcpTeYZmoFFGd9lexJ7Qi1"
+  },
+  {
+    "birthday": "2005-08-16",
+    "created_at": "2025-03-17T21:50:07.195000+00:00",
+    "learning_styles": {
+      "reading": 69,
+      "visual": 64,
+      "kinesthetic": 75,
+      "auditory": 91
+    },
+    "name": "Niluka",
+    "email": "niluka01@gmail.com",
+    "classified_learning_style": "Undefined",
+    "gender": "",
+    "grade": "4",
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "id": "wvaLgizsoOfhLOfAwjJsWazDwKt2"
+  },
+  {
+    "learning_styles": {
+      "reading": 50,
+      "kinesthetic": 90,
+      "visual": 65,
+      "auditory": 45
+    },
+    "name": "Sirimal",
+    "email": "sirimal01@gmail.com",
+    "created_at": "2025-03-17T21:49:31.684000+00:00",
+    "birthday": "2005-01-15",
+    "classified_learning_style": "Undefined",
+    "grade": "4",
+    "gender": "Male",
+    "teacher_id": "uPSpxGSRFYdnexxEDh45TxUznRJ3",
+    "id": "x9d61UzYUWUewnNDBDt6vfEUhmr2"
+  },
+  {
+    "teacher_id": "QJ1GjKhJ9EOMeDZHsbl4waEvsTh1",
+    "name": "Dilani",
+    "birthday": "2005-09-04",
+    "email": "dilani@gmail.com",
+    "gender": "Female",
+    "grade": "4",
+    "created_at": "2025-03-17T21:44:25.755000+00:00",
+    "id": "zidiqRfe0XYAZKy0ntizdSD4qMx2"
+  }
+]
