@@ -721,6 +721,172 @@ def process_answer():
     return jsonify(response_data)
 
 
+# @kinesthetic_blueprint.route("/process-all-answers", methods=["POST"])
+# @login_required
+# def process_all_answers():
+#     """Process all answers for a question's sub-questions together"""
+#     # Check for proper request
+#     if request.method != "POST":
+#         flash("Invalid request method", "error")
+#         return redirect(url_for("kinesthetic.play"))
+    
+#     question_id = request.form.get("question_pk")
+#     answer_method = request.form.get("answer_method")
+#     sub_question_ids = request.form.getlist("sub_question_ids")
+#     # Get subject from the form data
+#     subject = request.form.get("subject", Subject.ADDITION)
+    
+#     # Initialize response
+#     response_data = {
+#         "success": True,
+#         "results": [],
+#         "subject": subject,
+#         "redirect_url": url_for("kinesthetic.play")  # No subject needed for mixed quiz
+#     }
+    
+#     total_points = 0
+#     correct_count = 0
+    
+#     # Process each sub-question
+#     for sub_question_id in sub_question_ids:
+#         # Look for captured image for this sub-question
+#         image_key = f"captured_image_{sub_question_id}"
+#         base64_image = request.form.get(image_key)
+        
+#         if not base64_image:
+#             continue  # Skip if no image for this sub-question
+            
+#         # Get sub-question details
+#         sub_question_ref = db.collection("sub_questions").document(sub_question_id).get()
+#         if not sub_question_ref.exists:
+#             continue
+            
+#         sub_question_data = sub_question_ref.to_dict()
+#         correct_answer = sub_question_data.get("correct_answer")
+#         sub_question_text = sub_question_data.get("text", "")
+#         points = sub_question_data.get("points", 1)
+        
+#         # Initialize result for this sub-question
+#         result = {
+#             "sub_question_id": sub_question_id,
+#             "sub_question_text": sub_question_text,
+#             "is_correct": False,
+#             "detected_value": None,
+#             "expected_value": correct_answer,
+#             "annotated_image_url": None
+#         }
+        
+#         # Process answer based on answer method
+#         if answer_method == AnswerMethod.ABACUS:
+#             # Check answer using the abacus service
+#             is_correct, detected_value, annotated_image_path = check_abacus_answer(
+#                 base64_image, correct_answer
+#             )
+#         elif answer_method == AnswerMethod.ANALOG_CLOCK or answer_method == AnswerMethod.DIGITAL_CLOCK:
+#             # Check answer using the clock service
+#             is_correct, detected_value, annotated_image_path = check_clock_answer(
+#                 base64_image, correct_answer
+#             )
+#         else:
+#             # Unsupported answer method
+#             continue
+            
+#         # Update result data
+#         result["is_correct"] = is_correct
+#         result["detected_value"] = detected_value
+        
+#         # If there's an annotated image path, copy it to the static folder
+#         if annotated_image_path and os.path.exists(annotated_image_path):
+#             static_uploads = os.path.join(current_app.static_folder, "uploads")
+#             os.makedirs(static_uploads, exist_ok=True)
+            
+#             filename = os.path.basename(annotated_image_path)
+#             static_path = os.path.join(static_uploads, filename)
+#             shutil.copy(annotated_image_path, static_path)
+            
+#             # Add the public URL to the result
+#             result["annotated_image_url"] = f"/static/uploads/{filename}"
+        
+#         # Save attempt to database
+#         captured_images = {image_key: base64_image}
+#         if result["annotated_image_url"]:
+#             captured_images["annotated_image"] = result["annotated_image_url"]
+            
+#         result_data = {
+#             "detected_value": detected_value,
+#             "expected_value": correct_answer,
+#         }
+        
+#         attempted = AttemptedQuestion(
+#             user_id=current_user.id,
+#             question_id=question_id,
+#             sub_question_id=sub_question_id,
+#             is_correct=is_correct,
+#             images=captured_images,
+#             result_data=result_data
+#         )
+#         attempted.save()
+        
+#         # Update counters
+#         if is_correct:
+#             correct_count += 1
+#             total_points += points
+            
+#         # Add to results list
+#         response_data["results"].append(result)
+    
+#     # Update quiz profile
+#     kinesthetic_profile = QuizProfile.get_by_user_id(current_user.id)
+#     if kinesthetic_profile:
+#         # Add points to the profile
+#         kinesthetic_profile.total_score += total_points
+        
+#         # Update attempts counter (this counts as one attempt regardless of sub-questions)
+#         kinesthetic_profile.current_lesson_attempts += 1
+        
+#         # Check if all questions are complete (15 total)
+#         total_questions = 15
+#         if kinesthetic_profile.current_lesson_attempts >= total_questions:
+#             kinesthetic_profile.mixed_quiz_completed = True
+#             response_data["quiz_completed"] = True
+#             response_data["redirect_url"] = url_for("kinesthetic.leaderboard")
+            
+#         kinesthetic_profile.save()
+    
+#     return jsonify(response_data)
+
+def clean_base64_string(base64_string):
+    """Clean and validate a base64 string, removing or replacing invalid characters"""
+    if not base64_string:
+        return None
+        
+    # Remove the data URL prefix if present
+    if "base64," in base64_string:
+        base64_string = base64_string.split("base64,")[1]
+    
+    # Define valid base64 characters
+    valid_chars = set("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=")
+    
+    # Check for and log invalid characters
+    invalid_chars = set()
+    for i, c in enumerate(base64_string[:100]):
+        if c not in valid_chars:
+            invalid_chars.add(c)
+    
+    if invalid_chars:
+        print(f"Found {len(invalid_chars)} invalid base64 characters: {list(invalid_chars)}")
+        
+        # Remove invalid characters
+        base64_string = ''.join(c for c in base64_string if c in valid_chars)
+        print(f"Cleaned base64 string, new length: {len(base64_string)}")
+    
+    # Add padding if needed
+    padding_needed = len(base64_string) % 4
+    if padding_needed > 0:
+        base64_string += '=' * (4 - padding_needed)
+        
+    return base64_string
+
 @kinesthetic_blueprint.route("/process-all-answers", methods=["POST"])
 @login_required
 def process_all_answers():
@@ -749,108 +915,283 @@ def process_all_answers():
     
     # Process each sub-question
     for sub_question_id in sub_question_ids:
-        # Look for captured image for this sub-question
-        image_key = f"captured_image_{sub_question_id}"
-        base64_image = request.form.get(image_key)
-        
-        if not base64_image:
-            continue  # Skip if no image for this sub-question
+        try:
+            # Look for captured image for this sub-question
+            image_key = f"captured_image_{sub_question_id}"
+            base64_image = request.form.get(image_key)
             
-        # Get sub-question details
-        sub_question_ref = db.collection("sub_questions").document(sub_question_id).get()
-        if not sub_question_ref.exists:
-            continue
+            if not base64_image:
+                print(f"No image data for sub-question {sub_question_id}")
+                continue  # Skip if no image for this sub-question
             
-        sub_question_data = sub_question_ref.to_dict()
-        correct_answer = sub_question_data.get("correct_answer")
-        sub_question_text = sub_question_data.get("text", "")
-        points = sub_question_data.get("points", 1)
-        
-        # Initialize result for this sub-question
-        result = {
-            "sub_question_id": sub_question_id,
-            "sub_question_text": sub_question_text,
-            "is_correct": False,
-            "detected_value": None,
-            "expected_value": correct_answer,
-            "annotated_image_url": None
-        }
-        
-        # Process answer based on answer method
-        if answer_method == AnswerMethod.ABACUS:
-            # Check answer using the abacus service
-            is_correct, detected_value, annotated_image_path = check_abacus_answer(
-                base64_image, correct_answer
+            # Basic validation of base64 data length
+            if len(base64_image) < 100:
+                print(f"Image data too small for sub-question {sub_question_id}: {len(base64_image)} bytes")
+                continue
+                
+            # Store the original image for saving to database later
+            original_image = base64_image
+            
+            # Get sub-question details
+            sub_question_ref = db.collection("sub_questions").document(sub_question_id).get()
+            if not sub_question_ref.exists:
+                continue
+                
+            sub_question_data = sub_question_ref.to_dict()
+            correct_answer = sub_question_data.get("correct_answer")
+            sub_question_text = sub_question_data.get("text", "")
+            points = sub_question_data.get("points", 1)
+            
+            # Initialize result for this sub-question
+            result = {
+                "sub_question_id": sub_question_id,
+                "sub_question_text": sub_question_text,
+                "is_correct": False,
+                "detected_value": None,
+                "expected_value": correct_answer,
+                "annotated_image_url": None
+            }
+            
+            try:
+                # Process answer based on answer method
+                if answer_method == AnswerMethod.ABACUS:
+                    # Check answer using the abacus service
+                    is_correct, detected_value, annotated_image_path = check_abacus_answer(
+                        base64_image, correct_answer
+                    )
+                elif answer_method == AnswerMethod.ANALOG_CLOCK or answer_method == AnswerMethod.DIGITAL_CLOCK:
+                    # Clean and validate the base64 string
+                    processed_base64 = clean_base64_string(base64_image)
+                    
+                    if not processed_base64:
+                        print(f"Failed to clean base64 data for sub-question {sub_question_id}")
+                        result["detected_value"] = "Error: Invalid image data"
+                        response_data["results"].append(result)
+                        continue
+                    
+                    # Check answer using the clock service with cleaned base64 data
+                    is_correct, detected_value, annotated_image_path = check_clock_answer(
+                        processed_base64, correct_answer
+                    )
+                else:
+                    # Unsupported answer method
+                    continue
+                    
+            except Exception as e:
+                print(f"Error processing image for sub-question {sub_question_id}: {str(e)}")
+                result["detected_value"] = f"Error: {str(e)}"
+                response_data["results"].append(result)
+                continue
+                
+            # Update result data
+            result["is_correct"] = is_correct
+            result["detected_value"] = detected_value
+            
+            # If there's an annotated image path, copy it to the static folder
+            if annotated_image_path and os.path.exists(annotated_image_path):
+                static_uploads = os.path.join(current_app.static_folder, "uploads")
+                os.makedirs(static_uploads, exist_ok=True)
+                
+                filename = os.path.basename(annotated_image_path)
+                static_path = os.path.join(static_uploads, filename)
+                shutil.copy(annotated_image_path, static_path)
+                
+                # Add the public URL to the result
+                result["annotated_image_url"] = f"/static/uploads/{filename}"
+            
+            # Save attempt to database - use the original base64 image with prefix intact
+            captured_images = {image_key: original_image}
+            if result.get("annotated_image_url"):
+                captured_images["annotated_image"] = result["annotated_image_url"]
+                
+            result_data = {
+                "detected_value": detected_value,
+                "expected_value": correct_answer,
+            }
+            
+            attempted = AttemptedQuestion(
+                user_id=current_user.id,
+                question_id=question_id,
+                sub_question_id=sub_question_id,
+                is_correct=is_correct,
+                images=captured_images,
+                result_data=result_data
             )
-        elif answer_method == AnswerMethod.ANALOG_CLOCK or answer_method == AnswerMethod.DIGITAL_CLOCK:
-            # Check answer using the clock service
-            is_correct, detected_value, annotated_image_path = check_clock_answer(
-                base64_image, correct_answer
-            )
-        else:
-            # Unsupported answer method
+            attempted.save()
+            
+            # Update counters
+            if is_correct:
+                correct_count += 1
+                total_points += points
+                
+            # Add to results list
+            response_data["results"].append(result)
+        
+        except Exception as e:
+            print(f"Error processing sub-question {sub_question_id}: {str(e)}")
+            # Continue with other sub-questions even if one fails
             continue
-            
-        # Update result data
-        result["is_correct"] = is_correct
-        result["detected_value"] = detected_value
-        
-        # If there's an annotated image path, copy it to the static folder
-        if annotated_image_path and os.path.exists(annotated_image_path):
-            static_uploads = os.path.join(current_app.static_folder, "uploads")
-            os.makedirs(static_uploads, exist_ok=True)
-            
-            filename = os.path.basename(annotated_image_path)
-            static_path = os.path.join(static_uploads, filename)
-            shutil.copy(annotated_image_path, static_path)
-            
-            # Add the public URL to the result
-            result["annotated_image_url"] = f"/static/uploads/{filename}"
-        
-        # Save attempt to database
-        captured_images = {image_key: base64_image}
-        if result["annotated_image_url"]:
-            captured_images["annotated_image"] = result["annotated_image_url"]
-            
-        result_data = {
-            "detected_value": detected_value,
-            "expected_value": correct_answer,
-        }
-        
-        attempted = AttemptedQuestion(
-            user_id=current_user.id,
-            question_id=question_id,
-            sub_question_id=sub_question_id,
-            is_correct=is_correct,
-            images=captured_images,
-            result_data=result_data
-        )
-        attempted.save()
-        
-        # Update counters
-        if is_correct:
-            correct_count += 1
-            total_points += points
-            
-        # Add to results list
-        response_data["results"].append(result)
     
     # Update quiz profile
-    kinesthetic_profile = QuizProfile.get_by_user_id(current_user.id)
-    if kinesthetic_profile:
-        # Add points to the profile
-        kinesthetic_profile.total_score += total_points
-        
-        # Update attempts counter (this counts as one attempt regardless of sub-questions)
-        kinesthetic_profile.current_lesson_attempts += 1
-        
-        # Check if all questions are complete (15 total)
-        total_questions = 15
-        if kinesthetic_profile.current_lesson_attempts >= total_questions:
-            kinesthetic_profile.mixed_quiz_completed = True
-            response_data["quiz_completed"] = True
-            response_data["redirect_url"] = url_for("kinesthetic.leaderboard")
+    try:
+        kinesthetic_profile = QuizProfile.get_by_user_id(current_user.id)
+        if kinesthetic_profile:
+            # Add points to the profile
+            kinesthetic_profile.total_score += total_points
             
-        kinesthetic_profile.save()
+            # Update attempts counter (this counts as one attempt regardless of sub-questions)
+            kinesthetic_profile.current_lesson_attempts += 1
+            
+            # Check if all questions are complete (15 total)
+            total_questions = 15
+            if kinesthetic_profile.current_lesson_attempts >= total_questions:
+                kinesthetic_profile.mixed_quiz_completed = True
+                response_data["quiz_completed"] = True
+                response_data["redirect_url"] = url_for("kinesthetic.leaderboard")
+                
+            kinesthetic_profile.save()
+    except Exception as e:
+        print(f"Error updating profile: {str(e)}")
+        # Continue anyway, so we at least return results to the user
     
     return jsonify(response_data)
+
+@kinesthetic_blueprint.route("/save-captured-image", methods=["POST"])
+@login_required
+def save_captured_image():
+    """Save a captured image to the static/uploads directory"""
+    if not request.is_json:
+        return jsonify({"success": False, "error": "Invalid request format"}), 400
+    
+    data = request.get_json()
+    image_data = data.get("image_data")
+    filename = data.get("filename")
+    
+    if not image_data or not filename:
+        return jsonify({"success": False, "error": "Missing image data or filename"}), 400
+    
+    # Make sure we have valid base64 data
+    if "base64," in image_data:
+        # Split the base64 string to get only the data part
+        image_data = image_data.split("base64,")[1]
+    
+    try:
+        # Create uploads directory if it doesn't exist
+        uploads_dir = os.path.join(current_app.static_folder, "uploads")
+        os.makedirs(uploads_dir, exist_ok=True)
+        
+        # Generate a unique filename with user ID to avoid conflicts
+        timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+        unique_filename = f"{current_user.id}_{timestamp}_{filename}"
+        
+        # Create the full file path
+        file_path = os.path.join(uploads_dir, unique_filename)
+        
+        # Save the image file
+        with open(file_path, "wb") as f:
+            f.write(base64.b64decode(image_data))
+        
+        # Return the URL path that can be used to access the file
+        file_url = f"/static/uploads/{unique_filename}"
+        
+        return jsonify({
+            "success": True, 
+            "file_path": file_url,
+            "message": "Image saved successfully"
+        })
+        
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+@kinesthetic_blueprint.route("/save-and-process-clock", methods=["POST"])
+@login_required
+def save_and_process_clock():
+    """Save a clock drawing to the static/uploads directory and process it with the clock model"""
+    if not request.is_json:
+        return jsonify({"success": False, "error": "Invalid request format"}), 400
+    
+    data = request.get_json()
+    image_data = data.get("image_data")
+    filename = data.get("filename")
+    sub_question_id = data.get("sub_question_id")
+    
+    if not image_data or not filename:
+        return jsonify({"success": False, "error": "Missing image data or filename"}), 400
+    
+    try:
+        # Make sure we have valid base64 data
+        if "base64," in image_data:
+            # Split the base64 string to get only the data part
+            image_data = image_data.split("base64,")[1]
+        
+        # Create uploads directory if it doesn't exist
+        uploads_dir = os.path.join(current_app.static_folder, "uploads")
+        os.makedirs(uploads_dir, exist_ok=True)
+        
+        # Generate a unique filename with user ID to avoid conflicts
+        timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+        unique_filename = f"{current_user.id}_{timestamp}_{filename}"
+        
+        # Create the full file path
+        file_path = os.path.join(uploads_dir, unique_filename)
+        
+        # Save the image file
+        with open(file_path, "wb") as f:
+            f.write(base64.b64decode(image_data))
+        
+        # Process with clock detection model
+        detected_result = None
+        expected_answer = None
+        is_correct = False
+        annotated_image_url = None
+        
+        # Get the sub-question to find expected answer
+        if sub_question_id:
+            sub_question_ref = db.collection("sub_questions").document(sub_question_id).get()
+            if sub_question_ref.exists:
+                sub_question_data = sub_question_ref.to_dict()
+                expected_answer = sub_question_data.get("correct_answer", "")
+                
+                # Process with clock model
+                from services.clock_service import check_clock_answer
+                
+                # Convert file path to base64 for the clock service
+                with open(file_path, "rb") as image_file:
+                    base64_data = base64.b64encode(image_file.read()).decode('utf-8')
+                
+                # Process with clock model
+                is_correct, detected_time, annotated_path = check_clock_answer(
+                    base64_data, expected_answer
+                )
+                
+                # If we have an annotated image, save its URL
+                if annotated_path and os.path.exists(annotated_path):
+                    annotated_filename = f"annotated_{unique_filename}"
+                    annotated_dest = os.path.join(uploads_dir, annotated_filename)
+                    shutil.copy(annotated_path, annotated_dest)
+                    annotated_image_url = f"/static/uploads/{annotated_filename}"
+                
+                detected_result = detected_time
+        
+        # Return the public URL path that can be used to access the file
+        file_url = f"/static/uploads/{unique_filename}"
+        
+        return jsonify({
+            "success": True, 
+            "file_path": file_url,
+            "detected_time": detected_result,
+            "expected_time": expected_answer,
+            "is_correct": is_correct,
+            "annotated_image_url": annotated_image_url,
+            "message": "Image saved and processed successfully"
+        })
+        
+    except Exception as e:
+        print(f"Error saving/processing clock image: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500

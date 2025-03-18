@@ -368,7 +368,7 @@ class AttemptedQuestion:
         self.question_id = question_id
         self.sub_question_id = sub_question_id
         self.is_correct = is_correct
-        self.images = images or {}
+        self.images = images or {}  # This can now contain file paths instead of base64
         self.result_data = result_data or {}  # Store detection results
         self.attempted_at = datetime.utcnow()
 
@@ -379,7 +379,7 @@ class AttemptedQuestion:
             "sub_question_id": self.sub_question_id,
             "is_correct": self.is_correct,
             "images": self.images,
-            "result_data": self.result_data,  # Add this field
+            "result_data": self.result_data,
             "attempted_at": self.attempted_at,
         }
         db.collection("attempted_questions").document(self.id).set(data)

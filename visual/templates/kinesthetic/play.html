@@ -93,7 +93,7 @@
                 <!-- Method-specific instructions with icons -->
                 <h5 class="method-title">
                   {% if question.answer_method == 'abacus' %}
-                  <i class="fa fa-calculator" style="color: #6366F1;"></i> ගණක රාමුව (ඇබකසය) පෙන්වන්න
+                  <i class="fa fa-calculator" style="color: #6366F1;"></i> දශම අගය ඇද දක්වන්න.
                   {% elif question.answer_method == 'analog_clock' %}
                   <i class="fa fa-clock-o" style="color: #6366F1;"></i> ඔරලෝසුවෙහි කටු මගින් ඇද දක්වන්න.
                   {% else %}
@@ -153,26 +153,15 @@
                         </button>
                       </div>
                     </div>
-                  {% elif subject == 'addition' %}
+                    {% elif subject == 'addition' %}
                     <!-- Decimal representation drawing interface -->
                     <div class="decimal-drawing-container">
                       <canvas id="decimalCanvas{{ loop.index }}" class="decimal-canvas" width="500" height="200"></canvas>
                       <div class="drawing-controls mt-3">
-                        <div class="color-tools">
-                          <button type="button" class="btn btn-color active" id="shadeTool{{ loop.index }}" 
-                            onclick="selectDecimalTool({{ loop.index }}, 'shade')" style="background-color: #3B82F6; border-color: #1D4ED8">
-                            <i class="fa fa-paint-brush"></i> වර්ණ කිරීම
-                          </button>
-                          <button type="button" class="btn btn-tool" id="eraserTool{{ loop.index }}" 
-                            onclick="selectDecimalTool({{ loop.index }}, 'eraser')">
-                            <i class="fa fa-eraser"></i> මකන්න
-                          </button>
-                          <button type="button" class="btn btn-secondary" onclick="clearDecimalDrawing({{ loop.index }})">
-                            <i class="fa fa-trash"></i> සියල්ල මකන්න
-                          </button>
-                        </div>
-                        <button type="button" class="btn btn-primary mt-2" 
-                          onclick="captureDecimalDrawing({{ loop.index }}, '{{ sub_q.id }}')">
+                        <button type="button" class="btn btn-secondary" onclick="clearDecimalDrawing({{ loop.index }})">
+                          <i class="fa fa-eraser"></i> මකන්න
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="captureDecimalDrawing({{ loop.index }}, '{{ sub_q.id }}')">
                           <i class="fa fa-save"></i> පිළිතුර සුරකින්න
                         </button>
                       </div>
