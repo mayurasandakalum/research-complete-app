@@ -271,7 +271,7 @@ def submit_write():
         print(ans_txt,"===",ori_answer,"===",sim)
 
         # If the similarity score is greater than 0.7 or matches 75%, consider it correct
-        if sim > 0.7 or is_75_percent_match(ori_answer, ans_txt):
+        if sim > 0.6 or is_75_percent_match(ori_answer, ans_txt):
             correct = True
             if wr_lesson > 0: 
                 Wr_results_2.append(lesson)
